@@ -46,7 +46,7 @@
 		- all the available => WiP
 		- all the related to an specific architectural space
 			- JS need to detect in which architectural space is the user at anytime
-		- Use OpenSeaDragon for large images.
+		- Alternative to the carrusel => use OpenSeaDragon for large images.
 	- showing the descriptions
 		- monument level
 		* architectural phase level
