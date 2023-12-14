@@ -1,0 +1,49 @@
+html,
+body {
+  overflow: hidden;
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+#cesiumContainer {
+  height: 100%;
+}
+#resetButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+}
+#PhaseNow {
+  position: absolute;
+  top: 10px;
+  left: 120px;
+  z-index: 1;
+}
+#PhaseOne {
+  position: absolute;
+  top: 10px;
+  left: 210px;
+  z-index: 1;
+}
+#PhaseTwo {
+  position: absolute;
+  top: 10px;
+  left: 300px;
+  z-index: 1;
+}
+#PhaseThree {
+  position: absolute;
+  top: 10px;
+  left: 390px;
+  z-index: 1;
+}
+
+#nextButton {
+  position: absolute;
+  top: 10px;
+  left: 490px;
+  z-index: 1;
+
+}
+
