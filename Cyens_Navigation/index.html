@@ -25,15 +25,10 @@
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrain: Cesium.Terrain.fromWorldTerrain(),
         });
-
-
-
         const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-        // // Set up variables for camera controls
-        var cameraHeight = 1000.0;
-        var rotateSpeed = 0.01;
-        var moveSpeed = 2.0;
 
+        // // Set up variables for camera controls
+        var moveSpeed = 2.0;
         // Add keyboard event listener for WASD movement
         document.addEventListener('keydown', function (e) {
             switch (e.key) {
@@ -71,7 +66,7 @@
                 Cesium.Cartesian3.subtract(destination, cameraPosition, direction);
 
                 // Set a desired distance (e.g., 1000 meters) from the destination
-                const distance = -2.5;
+                const distance = -1;
                 Cesium.Cartesian3.normalize(direction, direction);
                 Cesium.Cartesian3.multiplyByScalar(direction, distance, direction);
 
@@ -95,7 +90,6 @@
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 
-
         // Add Cesium OSM Buildings.
         const buildingsTileset = await Cesium.createOsmBuildingsAsync();
         viewer.scene.primitives.add(buildingsTileset);
@@ -103,7 +97,6 @@
         // Add the 3D Tileset you created from your Cesium ion account.
         const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2302705);
         viewer.scene.primitives.add(newBuildingTileset);
-
 
         // Move the camera to the new building with more space
         viewer.flyTo(newBuildingTileset, {
@@ -114,6 +107,7 @@
             ),
         });
 
+        resetCamera();
         // Function to hide all other 3D Tilesets
         function hideAllTilesets() {
             const primitives = viewer.scene.primitives;
@@ -125,25 +119,38 @@
                 }
             }
         }
+
         async function addPhaseNow() {
             hideAllTilesets();
             const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2302705);
             viewer.scene.primitives.add(newBuildingTileset);
+            resetCamera();
             showEntities();
+            currentPhase = "Phase Now";
+            currentIndex = 0;
+            setCameraToLocation(currentIndex);
         }
 
         async function addPhaseOne() {
             hideAllTilesets();
             const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2301221);
             viewer.scene.primitives.add(newBuildingTileset);
+            resetCamera();
             hideEntities();
+            currentPhase = "Phase One";
+            currentIndex = 0;
+            setCameraToLocation(currentIndex);
         }
 
         async function addPhaseTwo() {
             hideAllTilesets();
             const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2301244);
             viewer.scene.primitives.add(newBuildingTileset);
+            resetCamera();
             hideEntities();
+            currentPhase = "Phase Two";
+            currentIndex = 0;
+            setCameraToLocation(currentIndex);
 
         }
 
@@ -151,40 +158,90 @@
             hideAllTilesets();
             const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2301245);
             viewer.scene.primitives.add(newBuildingTileset);
+            resetCamera();
             hideEntities();
+            currentPhase = "Phase Three";
+            currentIndex = 0;
+            setCameraToLocation(currentIndex);
         }
 
-
-
-
         //Add a sample point on the map
-        var samplePoint = viewer.entities.add({
+        var Holly = viewer.entities.add({
             name: 'My Point',
-            position: Cesium.Cartesian3.fromDegrees(32.44523, 34.8468868, 475),
+            position: Cesium.Cartesian3.fromDegrees(32.4451568427, 34.8468619172, 470),
             point: {
                 pixelSize: 30,
-                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)')
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
             },
             label: {
-                text: '1',
+                text: '5',
                 font: '14px sans-serif',
                 fillColor: Cesium.Color.White,
                 style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                 outlineWidth: 2,
                 outlineColor: Cesium.Color.White,
                 pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, 0)
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
 
             }
         });
 
         // Add a sample point on the map
-        var samplePoint2 = viewer.entities.add({
+        var Tomb = viewer.entities.add({
             name: 'My Point 2',
-            position: Cesium.Cartesian3.fromDegrees(32.445165, 34.846885, 470.6),
+            position: Cesium.Cartesian3.fromDegrees(32.4452111387, 34.8469302888, 471.5),
             point: {
                 pixelSize: 30,
-                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)')
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '6',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+        // Add a sample point on the map
+        var Hagiasterion = viewer.entities.add({
+            name: 'Hagiasterion',
+            position: Cesium.Cartesian3.fromDegrees(32.4451838261, 34.8468564217, 475.5),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '3',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+        // Add a sample point on the map
+        var SecondCell = viewer.entities.add({
+            name: 'SecondCell',
+            position: Cesium.Cartesian3.fromDegrees(32.4451669844, 34.8468502703, 478.2),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
             },
             label: {
                 text: '2',
@@ -194,21 +251,79 @@
                 outlineWidth: 2,
                 outlineColor: Cesium.Color.White,
                 pixelOffset: new Cesium.Cartesian2(0, 0),
-                eyeOffset: new Cesium.Cartesian3(0, 0, 0)
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
 
             }
         });
 
+        // Add a sample point on the map
+        var BaptistCell = viewer.entities.add({
+            name: 'BaptistCell',
+            position: Cesium.Cartesian3.fromDegrees(32.4452343032, 34.84693573, 477.5),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '1',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+        // Add a sample point on the map
+        var Rock = viewer.entities.add({
+            name: 'Rock',
+            position: Cesium.Cartesian3.fromDegrees(32.4453239321, 34.8469644945, 468.2),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '4',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+
         function hideEntities() {
-            // samplePoint2.show = false;
-            //samplePoint.show = false;
+            Holly.show = false;
+            SecondCell.show = false;
+            BaptistCell.show = false;
+            Rock.show = false;
+            Hagiasterion.show = false;
+            Tomb.show=false;
+            viewer.entities.remove(currentLabelEntity);
+            currentLabelEntity = null;
             // entity.show=false;
         }
 
         // Function to show the entities
         function showEntities() {
-            // samplePoint2.show = true;
-            //  samplePoint.show = true;
+            Holly.show = true;
+            SecondCell.show = true;
+            BaptistCell.show = true;
+            Rock.show = true;
+            Hagiasterion.show = true;
+            Tomb.show=true;
 
         }
         // Function to reset the camera to the desired position
@@ -230,26 +345,30 @@
         }
         // Path to your JSON file
         var jsonFilePath = 'data.json';
-
+        // Variable to store the phases and their locations
+        var phases = {};
         // Variable to store the locations
-        var locations = [];
-
-        // Variable to store the current label entity
+        //var locations = [];
         var currentLabelEntity = null;
+        // Variable to store the current label entity
 
+
+        // Variable to store the current phase
+        var currentPhase = null;
         // Fetch the JSON data
         fetch(jsonFilePath)
             .then(response => response.json())
             .then(data => {
+                phases = data
                 // Assuming your JSON file has an array of locations
-                locations = data.locations;
-
+                //locations = data.locations;
+                currentPhase = "Phase Now";
                 // Initial index
                 var currentIndex = 0;
 
                 // Function to set the camera to the current location and update description
                 function setCameraToLocation(index) {
-                    const location = locations[index];
+                    const location = phases[currentPhase].locations[index];
                     const destination = Cesium.Cartesian3.fromDegrees(
                         location.lon,
                         location.lat,
@@ -262,7 +381,7 @@
                     Cesium.Cartesian3.subtract(destination, cameraPosition, direction);
 
                     // Set a desired distance (e.g., 1000 meters) from the destination
-                    const distance = -2.5;
+                    const distance = -1.0;
                     Cesium.Cartesian3.normalize(direction, direction);
                     Cesium.Cartesian3.multiplyByScalar(direction, distance, direction);
 
@@ -277,42 +396,61 @@
                         currentLabelEntity = null;
                     }
                     // Create a label for the current location
-                    currentLabelEntity = viewer.entities.add({
-                        position: destination,
-                        label: {
-                            text: location.descriptions,
-                            font: '14px sans-serif',
-                            fillColor: Cesium.Color.White,
-                            outlineColor: Cesium.Color.BLACK,
-                            outlineWidth: 2, // Adjust the outline width as needed
-                            style: Cesium.LabelStyle.FILL_AND_OUTLINE,
-                            verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                            pixelOffset: new Cesium.Cartesian2(0, -10),
-                            backgroundColor: Cesium.Color.fromCssColorString('rgba(0,0,0,0.7)'), // Black background with some transparency
-                            showBackground: true, // Set to true to show the background
-                            backgroundPadding: new Cesium.Cartesian2(8, 4), // Adjust padding as needed
+                    if (location.descriptions || location.image) {
+                        currentLabelEntity = viewer.entities.add({
+                            position: destination,
+                            label: {
+                                text: location.descriptions,
+                                show: false,
+                                font: '14px sans-serif',
+                                fillColor: Cesium.Color.White,
+                                outlineColor: Cesium.Color.BLACK,
+                                outlineWidth: 2, // Adjust the outline width as needed
+                                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                                pixelOffset: new Cesium.Cartesian2(0, 40),
+                                backgroundColor: Cesium.Color.fromCssColorString('rgba(0,0,0,0.7)'), // Black background with some transparency
+                                showBackground: true, // Set to true to show the background
+                                backgroundPadding: new Cesium.Cartesian2(8, 4), // Adjust padding as needed
+                                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                                // distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5), // Set the display condition
 
-                        }
-                    });
-
-                    viewer.scene.camera.flyTo({
-                        destination: finalDestination,
-                        orientation: {
-                            heading: Cesium.Math.toRadians(location.heading),
-                            pitch: viewer.camera.pitch,
-                            roll: viewer.camera.roll
-                        },
-                        duration: 2.0, // Animation duration in seconds
-                        complete: function () {
-
-                        },
-                    });
+                            },
+                            billboard: {
+                                image: location.image,
+                                show: false,
+                                verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                                width: 200,  // Adjust the width of the image as needed
+                                height: 200,
+                                pixelOffset: new Cesium.Cartesian2(0, 250), // Adjust the height of the image as needed
+                                //distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5), // Set the display condition
+                            },
+                        });
+                    }
+                    if (phases[currentPhase].locations[index].move == 1) {
+                        viewer.scene.camera.flyTo({
+                            destination: finalDestination,
+                            orientation: {
+                                heading: Cesium.Math.toRadians(location.heading),
+                                pitch: Cesium.Math.toRadians(location.pitch),
+                                roll: viewer.camera.roll
+                            },
+                            duration: 3.0, // Animation duration in seconds
+                            complete: function () {
+                                
+                            },
+                        });
+                    }
                 }
+
+              
 
                 // Function to handle the next button click
                 function onNextButtonClick() {
-                    currentIndex = (currentIndex + 1) % locations.length;
+                    currentIndex = (currentIndex + 1) % phases[currentPhase].locations.length;
                     setCameraToLocation(currentIndex);
+                    currentLabelEntity.label.show = true;
+                    currentLabelEntity.billboard.show = true;
                 }
 
                 // Add event listener for the next button
