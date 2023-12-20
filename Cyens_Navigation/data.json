@@ -1,15 +1,103 @@
 {
+  "Phase Now": {
     "locations": [
       {
-        "lon": 32.445165, 
+        "lon": 32.4452111387,      
+        "lat": 34.8469302888,
+        "height": 471.5,
+        "heading": 30,
+        "pitch": -30,
+        "move": 1,
+        "descriptions": "Tomb"
+       
+      },
+      {
+        "lon": 32.4452343032,    
+        "lat": 34.84693573,
+        "height": 477.5,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "Saint John Baptist Cell"
+       
+      },
+      {
+        "lon": 32.4451669844,  
+        "lat": 34.8468502703,
+        "height": 478.3,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "Neophytos Second Cell: New Zion"
+       
+      },
+      {
+        "lon": 32.4451838261,
+        "lat": 34.8468564217,
+        "height": 475.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "Hagiasterion"
+      },
+      {
+        "lon": 32.4453239321,    
+        "lat": 34.8469644945,
+        "height": 468.2,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "Two Rock-cut structures"
+       
+      },
+      {
+        "lon": 32.4451568427,    
+        "lat": 34.8468619172,
+        "height": 470,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "descriptions": "Church of the Holly Cross"
+       
+      }
+    ]
+  },
+  "Phase One": {
+    "locations": [
+      {
+        "lon": 32.445165,
         "lat": 34.846885,
         "height": 470.5,
-        "heading":-30,
+        "heading": -30,
         "pitch": 0,
-        "descriptions": "Enkeilstra of Neophytos, church of the Holy Cross, templon"
-        
+        "descriptions": "Phase One locations 1",
+        "image": "temp2.png"
       }
-      
-      
+    ]
+  },
+  "Phase Two": {
+    "locations": [
+      {
+        "lon": 32.445165,
+        "lat": 34.846885,
+        "height": 470.5,
+        "heading": -30,
+        "pitch": 0,
+        "descriptions": "Phase Two locations 1"
+      }
+    ]
+  },
+  "Phase Three": {
+    "locations": [
+      {
+        "lon": 32.445165,
+        "lat": 34.846885,
+        "height": 470.5,
+        "heading": -30,
+        "pitch": 0,
+        "descriptions": "Phase Three locations 1"
+      }
     ]
   }
+
+}
