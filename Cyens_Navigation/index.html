@@ -9,6 +9,35 @@
 
 <body>
     <div id="cesiumContainer"></div>
+    <div id="menu">
+        <h3>Menu</h3>
+        <ul>
+            <li>
+                <p><b>Menu button</b> = Displays the menu.</p>
+            </li>
+            <li>
+                <p><b>Reset Camera button</b> = Resets the camera to its initial position.</p>
+            </li>
+            <li>
+                <p><b>Phase Now button</b> = Shows the 3D model as it is now.</p>
+            </li>
+            <li>
+                <p><b>Phase One button</b> = Shows the 3D model as it was in 1160.</p>
+            </li>
+            <li>
+                <p><b>Phase Two button</b> = Shows the 3D model as it was in 1170-1183.</p>
+            </li>
+            <li>
+                <p><b>Phase Three button</b> = Shows the 3D model as it was in 1183-1214.</p>
+            </li>
+            <li>
+                <p><b>Story Mode(Next Location) button</b> = Displays the annotations/points on the 3D model with
+                    descriptions of what each one is.</p>
+            </li>
+        </ul>
+    </div>
+
+    <button id="menuButton">Menu</button>
     <button id="resetButton">Reset Camera</button>
     <button id="PhaseNow">Phase Now</button>
     <button id="PhaseOne">Phase One</button>
@@ -25,8 +54,12 @@
         const viewer = new Cesium.Viewer('cesiumContainer', {
             terrain: Cesium.Terrain.fromWorldTerrain(),
         });
-        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
 
+
+
+        const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+        var menu = document.getElementById('menu');
+        menu.style.display = 'none';
         // // Set up variables for camera controls
         var moveSpeed = 2.0;
         // Add keyboard event listener for WASD movement
@@ -48,7 +81,7 @@
         });
 
         let isAnimating = false;
-
+        var currentIndex = 0;
         handler.setInputAction(function (movement) {
             if (isAnimating) {
                 return;
@@ -125,10 +158,13 @@
             const newBuildingTileset = await Cesium.Cesium3DTileset.fromIonAssetId(2302705);
             viewer.scene.primitives.add(newBuildingTileset);
             resetCamera();
-            showEntities();
+            viewer.entities.remove(currentLabelEntity);
+            currentLabelEntity = null;
+            hideEntities();
+            showEntitiesNow();
             currentPhase = "Phase Now";
             currentIndex = 0;
-            setCameraToLocation(currentIndex);
+
         }
 
         async function addPhaseOne() {
@@ -137,9 +173,10 @@
             viewer.scene.primitives.add(newBuildingTileset);
             resetCamera();
             hideEntities();
+            showEntitiesOne();
             currentPhase = "Phase One";
             currentIndex = 0;
-            setCameraToLocation(currentIndex);
+
         }
 
         async function addPhaseTwo() {
@@ -150,7 +187,7 @@
             hideEntities();
             currentPhase = "Phase Two";
             currentIndex = 0;
-            setCameraToLocation(currentIndex);
+
 
         }
 
@@ -162,7 +199,17 @@
             hideEntities();
             currentPhase = "Phase Three";
             currentIndex = 0;
-            setCameraToLocation(currentIndex);
+
+        }
+
+        function onClickMenu() {
+            var menu = document.getElementById('menu');
+            if (menu.style.display === 'none') {
+                menu.style.display = 'block';
+            } else {
+                menu.style.display = 'none';
+            }
+
         }
 
         //Add a sample point on the map
@@ -303,29 +350,110 @@
             }
         });
 
+        // Add a sample point on the map
+        var Refectory = viewer.entities.add({
+            name: 'Refectory',
+            position: Cesium.Cartesian3.fromDegrees(32.4452766161, 34.846958311, 470),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '7',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
 
+            }
+        });
+
+        // Add a sample point on the map
+        var HermitagePhaseOne = viewer.entities.add({
+            name: 'Hermitage',
+            show: false,
+            position: Cesium.Cartesian3.fromDegrees(32.4453339248, 34.8467981222, 473.5),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '1',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+        // Add a sample point on the map
+        var TombPhaseOne = viewer.entities.add({
+            name: 'Tomb',
+            show: false,
+            position: Cesium.Cartesian3.fromDegrees(32.4453080581, 34.8468350752, 473.5),
+            point: {
+                pixelSize: 30,
+                color: Cesium.Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+            },
+            label: {
+                text: '2',
+                font: '14px sans-serif',
+                fillColor: Cesium.Color.White,
+                style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+                outlineWidth: 2,
+                outlineColor: Cesium.Color.White,
+                pixelOffset: new Cesium.Cartesian2(0, 0),
+                eyeOffset: new Cesium.Cartesian3(0, 0, 0),
+                disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+            }
+        });
+
+        //hide annotations
         function hideEntities() {
             Holly.show = false;
             SecondCell.show = false;
             BaptistCell.show = false;
             Rock.show = false;
             Hagiasterion.show = false;
-            Tomb.show=false;
+            Tomb.show = false;
+            Refectory.show = false;
+            HermitagePhaseOne.show=false;
+            TombPhaseOne.show=false;
             viewer.entities.remove(currentLabelEntity);
             currentLabelEntity = null;
-            // entity.show=false;
         }
 
         // Function to show the entities
-        function showEntities() {
+        function showEntitiesNow() {
             Holly.show = true;
             SecondCell.show = true;
             BaptistCell.show = true;
             Rock.show = true;
             Hagiasterion.show = true;
-            Tomb.show=true;
-
+            Tomb.show = true;
+            Refectory.show = true;
+           
         }
+
+        // Function to show the entities
+        function showEntitiesOne() {
+            HermitagePhaseOne.show=true;
+            TombPhaseOne.show=true;
+        }
+
         // Function to reset the camera to the desired position
         function resetCamera() {
             const primitives = viewer.scene.primitives;
@@ -364,7 +492,7 @@
                 //locations = data.locations;
                 currentPhase = "Phase Now";
                 // Initial index
-                var currentIndex = 0;
+
 
                 // Function to set the camera to the current location and update description
                 function setCameraToLocation(index) {
@@ -397,12 +525,13 @@
                     }
                     // Create a label for the current location
                     if (location.descriptions || location.image) {
+                       
                         currentLabelEntity = viewer.entities.add({
                             position: destination,
                             label: {
                                 text: location.descriptions,
                                 show: false,
-                                font: '14px sans-serif',
+                                font:location.font,
                                 fillColor: Cesium.Color.White,
                                 outlineColor: Cesium.Color.BLACK,
                                 outlineWidth: 2, // Adjust the outline width as needed
@@ -420,9 +549,9 @@
                                 image: location.image,
                                 show: false,
                                 verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                                width: 200,  // Adjust the width of the image as needed
-                                height: 200,
-                                pixelOffset: new Cesium.Cartesian2(0, 250), // Adjust the height of the image as needed
+                                width: location.image_width,  // Adjust the width of the image as needed
+                                height: location.image_height,
+                                pixelOffset: new Cesium.Cartesian2(0, location.pixelOffset), // Adjust the height of the image as needed
                                 //distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 5), // Set the display condition
                             },
                         });
@@ -437,20 +566,23 @@
                             },
                             duration: 3.0, // Animation duration in seconds
                             complete: function () {
-                                
+
                             },
                         });
+                    } else if (phases[currentPhase].locations[index].move == 0) {
+                        resetCamera();
                     }
                 }
 
-              
+
 
                 // Function to handle the next button click
                 function onNextButtonClick() {
-                    currentIndex = (currentIndex + 1) % phases[currentPhase].locations.length;
+                    currentIndex = (currentIndex) % phases[currentPhase].locations.length;
                     setCameraToLocation(currentIndex);
                     currentLabelEntity.label.show = true;
                     currentLabelEntity.billboard.show = true;
+                    currentIndex += 1;
                 }
 
                 // Add event listener for the next button
@@ -467,6 +599,10 @@
         const resetButton = document.getElementById("resetButton");
         resetButton.addEventListener("click", resetCamera);
 
+        //Event listener to show the menu UI
+        const Menu = document.getElementById("menuButton");
+        Menu.addEventListener("click", onClickMenu);
+
         // Event listener for the add tilesets buttons
         const PhaseNow = document.getElementById("PhaseNow");
         PhaseNow.addEventListener("click", addPhaseNow);
@@ -479,6 +615,8 @@
 
         const PhaseThree = document.getElementById("PhaseThree");
         PhaseThree.addEventListener("click", addPhaseThree);
+
+
     </script>
 </body>
 
