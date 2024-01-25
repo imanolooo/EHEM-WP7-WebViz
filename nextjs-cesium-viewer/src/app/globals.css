@@ -31,3 +31,8 @@ body {
   width: 100%;
   height: 100vh;
 }
+
+/* Change the Graph Material Carousel thumbnail arrows*/ 
+.control-arrow, .control-next, .control-prev {
+  color: black; /* Change this to the color you want */
+}
