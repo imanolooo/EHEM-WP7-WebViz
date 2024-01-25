@@ -1,126 +1,28 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, defined, Color, PolygonHierarchy, Quaternion, Matrix3, Transforms, HeadingPitchRoll, ConstantProperty, Cartographic, Matrix4, Entity, HeadingPitchRange } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, defined, Color, PolygonHierarchy, Quaternion, Matrix3, Transforms, HeadingPitchRoll, ConstantProperty, Cartographic, Matrix4, Entity, HeadingPitchRange, Camera } from "cesium";
 import { Math as CesiumMath } from 'cesium';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
 
+import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
+import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
+
 import "cesium/Build/Cesium/Widgets/widgets.css"
-
-
-// ------
-// Debug-box-related
-type Point = {
-    x: number;
-    y: number;
-    z: number;
-};
-
-type Orientation = { // degrees
-    heading: number;
-    pitch: number;
-    roll: number;
-}
-
-type LocalPosition = {
-    east: number;  // meters east
-    north: number; // meters north
-    up: number;    // meters up
-};
-
-type Dimensions = {
-    length: number;
-    width: number;
-    height: number;
-};
-
-let boxIdCounter = 0;
-
-type PhaseBoxProps = {
-    viewer: Viewer;
-    points: Point[];
-    color: Color;
-    orientation: Orientation;
-    localPosition: LocalPosition;
-    dimensions: Dimensions;
-};
-
-type BoxEntityInfo = {
-    id: string;
-    entity: Entity;
-    position: Cartesian3;
-    orientation: Orientation;
-    dimensions: Dimensions;
-};
-
-// ------
-// Phase - related
-const phases = [
-    { id: 2401793, text: "Phase IX" },
-    { id: 2401794, text: "Phase X" },
-    { id: 2401797, text: "Phase XI" },
-    { id: 2401801, text: "Phase XII" },
-    { id: 2401804, text: "Phase XIII" }
-];
-
-// Phase IX
-export const phaseIXPoints_main = [
-    { x: 4736921.275051899, y: 155780.7992326276,  z: 4254903.635465469 },   // 1
-    { x: 4736919.078558417, y: 155782.5448048238,  z: 4254906.701666768 },   // 2
-    { x: 4736921.551735409, y: 155791.415475381,   z: 4254903.598241987 },   // 3
-    { x: 4736923.238670296, y: 155789.02869342198, z: 4254900.048742468 },   // 4
-];
-export const phaseIXPoints_secondary = [
-    { x: 4736921.551735409, y: 155791.415475381,   z: 4254903.598241987 },  // 3
-    { x: 4736923.238670296, y: 155789.02869342198, z: 4254900.048742468 },  // 4
-    { x: 4736923.304626978, y: 155795.59219304976, z: 4254902.326165935 },  // 5
-    { x: 4736925.156289683, y: 155794.501318515,   z: 4254900.056746761 },  // 6
-];
-
-// Phase X
-export const phaseXPoints_top = [
-    { x: 4736919.078558417,  y: 155782.5448048238,  z: 4254906.701666768 },   // 2
-    { x: 4736917.442880731,  y: 155784.0460917098,  z: 4254909.354462574 },   // 7
-    { x: 4736919.4644265305, y: 155793.10161341645, z: 4254906.700814347 },   // 8
-    { x: 4736921.551735409,  y: 155791.415475381,   z: 4254903.598241987 },   // 3
-];
-
-export const phaseXPoints_bottom = [
-    { x: 4736921.275051899,  y: 155780.7992326276,  z: 4254903.635465469 },  // 1
-    { x: 4736926.3798482595, y: 155778.7703270956,  z: 4254899.582549576 },  // 10
-    { x: 4736926.620684734,  y: 155788.50797998527, z: 4254897.801063492 },  // 11
-    { x: 4736921.551735409,  y: 155791.415475381,   z: 4254903.598241987 },  // 4
-];
-
-// Phase XI (same outline as Phase XII)
-export const phaseXIPoints = [
-    { x: 4736921.275051899, y: 155780.7992326276,  z: 4254903.635465469 },  // 1
-    { x: 4736919.078558417, y: 155782.5448048238,  z: 4254906.701666768 },  // 2
-    { x: 4736920.373439955, y: 155780.1964367563,  z: 4254906.295053598},   // 13
-    { x: 4736923.35886236,  y: 155778.54841953184, z: 4254902.473716368 },  // 14
-];
-
-
-// Phase XIII
-export const phaseXIIIPoints = [
-    { x: 4736923.490581084, y: 155788.0811738723,  z: 4254901.063082168 },  // 15
-    { x: 4736925.953476667, y: 155786.66641559973, z: 4254898.420621295 },  // 16
-    { x: 4736926.620684734, y: 155788.50797998527, z: 4254897.801063492 },  // 11
-    { x: 4736921.551735409, y: 155791.415475381,   z: 4254903.598241987 },  // 4
-];
-
 
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZWYyNTk3YS02M2Q1LTRhZjctODc1NC05NzA5YjlkMGMzNTkiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDMwMDczNjZ9.D1C9jwUVvtc09v6HJtZ3pWGBzAjA3mQZPaRs8Gis4WY';
 
 const tilesets: Cesium3DTileset[] = [];
+let boxIdCounter = 0;
 
 export default () => {
 
     const [isCarouselOpen, setIsCarouselOpen] = useState(false); // Handle the modal carousel state
     const [viewer, setViewer] = useState<Viewer>();
-
+    const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);
+    
 
     // Initialize the Cesium Viewer
     useEffect(() => {
@@ -178,7 +80,7 @@ export default () => {
                 scene.screenSpaceCameraController.enableCollisionDetection = false;
 
                 // Set up variables for camera controls
-                var moveSpeed = 2.0;
+                var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
                 document.addEventListener('keydown', function (e) {
                     if (e.key === 'w' || e.key === 'W')
@@ -204,7 +106,7 @@ export default () => {
                     if (primitive instanceof Cesium3DTileset) {
                     viewer.flyTo(primitive, {
                         offset: new HeadingPitchRange(
-                        CesiumMath.toRadians(-35),
+                        CesiumMath.toRadians(100),
                         CesiumMath.toRadians(0),
                         35
                         ),
@@ -299,13 +201,46 @@ export default () => {
                     toolbar.insertBefore(resetButton, phasesDropdown);
                 }
 
+                
+                
+                // ------
+                // Debug Boxes
+
+                // Define your phase box data array (replace this with actual data)
+                const phaseBoxData: PhaseBoxDataType[] = [
+                    // Example:
+                    // { points: /* ... */, color: /* ... */, orientation: /* ... */, ... }
+                    { points: phaseIXPoints_main, color: Color.RED, orientation: { heading: 21, pitch: 6, roll: 6 }, localPosition: { east: -1.0, north: -2.5, up: 0 }, dimensions: { length: 11, width: 6, height: 8 } },
+                    { points: phaseIXPoints_secondary, color: Color.RED, orientation: { heading: 21, pitch: 6, roll: 6 }, localPosition: { east: -0.5, north: -2.0, up: 0 }, dimensions: { length: 4.5, width: 4.5, height: 8 } },
+                    { points: phaseXPoints_top, color: Color.BLUE, orientation: { heading: 21, pitch: 6, roll: 6 }, localPosition: { east: 0.0, north: -1.8, up: 0 }, dimensions: { length: 13, width: 4, height: 6 } },
+                    { points: phaseXPoints_bottom, color: Color.BLUE, orientation: { heading: 21, pitch: 6, roll: 6 }, localPosition: { east: 0.0, north: -4.2, up: 0 }, dimensions: { length: 13, width: 4, height: 6 } },
+                    { points: phaseXIPoints, color: Color.GREEN, orientation: { heading: 21, pitch: 6, roll: 6 }, localPosition: { east: -2.0, north: -1.0, up: 0 }, dimensions: { length: 3, width: 6, height: 6 } },
+                    { points: phaseXIIIPoints, color: Color.YELLOW, orientation: { heading: 21, pitch: 8, roll: 6 }, localPosition: { east: -1.0, north: -5.0, up: 0 }, dimensions: { length: 6.0, width: 5.0, height: 6 } },   
+                ];
+
+                const boxes: JSX.Element[] = phaseBoxData.map((boxData, index) => (
+                    <PhaseBox
+                        key={`phaseBox-${index}`} // Unique React key for each PhaseBox
+                        viewer={viewer}
+                        points={boxData.points}
+                        color={boxData.color}
+                        orientation={boxData.orientation}
+                        localPosition={boxData.localPosition}
+                        dimensions={boxData.dimensions}
+                    />
+                ));
+
+                setPhaseBoxes(boxes);
+
+
             } catch (error) {
                 console.log(error);
             }
         };
 
         initializeViewer();
-    }, []);
+    }, []); 
+    
     
     return (
         <div>
@@ -314,32 +249,7 @@ export default () => {
             <div id="cesiumContainer" />
 
             {/* Debug Boxes */}
-
-            {/* Phase IX */}
-            {viewer && <PhaseBox viewer={viewer} points={phaseIXPoints_main} color={Color.RED}
-            orientation={{ heading: 21, pitch: 6, roll: 6 }}
-            localPosition={{ east: -1.0, north: -2.5, up: 0 }} dimensions={{ length: 11, width: 6, height: 8 }} />}
-            {viewer && <PhaseBox viewer={viewer} points={phaseIXPoints_secondary} color={Color.RED}
-            orientation={{ heading: 21, pitch: 6, roll: 6 }}
-            localPosition={{ east: -0.5, north: -2.0, up: 0 }} dimensions={{ length: 4.5, width: 4.5, height: 8 }} />}
-                
-            {/* Phase X */}
-            {viewer && <PhaseBox viewer={viewer} points={phaseXPoints_top} color={Color.BLUE} 
-            orientation={{ heading: 21, pitch: 6, roll: 6 }}
-            localPosition={{ east: 0.0, north: -1.8, up: 0 }} dimensions={{ length: 13, width: 4, height: 6 }} />}
-            {viewer && <PhaseBox viewer={viewer} points={phaseXPoints_bottom} color={Color.BLUE} 
-            orientation={{ heading: 21, pitch: 6, roll: 6 }}
-            localPosition={{ east: 0.0, north: -4.2, up: 0 }} dimensions={{ length: 13, width: 4, height: 6 }} />}
-
-            {/* Phase XI */}
-            {viewer && <PhaseBox viewer={viewer} points={phaseXIPoints} color={Color.GREEN}
-            orientation={{ heading: 21, pitch: 6, roll: 6 }}
-            localPosition={{ east: -2.0, north: -1.0, up: 0 }} dimensions={{ length: 3, width: 6, height: 6 }} />}
-
-            {/* Phase XIII */}
-            {viewer && <PhaseBox viewer={viewer} points={phaseXIIIPoints} color={Color.YELLOW}
-            orientation={{ heading: 21, pitch: 8, roll: 6 }}
-            localPosition={{ east: -1.0, north: -5.0, up: 0 }} dimensions={{ length: 6.0, width: 5.0, height: 6 }} />}
+            {viewer && phaseBoxes}
 
             {/* Graphic Material Modal */}
             {/* Return the Image Carousel Modal */}
@@ -351,6 +261,23 @@ export default () => {
     );
 };
 
+
+
+// Debug Box Component
+function PhaseBox({ viewer, points, color, orientation, localPosition, dimensions }: PhaseBoxProps) {
+    useEffect(() => {
+        if (!viewer) return;
+
+        const centroid = calculateCentroid(points.map(p => new Cartesian3(p.x, p.y, p.z)));
+        const boxEntity = createBox(viewer, centroid, dimensions, orientation, localPosition, color, 0.5);
+        
+        // Additional logic for each phase
+        // .....
+
+    }, [viewer, points, color, orientation, localPosition, dimensions]);
+
+    return null; // This component does not render anything to the DOM
+}
 
 // Function to calculate the centroid of the 4 corners
 function calculateCentroid(points: any[]) {
@@ -378,7 +305,8 @@ function createBox(viewer: Viewer, centroid: Cartesian3, dimensions: Dimensions,
     const adjustedPosition = Matrix4.multiplyByPoint(localFrame, localOffset, new Cartesian3());
 
     const orientationQuaternion = Transforms.headingPitchRollQuaternion(adjustedPosition, hpr);
-
+    
+    // Create the box entity and add it to the viewer
     const boxEntity =  viewer.entities.add({
         id: `debugBox-${boxIdCounter++}`,
         position: adjustedPosition,
@@ -391,59 +319,26 @@ function createBox(viewer: Viewer, centroid: Cartesian3, dimensions: Dimensions,
         }
     });
 
-    return { // In the structure of type BoxEntityInfo
-        id: `debugBox-${boxIdCounter++}`,
-        entity: boxEntity,
-        position: centroid,
-        orientation: orientation,
-        dimensions: dimensions
-    };
-}
-
-// Debug Box Component
-function PhaseBox({ viewer, points, color, orientation, localPosition, dimensions }: PhaseBoxProps) {
-    useEffect(() => {
-        if (!viewer) return;
-
-        const centroid = calculateCentroid(points.map(p => new Cartesian3(p.x, p.y, p.z)));
-        const boxEntity = createBox(viewer, centroid, dimensions, orientation, localPosition, color, 0.5);
-
-        // Additional logic for each phase
-        // .....
-
-    }, [viewer, points, color, orientation, localPosition, dimensions]);
-
-    return null; // This component does not render anything to the DOM
+    return null;  
 }
 
 
-// Function to check if the camera is inside a box
-// function isCameraInsideBox(cameraPosition: Cartesian3, debugBoxes: BoxEntityInfo[]) {
-//     for (const box of debugBoxes) {
-//         const boxEntity = box.entity;
-//         const boxDimensions = box.dimensions; // Assuming this is a Cartesian3 object with box dimensions
-
-//         // Create a transformation matrix from the box's orientation and position
-//         const hpr = HeadingPitchRoll.fromQuaternion(boxEntity.orientation);
-//         const transformMatrix = Transforms.headingPitchRollToFixedFrame(boxEntity.position, hpr);
-
-//         // Invert the transformation matrix
-//         const inverseTransform = Matrix4.inverse(transformMatrix, new Matrix4());
-
-//         // Transform the camera position into the box's local space
-//         const localCameraPosition = Matrix4.multiplyByPoint(inverseTransform, cameraPosition, new Cartesian3());
-
-//         // Half dimensions of the box
-//         const halfDimensions = Cartesian3.multiplyByScalar(new Cartesian3(boxDimensions.length, boxDimensions.width, boxDimensions.height), 0.5, new Cartesian3());
-
-//         // Check if the local camera position falls within the box's dimensions
-//         if (Math.abs(localCameraPosition.x) <= halfDimensions.x &&
-//             Math.abs(localCameraPosition.y) <= halfDimensions.y &&
-//             Math.abs(localCameraPosition.z) <= halfDimensions.z) {
-//             console.log(`Camera is inside box: ${box.id}`);
-//             return box.id; // Return the ID of the box the camera is inside
-//         }
+/* Under construction... */
+// function isCameraInsideBox(camera: Camera, box: PhaseBoxProps | PhaseBoxDataType): boolean {
+//     if (!box.localPosition || !box.dimensions) {
+//         throw new Error('Box does not have a localPosition or dimensions property');
 //     }
-//     return null; // Return null if the camera is not inside any box
-// }
 
+//     // Calculate the box boundaries
+//     const minX = box.localPosition.east - box.dimensions.width / 2;
+//     const maxX = box.localPosition.east + box.dimensions.width / 2;
+//     const minY = box.localPosition.north - box.dimensions.length / 2;
+//     const maxY = box.localPosition.north + box.dimensions.length / 2;
+//     const minZ = box.localPosition.up;
+//     const maxZ = box.localPosition.up + box.dimensions.height;
+
+//     // Check if the camera is inside the box boundaries
+//     return camera.position.x >= minX && camera.position.x <= maxX
+//         && camera.position.y >= minY && camera.position.y <= maxY
+//         && camera.position.z >= minZ && camera.position.z <= maxZ;
+// }
