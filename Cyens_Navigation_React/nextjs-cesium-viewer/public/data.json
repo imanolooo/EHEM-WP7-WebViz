@@ -1,0 +1,156 @@
+{
+  "Phase Now": {
+    "locations": [ 
+      {
+        "lon": 32.4452343032,    
+        "lat": 34.84693573,
+        "height": 477.5,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "font": "'14px sans-serif'",
+        "descriptions": "Saint John Baptist Cell"
+       
+      },
+      {
+        "lon": 32.4451669844,  
+        "lat": 34.8468502703,
+        "height": 478.3,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "font": "'14px sans-serif'",
+        "descriptions": "Neophytos Second Cell: New Zion"
+       
+      },
+      {
+        "lon": 32.4451838261,
+        "lat": 34.8468564217,
+        "height": 475.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 0,
+        "font": "'14px sans-serif'",
+        "descriptions": "Hagiasterion"
+      },
+      {
+        "lon": 32.4453239321,    
+        "lat": 34.8469644945,
+        "height": 468.2,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "font": "'14px sans-serif'",
+        "descriptions": "Two Rock-cut structures"
+       
+      },
+      {
+        "lon": 32.4451568427,    
+        "lat": 34.8468619172,
+        "height": 470,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "font": "'14px sans-serif'",
+        "descriptions": "Church of the Holly Cross"
+       
+      },
+      {
+        "lon": 32.4452111387,      
+        "lat": 34.8469302888,
+        "height": 471.5,
+        "heading": 30,
+        "pitch": -30,
+        "move": 1,
+        "font": "'14px sans-serif'",
+        "descriptions": "Tomb"
+       
+      },
+      {
+        "lon": 32.4452766161,      
+        "lat": 34.846958311,
+        "height": 470,
+        "heading": 60,
+        "pitch": 0,
+        "move": 1,
+        "font": "'14px sans-serif'",
+        "descriptions": "Refectory"
+      }
+    ]
+  },
+  "Phase One": {
+    "locations": [
+      {
+        "lon": 32.4454265126,
+        "lat": 34.8468337256,
+        "height": 472.5,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'25px sans-serif'",
+        "descriptions": "CYENS is creating a digital 3D model of the Hermitage based\n on a hypothetical plan from June 24th, 1160.\nNeophytos transformed the cave into an ascetic retreat and\n built an altar and his tomb out of rock.\nHe dedicated the altar to the Holy Cross on September 14th, 1160.\nThe east curtain wall has a surviving arched window\n that may suggest a door opening below it. " 
+      },
+      {
+        "lon": 32.4454265126,
+        "lat": 34.8468337256,
+        "height": 472.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "",
+        "image":"/images_engklistra/1stPhase.png",
+        "image_width":500,
+        "image_height":370,
+        "pixelOffset":200
+      },
+      {
+        "lon": 32.4453339248,
+        "lat": 34.8467981222,
+        "height": 473.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 1,
+        "font": "'14px sans-serif'",
+        "descriptions": "Hermitage"
+        
+      },
+      {
+        "lon": 32.4453080581,
+        "lat": 34.8468350752,
+        "height": 473.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 1,
+        "font": "'14px sans-serif'",
+        "descriptions": "Tomb"
+        
+      }
+    ]
+  },
+  "Phase Two": {
+    "locations": [
+      {
+        "lon": 32.4454265126,
+        "lat": 34.8468337256,
+        "height": 470.5,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'25px sans-serif'",
+        "descriptions": "Neophytos was ordained priest by Bishop Basilieios Kinnamos of Paphos around 1170.\n By 1183, the Enkleistra had developed into a small monastery\n with a few monks and a subsidy from the bishop.\n The partition wall was built to separate Neophytos' cell from the rest of the Enkleistra. \nA painting campaign in 1183 included a painting of Neophytos \nbetween Archangels by the artist Theodoros Apsudes.\n The western part of the Enkleistra was partially carved and painted by the same year." 
+      }
+    ]
+  },
+  "Phase Three": {
+    "locations": [
+      {
+        "lon": 32.445165,
+        "lat": 34.846885,
+        "height": 470.5,
+        "heading": -30,
+        "pitch": 0,
+        "descriptions": "Phase Three locations 1"
+      }
+    ]
+  }
+}

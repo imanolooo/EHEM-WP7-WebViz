@@ -1,0 +1,83 @@
+html,
+body {
+  overflow: hidden;
+  margin: 0px;
+  padding: 0px;
+  height: 100%;
+}
+#cesiumContainer {
+  height: 100%;
+}
+#menuButton {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+}
+#resetButton {
+  position: absolute;
+  top: 10px;
+  left: 65px;
+  z-index: 1;
+}
+#PhaseNow {
+  position: absolute;
+  top: 10px;
+  left: 170px;
+  z-index: 1;
+}
+#PhaseOne {
+  position: absolute;
+  top: 10px;
+  left: 260px;
+  z-index: 1;
+}
+#PhaseTwo {
+  position: absolute;
+  top: 10px;
+  left: 345px;
+  z-index: 1;
+}
+#PhaseThree {
+  position: absolute;
+  top: 10px;
+  left: 430px;
+  z-index: 1;
+}
+
+#nextButton {
+  position: absolute;
+  top: 10px;
+  left: 525px;
+  z-index: 1;
+
+}
+#menu {
+  position: absolute;
+  top: 100px;
+  right: 500px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px; /* Adjust padding for the content inside the menu */
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+  width: 490px; /* Set the width of the menu */
+  height: 350px; /* Set the height of the menu */
+}
+
+#closeButton {
+  cursor: pointer;
+  position: absolute;
+  top: 90px;
+  right: 465px;
+  font-size: 30px;
+  color: rgba(0, 0, 0, 0.8); /* Red transparent color */
+  background-color: rgba(242, 53, 53, 0.8);
+  border: 2px solid rgb(255, 0, 0); /* Red transparent border */
+  padding: 5px;
+  width: 15px; /* Set the width of the button */
+  height: 15px; /* Set the height of the button */
+  border-radius: 50%; /* Make the button a circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
