@@ -9,6 +9,7 @@ import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, 
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 
 import "cesium/Build/Cesium/Widgets/widgets.css"
+import { debug } from "console";
 
 
 // This is the default access token
@@ -16,13 +17,14 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZWYyN
 
 const tilesets: Cesium3DTileset[] = [];
 let boxIdCounter = 0;
+let boxEntities: Entity[] = []; // Global variable to store box entities
 
 export default () => {
 
-    const [isCarouselOpen, setIsCarouselOpen] = useState(false); // Handle the modal carousel state
+    const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
     const [viewer, setViewer] = useState<Viewer>();
-    const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);
-    
+    const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
+    const [selectedPhase, setSelectedPhase] = useState<string | null>('Phase IX'); // Initialize it to Phase IX
 
     // Initialize the Cesium Viewer
     useEffect(() => {
@@ -125,15 +127,15 @@ export default () => {
 
                 
                 // ------
-                // Carousel
+                // Modal
                 // Create a custom button in the Cesium's existing toolbar
                 const carouselButton = document.createElement('button');
                 carouselButton.classList.add('cesium-button');
-                carouselButton.innerHTML = 'GraphMat';    // Open Carousel button name
+                carouselButton.innerHTML = 'GraphMat';    // Open Modal button name
 
-                // Add a click event handler to open the Carousel
+                // Add a click event handler to open the Modal
                 carouselButton.addEventListener('click', () => {
-                    setIsCarouselOpen(true);
+                    setIsModalOpen(true);
                 });  
 
 
@@ -156,6 +158,7 @@ export default () => {
                 phasesDropdown.addEventListener('change', (event) => {
                     const selectedOption = event.target as HTMLSelectElement;
                     const selectedPhaseId = parseInt(selectedOption.value); // Translate it to int
+                    const selectedPhaseText = selectedOption.options[selectedOption.selectedIndex].text;
 
                     // Hide all the phase tilesets
                     for (let tileset of tilesets) {
@@ -178,7 +181,41 @@ export default () => {
                     else if (selectedPhaseId == 2401804) {
                         tileset_Phase_XIII.show = true;
                     }
+
+                    setSelectedPhase(selectedPhaseText);
                 });
+
+
+
+                // test 
+
+                // Create the Debug button
+                const debugButton = document.createElement('button');
+                debugButton.classList.add('cesium-button');
+                debugButton.textContent = "Debug";
+
+                // Create the checkbox for the Debug button
+                const debugCheckbox = document.createElement('input');
+                debugCheckbox.type = 'checkbox';
+                debugCheckbox.id = 'debug-checkbox';
+                debugCheckbox.checked = false;
+
+                // Append the checkbox next to the Debug button text
+                debugButton.appendChild(debugCheckbox);
+
+                // Event listener for Debug button
+                debugButton.addEventListener('click', () => {
+                    // Toggle the checkbox's checked state
+                    debugCheckbox.checked = !debugCheckbox.checked;
+
+                    // Toggle visibility of each box entity
+                    boxEntities.forEach(entity => {
+                        entity.show = debugCheckbox.checked;
+                    });
+                });
+
+
+                // end of test
 
                 // ------
                 // Toolbar 
@@ -201,6 +238,9 @@ export default () => {
                     toolbar.insertBefore(resetButton, phasesDropdown);
                 }
 
+                if (toolbar) {
+                    toolbar.insertBefore(debugButton, resetButton);
+                }
                 
                 
                 // ------
@@ -248,15 +288,14 @@ export default () => {
             {/* Return the Cesium Viewer */}
             <div id="cesiumContainer" />
 
-            {/* Debug Boxes */}
-            {viewer && phaseBoxes}
-
             {/* Graphic Material Modal */}
             {/* Return the Image Carousel Modal */}
-            <Modal isOpen={isCarouselOpen} onClose={() => setIsCarouselOpen(false)} openModal={() => setIsCarouselOpen(true)}>
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
+                openModal={() => setIsModalOpen(true)} selectedPhase={selectedPhase}>
             </Modal>
 
-           
+            {/* Conditionally render phaseBoxes */}
+            {viewer && phaseBoxes}
         </div>
     );
 };
@@ -270,7 +309,8 @@ function PhaseBox({ viewer, points, color, orientation, localPosition, dimension
 
         const centroid = calculateCentroid(points.map(p => new Cartesian3(p.x, p.y, p.z)));
         const boxEntity = createBox(viewer, centroid, dimensions, orientation, localPosition, color, 0.5);
-        
+        boxEntities.push(boxEntity);
+
         // Additional logic for each phase
         // .....
 
@@ -316,29 +356,9 @@ function createBox(viewer: Viewer, centroid: Cartesian3, dimensions: Dimensions,
             material: color.withAlpha(alpha),
             outline: true,
             outlineColor: Color.BLACK,
-        }
+        },
+        show: false,    // Hide the box by default
     });
 
-    return null;  
+    return boxEntity;  
 }
-
-
-/* Under construction... */
-// function isCameraInsideBox(camera: Camera, box: PhaseBoxProps | PhaseBoxDataType): boolean {
-//     if (!box.localPosition || !box.dimensions) {
-//         throw new Error('Box does not have a localPosition or dimensions property');
-//     }
-
-//     // Calculate the box boundaries
-//     const minX = box.localPosition.east - box.dimensions.width / 2;
-//     const maxX = box.localPosition.east + box.dimensions.width / 2;
-//     const minY = box.localPosition.north - box.dimensions.length / 2;
-//     const maxY = box.localPosition.north + box.dimensions.length / 2;
-//     const minZ = box.localPosition.up;
-//     const maxZ = box.localPosition.up + box.dimensions.height;
-
-//     // Check if the camera is inside the box boundaries
-//     return camera.position.x >= minX && camera.position.x <= maxX
-//         && camera.position.y >= minY && camera.position.y <= maxY
-//         && camera.position.z >= minZ && camera.position.z <= maxZ;
-// }
