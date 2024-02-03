@@ -32,7 +32,7 @@ body {
   height: 100vh;
 }
 
-/* Change the Graph Material Carousel thumbnail arrows*/ 
-.control-arrow, .control-next, .control-prev {
-  color: black; /* Change this to the color you want */
+/* Move the OpenSeadragon container to the right */
+.openseadragon-container {
+  margin-left: 25px;
 }

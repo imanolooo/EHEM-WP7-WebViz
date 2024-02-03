@@ -19,7 +19,7 @@ const tilesets: Cesium3DTileset[] = [];
 let boxIdCounter = 0;
 let boxEntities: Entity[] = []; // Global variable to store box entities
 
-export default () => {
+const Map = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
     const [viewer, setViewer] = useState<Viewer>();
@@ -362,3 +362,8 @@ function createBox(viewer: Viewer, centroid: Cartesian3, dimensions: Dimensions,
 
     return boxEntity;  
 }
+
+
+
+
+export default Map;

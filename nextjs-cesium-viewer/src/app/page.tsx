@@ -1,7 +1,6 @@
 'use client'    // Client component
 
 import "cesium/Build/Cesium/Widgets/widgets.css"
-import { useState } from 'react';
 import dynamic from "next/dynamic"
 import FilterToolbar from "../components/FilterToolbar";
 

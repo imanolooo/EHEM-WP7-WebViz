@@ -20,13 +20,11 @@ const thumbnailsUrlPrefix = 'https://ehem.virvig.eu/thumbs/';
 
 
 const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }) => {
-
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [thumbnailUrls, setThumbnailUrls] = useState<string[]>([]);
     const [authors, setAuthors] = useState<string[]>([]);
     const [dates, setDates] = useState<string[]>([]);
     const [descriptions, setDescriptions] = useState<string[]>([]);
-
 
     const [isXmlParsed, setIsXmlParsed] = useState(false);
     const [currentImage, setCurrentImage] = useState<string | null>(null);
@@ -128,92 +126,121 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         setDescriptions(newDescriptions); // Setting descriptions
     };
 
-    // Change the image based on which thumbnail was selected
+
+    // version 1: Simple Carousel viewer
+    // // Change the image based on which thumbnail was selected
+    // const handleThumbnailClick = (thumbnailUrl: string) => {
+    //     const index = thumbnailUrls.indexOf(thumbnailUrl);
+    //     if (index !== -1) {
+    //         setCurrentImage(imageUrls[index]);
+    //     }
+    // };
+    
+    // const renderCarouselItems = () => {
+    //     return thumbnailUrls.map((thumbnailUrl, index) => (
+    //         <div key={index} className="h-[500px] flex align-center justify-center"
+    //         onClick={() => handleThumbnailClick(thumbnailUrl)}
+    //         >
+    //             <img 
+    //                 src={currentImage === imageUrls[index] ? currentImage : thumbnailUrl}
+    //                 alt={`Thumbnail ${index + 1}`} 
+    //                 className="max-w-full max-h-full object-contain"
+    //             />
+    //         </div>
+    //     ));
+    // };
+    // end of version 1
+
+
+    // version 2 - OpenSeadragon (Initialize one OSD viewer per image)
+
+    const viewerRef = useRef<HTMLDivElement>(null);
+
+    // Handle thumbnail click
     const handleThumbnailClick = (thumbnailUrl: string) => {
         const index = thumbnailUrls.indexOf(thumbnailUrl);
         if (index !== -1) {
             setCurrentImage(imageUrls[index]);
         }
     };
-    
+
+    // Render custom thumbnails
+    const renderCustomThumbnails = () => {
+        return thumbnailUrls.map((thumbnailUrl, index) => {
+            // You can access the current image or any other state here as needed
+            const isSelected = currentImage === imageUrls[index];
+            return (
+                <button
+                    key={index}
+                    onClick={() => handleThumbnailClick(thumbnailUrl)}
+                    className={`thumbnail ${isSelected ? 'selected-thumbnail' : ''}`}
+                >
+                    <img src={thumbnailUrl} alt={`Thumbnail ${index + 1}`} />
+                </button>
+            );
+        });
+    };
+
+    // Render carousel items
     const renderCarouselItems = () => {
         return thumbnailUrls.map((thumbnailUrl, index) => (
             <div key={index} className="h-[500px] flex align-center justify-center"
-            onClick={() => handleThumbnailClick(thumbnailUrl)}
+                onClick={() => handleThumbnailClick(thumbnailUrl)}
             >
-                <img 
-                    src={currentImage === imageUrls[index] ? currentImage : thumbnailUrl}
-                    alt={`Thumbnail ${index + 1}`} 
-                    className="max-w-full max-h-full object-contain"
-                />
+                {currentImage === imageUrls[index] ? (
+                    <div ref={viewerRef} key={currentImage} className="openseadragon-container" style={{ width: '100%', height: '500px' }} />
+                ) : (
+                    <img 
+                        src={thumbnailUrl}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="max-w-full max-h-full object-contain"
+                    />
+                )}
             </div>
         ));
     };
 
-    // test 2 - OpenSeadragon
-
-    // const viewerRef = useRef<HTMLDivElement>(null);
-
-    // // Initialize OpenSeadragon
-    // const initOpenSeadragon = (imageUrl: string, element: HTMLDivElement | null) => {
-    //     console.log("Initializing OpenSeadragon for: ", imageUrl);
-    //     if (element) {
-    //         element.innerHTML = ''; // Clear the previous viewer
-    //         OpenSeadragon({
-    //             element: element,
-    //             tileSources: {
-    //                 type: 'image',
-    //                 url: imageUrl
-    //             },
-    //             // Additional OpenSeadragon options...
-    //         });
-    //     }
-    // };
-
-    // // Handle thumbnail click
-    // const handleThumbnailClick = (thumbnailUrl: string) => {
-    //     console.log("Thumbnail clicked: ", thumbnailUrl);
-    //     const index = thumbnailUrls.indexOf(thumbnailUrl);
-    //     if (index !== -1) {
-    //         setCurrentImage(imageUrls[index]);
-    //     }
-    // };
-
-    // // Render carousel items
-    // const renderCarouselItems = () => {
-    //     return thumbnailUrls.map((thumbnailUrl, index) => (
-    //         <div key={index} className="h-[500px] flex align-center justify-center"
-    //             onClick={() => handleThumbnailClick(thumbnailUrl)}
-    //         >
-    //             {currentImage === imageUrls[index] ? (
-    //                 <div ref={viewerRef} />
-    //             ) : (
-    //                 <img 
-    //                     src={thumbnailUrl}
-    //                     alt={`Thumbnail ${index + 1}`}
-    //                     className="max-w-full max-h-full object-contain"
-    //                 />
-    //             )}
-    //         </div>
-    //     ));
-    // };
-
-    // // Ensure OpenSeadragon is initialized only once per image
-    // useEffect(() => {
-    //     if (currentImage && viewerRef.current) {
-    //         initOpenSeadragon(currentImage, viewerRef.current);
-    //     }
-    // }, [currentImage]);
-
-    // end of test 2
-
-    // useEffect to log changes in selectedPhase
     useEffect(() => {
-        console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
-        // Here, you can also add any logic that needs to run when selectedPhase changes
+        if (imageUrls.length > 0 && !currentImage) {
+            setCurrentImage(imageUrls[0]);
+        }
+    }, [imageUrls]);
+
+    // Ensure OpenSeadragon is initialized only once per image
+    useEffect(() => {
+        if (isXmlParsed && currentImage && viewerRef.current) {
+            viewerRef.current.innerHTML = ''; // Clear any previous viewer instances
+    
+            const viewer = OpenSeadragon({
+                element: viewerRef.current,
+                tileSources: {
+                    type: 'image',
+                    url: currentImage,
+                },
+                // Additional OpenSeadragon options...
+            });
+    
+            viewer.addHandler('open', () => {
+                console.log('OpenSeadragon viewer opened image successfully:', currentImage);
+            });
+    
+            return () => {
+                // Clean up viewer on component unmount or when the current image changes
+                viewer.destroy();
+            };
+        } else {
+            console.log('Current image or viewerRef.current is null, skipping OpenSeadragon initialization');
+        }
+    }, [currentImage]);
+
+    // end of version 2
+      
+    // Log changes in selectedPhase
+    useEffect(() => {
+        // console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
+        // Here, you can add any logic that needs to run when selectedPhase changes
 
     }, [selectedPhase]); // The dependency array includes selectedPhase to watch for its changes
-
 
     return (
         <div className="">
@@ -224,7 +251,8 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                 <React.Fragment>
                     {/* Image Carousel */}
                     <Carousel
-                        showThumbs={false}
+                        showThumbs={true}
+                        renderThumbs={renderCustomThumbnails}
                         showArrows={true}
                         showStatus={true}
                         showIndicators={false}
@@ -264,6 +292,31 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                         </p>
                         <p>
                             etc...
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                         </p>
                     </div>
                 </React.Fragment>
