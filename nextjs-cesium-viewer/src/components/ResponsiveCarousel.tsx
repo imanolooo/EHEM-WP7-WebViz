@@ -5,12 +5,23 @@ import { Carousel } from "react-responsive-carousel";
 import XMLParser from "./XMLParser";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import OpenSeadragon from 'openseadragon';
+import * as Annotorious from '@recogito/annotorious-openseadragon';
 
-// import { Annotorious } from '@recogito/annotorious';
-// import '@recogito/annotorious/dist/annotorious.min.css';
+import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
+
 
 interface ResponsiveCarouselProps {
     selectedPhase?: string | null;
+}
+
+interface AnnotationData {
+    text: string;
+    points: string[];
+}
+
+interface Annotation {
+    type: string;
+    data: AnnotationData[];
 }
 
 const xmlUrl = 'database.xml';
@@ -19,16 +30,45 @@ const thumbnailsUrlPrefix = 'https://ehem.virvig.eu/thumbs/';
 // example: https://ehem.virvig.eu/thumbs/GM000013.jpg
 
 
+// test 
+function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImage: string | null): any | null {
+    if (annotationData.points.length === 0) {
+        return null;
+    }
+
+    const points = annotationData.points.filter(point => point !== '').map(point => point.replace(',', ' ')).join(', ');
+
+    return {
+        "@context": "http://www.w3.org/ns/anno.jsonld",
+        "type": "Annotation",
+        "body": {
+            "type": "TextualBody",
+            "value": annotationData.text,
+            "format": "text/plain"
+        },
+        "target": {
+            "source": currentImage,
+            "selector": {
+                "type": "SvgSelector",
+                "value": `<svg><polygon points="${points}" /></svg>`
+            }
+        }
+    };
+}
+// end of test
+
+
 const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }) => {
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [thumbnailUrls, setThumbnailUrls] = useState<string[]>([]);
     const [authors, setAuthors] = useState<string[]>([]);
     const [dates, setDates] = useState<string[]>([]);
     const [descriptions, setDescriptions] = useState<string[]>([]);
+    const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
     const [isXmlParsed, setIsXmlParsed] = useState(false);
     const [currentImage, setCurrentImage] = useState<string | null>(null);
-    
+
     // Handle the parsed data from the database's XML
     const handleParsedData = (data: any) => {
 
@@ -47,6 +87,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         const newAuthors: string[] = [];
         const newDates: string[] = [];
         const newDescriptions: string[] = [];
+        const newAnnotations: Annotation[] = [];
     
 
         // Loop through each row in the XML data to get the required information
@@ -83,7 +124,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                     newDates.push('Unknown date'); // Also a fallback for missing date data
                 }
 
-                // Get the dates
+                // Get the descriptions
                 if (row.children && row.children[4] && row.children[4].children &&
                     row.children[4].children[0].children) {
                     const description = row.children[4].children[0].children[0];
@@ -97,7 +138,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                     newDescriptions.push('No description.'); // Also a fallback for missing description data
                 }
 
-                // Get the image URL
+                // Get the image URLs
                 if (row.children && row.children[6] && row.children[6].children) {
                     const imageFilename = row.children[6].children[0].children[0];
                     if (imageFilename && typeof imageFilename === 'string') {
@@ -114,7 +155,32 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                         }
                     }
                 }
+
+                // Get the annotations
+                const annotationsText = row.children[16];
+                const annotationsPoints = row.children[17];
+
+                // Process annotations from both columns
+                if (annotationsText && annotationsText.children && annotationsPoints && annotationsPoints.children) {
+                    const rowAnnotations: AnnotationData[] = [];
+                    annotationsText.children.forEach((annotationText: any, index: number) => {
+                        const annotationPoint = annotationsPoints.children[index];
+                        if (annotationPoint) {
+                            // Create single annotation object with embedded arrays for text and points
+                            const text = annotationText.children[0];
+                            const points = annotationPoint.children[0].split(' ');
+                            rowAnnotations.push({ text, points });
+                        } 
+                    });
+                    newAnnotations.push({ type: 'Annotation', data: rowAnnotations });
+                }
+                else {
+                    // If no annotations exist for the row, store an empty annotation
+                    newAnnotations.push({ type: 'Annotation', data: [] });
+                }
+                    
             }
+
         });
     
         setImageUrls(newImageUrls); // Setting image URLs
@@ -124,8 +190,12 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         setAuthors(newAuthors); // Setting authors
         setDates(newDates); // Setting dates
         setDescriptions(newDescriptions); // Setting descriptions
+        setAnnotations(newAnnotations); // Setting annotations
     };
 
+    useEffect(() => {
+        console.log("Annotations:", annotations);
+    }, [annotations]);
 
     // version 1: Simple Carousel viewer
     // // Change the image based on which thumbnail was selected
@@ -187,7 +257,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             <div key={index} className="h-[500px] flex align-center justify-center"
                 onClick={() => handleThumbnailClick(thumbnailUrl)}
             >
-                {currentImage === imageUrls[index] ? (
+                {currentImage === imageUrls[index] && viewerRef ? (
                     <div ref={viewerRef} key={currentImage} className="openseadragon-container" style={{ width: '100%', height: '500px' }} />
                 ) : (
                     <img 
@@ -200,26 +270,58 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         ));
     };
 
-    useEffect(() => {
-        if (imageUrls.length > 0 && !currentImage) {
-            setCurrentImage(imageUrls[0]);
-        }
-    }, [imageUrls]);
+
 
     // Ensure OpenSeadragon is initialized only once per image
     useEffect(() => {
+
+        if (!isXmlParsed || !imageUrls.length) {
+            return; // Wait for XML parsing and image URLs to be available
+        }
+        
+        console.log('isXmlParsed:', isXmlParsed);
+        console.log('currentImage:', currentImage);
+        console.log('viewerRef.current:', viewerRef.current);
+        console.log('current image:', currentImage);
+        
         if (isXmlParsed && currentImage && viewerRef.current) {
-            viewerRef.current.innerHTML = ''; // Clear any previous viewer instances
-    
+            // viewerRef.current.innerHTML = ''; // Clear any previous viewer instances
+
+            // Clear any previous viewer instances and insert testing text
+            viewerRef.current.innerHTML = '<p>Testing text...</p>'; 
+
             const viewer = OpenSeadragon({
                 element: viewerRef.current,
                 tileSources: {
                     type: 'image',
-                    url: currentImage,
+                    url: currentImage || imageUrls[0],
                 },
                 // Additional OpenSeadragon options...
+                // Here I need to extend the maxZoom (like up to x2 or x3)
             });
-    
+
+            
+            // test
+
+            // Add annotations to the viewer
+            const config = {};
+
+            Annotorious(viewer, config);   
+            
+            const anno = Annotorious(viewer, config);
+            anno.clearAnnotations();
+
+            annotations.forEach(annotation => {
+                annotation.data.forEach(annotationData => {
+                    const annoAnnotation = createAnnotoriousAnnotation(annotationData, currentImage);
+                    if (annoAnnotation !== null) {
+                        anno.addAnnotation(annoAnnotation);
+                    }
+                });
+            });
+
+            // end of test
+            
             viewer.addHandler('open', () => {
                 console.log('OpenSeadragon viewer opened image successfully:', currentImage);
             });
@@ -227,11 +329,14 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             return () => {
                 // Clean up viewer on component unmount or when the current image changes
                 viewer.destroy();
+                // Clear the annotations
+                anno.destroy();
             };
         } else {
             console.log('Current image or viewerRef.current is null, skipping OpenSeadragon initialization');
         }
-    }, [currentImage]);
+
+    }, [isXmlParsed, currentImage]);
 
     // end of version 2
       
@@ -244,6 +349,11 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
 
     return (
         <div className="">
+
+            {/* Parse the .xml only once, so it doesn't try to parse it infinitely */}
+            {!isXmlParsed && <XMLParser url={xmlUrl} onParsed={handleParsedData} />}
+
+            
             {/* Render the Carousel after the .xml is parsed */}
             {isXmlParsed &&
                 // React.Fragment docs: https://legacy.reactjs.org/docs/fragments.html
@@ -321,8 +431,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                     </div>
                 </React.Fragment>
             }
-            {/* Parse the .xml only once, so it doesn't try to parse it infinitely */}
-            {!isXmlParsed && <XMLParser url={xmlUrl} onParsed={handleParsedData} />}
+            
         </div>
     );
     

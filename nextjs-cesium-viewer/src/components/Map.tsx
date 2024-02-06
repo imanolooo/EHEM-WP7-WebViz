@@ -1,8 +1,8 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, defined, Color, PolygonHierarchy, Quaternion, Matrix3, Transforms, HeadingPitchRoll, ConstantProperty, Cartographic, Matrix4, Entity, HeadingPitchRange, Camera } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage } from "cesium";
 import { Math as CesiumMath } from 'cesium';
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from './Modal';
 
 import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
@@ -39,30 +39,34 @@ const Map = () => {
                 });
                 setViewer(viewer);
                 const scene = viewer.scene;
+                const primitives = viewer.scene.primitives;
+
+                // ------
+                // Tilesets
 
                 // IX
                 const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2401793); // IX
-                scene.primitives.add(tileset_Phase_IX);
+                primitives.add(tileset_Phase_IX);
                 tileset_Phase_IX.show = true;
                 tilesets.push(tileset_Phase_IX);
                 // X
                 const tileset_Phase_X = await Cesium3DTileset.fromIonAssetId(2401794); // X
-                scene.primitives.add(tileset_Phase_X);
+                primitives.add(tileset_Phase_X);
                 tileset_Phase_X.show = false;
                 tilesets.push(tileset_Phase_X);
                 // XI
                 const tileset_Phase_XI = await Cesium3DTileset.fromIonAssetId(2401797); // XI
-                scene.primitives.add(tileset_Phase_XI);
+                primitives.add(tileset_Phase_XI);
                 tileset_Phase_XI.show = false;
                 tilesets.push(tileset_Phase_XI);
                 // XII
                 const tileset_Phase_XII = await Cesium3DTileset.fromIonAssetId(2401801); // XII
-                scene.primitives.add(tileset_Phase_XII);
+                primitives.add(tileset_Phase_XII);
                 tileset_Phase_XII.show = false;
                 tilesets.push(tileset_Phase_XII);
                 // XIII
                 const tileset_Phase_XIII = await Cesium3DTileset.fromIonAssetId(2401804); // XIII
-                scene.primitives.add(tileset_Phase_XIII);
+                primitives.add(tileset_Phase_XIII);
                 tileset_Phase_XIII.show = false;
                 tilesets.push(tileset_Phase_XIII);
 
@@ -100,7 +104,7 @@ const Map = () => {
                 });
 
                 const resetCamera = () => {
-                const primitives = viewer.scene.primitives;
+                
         
                 for (let i = 0; i < primitives.length; i++) {
                     const primitive = primitives.get(i);
@@ -125,7 +129,49 @@ const Map = () => {
                 });
                 viewer.container.appendChild(resetButton);
 
-                
+
+                // ------
+                // Lights
+
+                // Create directional light
+                const dirLightIntensity = 10.0;
+                const dirLightDirection = new Cartesian3(0.25, 0.88, 0.40);
+                const dirLight = new DirectionalLight({
+                    direction: Cartesian3.normalize(
+                        dirLightDirection,
+                        new Cartesian3()),
+                    intensity: dirLightIntensity, 
+                    color: Color.WHITE 
+                });
+
+                // Set the light to the scene
+                scene.light = dirLight;
+                scene.light.intensity = 2.0; // Default light intensity
+
+                // Create the toggle light button
+                const lightToggle = document.createElement('button');
+                lightToggle.classList.add('cesium-button');
+                lightToggle.textContent = "Light";
+
+                // Create the checkbox for the toggle light button
+                const checkboxLight = document.createElement('input');
+                checkboxLight.type = 'checkbox';
+                checkboxLight.id = 'toggle-light-checkbox';
+                checkboxLight.style.justifyItems = 'center';
+                checkboxLight.style.alignSelf = 'center'; 
+                checkboxLight.checked = false;
+
+                lightToggle.appendChild(checkboxLight);
+
+                // Event listener for toggle light button
+                lightToggle.addEventListener('click', () => {
+                    // Toggle the checkbox's checked state
+                    checkboxLight.checked = !checkboxLight.checked;
+                    // Toggle the light intensity between our custom value and the default value (2.0)
+                    scene.light.intensity = checkboxLight.checked ? dirLightIntensity : 2.0;
+                });
+
+
                 // ------
                 // Modal
                 // Create a custom button in the Cesium's existing toolbar
@@ -185,63 +231,30 @@ const Map = () => {
                     setSelectedPhase(selectedPhaseText);
                 });
 
-
-
-                // test 
-
                 // Create the Debug button
-                const debugButton = document.createElement('button');
-                debugButton.classList.add('cesium-button');
-                debugButton.textContent = "Debug";
+                const toggleDebug = document.createElement('button');
+                toggleDebug.classList.add('cesium-button');
+                toggleDebug.textContent = "Debug";
 
                 // Create the checkbox for the Debug button
-                const debugCheckbox = document.createElement('input');
-                debugCheckbox.type = 'checkbox';
-                debugCheckbox.id = 'debug-checkbox';
-                debugCheckbox.checked = false;
+                const checkboxDebug = document.createElement('input');
+                checkboxDebug.type = 'checkbox';
+                checkboxDebug.id = 'toggle-checkbox';
+                checkboxDebug.checked = false;
 
                 // Append the checkbox next to the Debug button text
-                debugButton.appendChild(debugCheckbox);
+                toggleDebug.appendChild(checkboxDebug);
 
                 // Event listener for Debug button
-                debugButton.addEventListener('click', () => {
+                toggleDebug.addEventListener('click', () => {
                     // Toggle the checkbox's checked state
-                    debugCheckbox.checked = !debugCheckbox.checked;
+                    checkboxDebug.checked = !checkboxDebug.checked;
 
                     // Toggle visibility of each box entity
                     boxEntities.forEach(entity => {
-                        entity.show = debugCheckbox.checked;
+                        entity.show = checkboxDebug.checked;
                     });
                 });
-
-
-                // end of test
-
-                // ------
-                // Toolbar 
-
-                // Get the Cesium toolbar container element
-                const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
-
-                // Insert GM Carousel button before the existing buttons
-                if (toolbar) {
-                    const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
-                    toolbar.insertBefore(carouselButton, modeButton);
-                }
-
-                // Insert the Phases Dropdown toolbar before the GM Carousel
-                if (toolbar) {
-                    toolbar.insertBefore(phasesDropdown, carouselButton);
-                }
-                
-                if (toolbar) {
-                    toolbar.insertBefore(resetButton, phasesDropdown);
-                }
-
-                if (toolbar) {
-                    toolbar.insertBefore(debugButton, resetButton);
-                }
-                
                 
                 // ------
                 // Debug Boxes
@@ -271,6 +284,27 @@ const Map = () => {
                 ));
 
                 setPhaseBoxes(boxes);
+
+
+                // ------
+                // Toolbar 
+
+                // Get the Cesium toolbar container element
+                const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
+                
+                if (toolbar) {
+                    // Insert GM Carousel button before the existing buttons
+                    const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
+                    toolbar.insertBefore(carouselButton, modeButton);
+                    // Insert the Phases Dropdown toolbar before the GM Carousel
+                    toolbar.insertBefore(phasesDropdown, carouselButton);
+                    // Insert the Reset Camera button before the Phases Dropdown
+                    toolbar.insertBefore(resetButton, phasesDropdown);
+                    // Insert the Debug button before the Reset Camera
+                    toolbar.insertBefore(toggleDebug, resetButton);
+                    // Insert the Light button before the Debug button
+                    toolbar.insertBefore(lightToggle, toggleDebug);
+                }   
 
 
             } catch (error) {
