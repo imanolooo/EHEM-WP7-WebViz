@@ -17,6 +17,8 @@ interface ResponsiveCarouselProps {
 interface AnnotationData {
     text: string;
     points: string[];
+    imageUrl: string;
+    id: string;
 }
 
 interface Annotation {
@@ -30,21 +32,24 @@ const thumbnailsUrlPrefix = 'https://ehem.virvig.eu/thumbs/';
 // example: https://ehem.virvig.eu/thumbs/GM000013.jpg
 
 
-// test 
+// Create an Annotorious annotation from the annotation data
 function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImage: string | null): any | null {
     if (annotationData.points.length === 0) {
         return null;
     }
 
     const points = annotationData.points.filter(point => point !== '').map(point => point.replace(',', ' ')).join(', ');
+    console.log(points);
 
     return {
         "@context": "http://www.w3.org/ns/anno.jsonld",
+        "id": annotationData.id,
         "type": "Annotation",
         "body": {
             "type": "TextualBody",
             "value": annotationData.text,
-            "format": "text/plain"
+            // "format": "text/plain"
+            "purpose": "commenting"
         },
         "target": {
             "source": currentImage,
@@ -55,7 +60,6 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
         }
     };
 }
-// end of test
 
 
 const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }) => {
@@ -139,11 +143,12 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                 }
 
                 // Get the image URLs
+                var imageUrl = '';
                 if (row.children && row.children[6] && row.children[6].children) {
                     const imageFilename = row.children[6].children[0].children[0];
                     if (imageFilename && typeof imageFilename === 'string') {
                         const encodedFilename = encodeURIComponent(imageFilename);
-                        const imageUrl = `${imgsUrlPrefix}${encodedFilename}`;
+                        imageUrl = `${imgsUrlPrefix}${encodedFilename}`;
                         const thumbnailUrl = `${thumbnailsUrlPrefix}${encodedFilename}`;
         
                         // if (imageUrl !== 'https://ehem.virvig.eu/imgs/GM0064.png') {
@@ -169,7 +174,8 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                             // Create single annotation object with embedded arrays for text and points
                             const text = annotationText.children[0];
                             const points = annotationPoint.children[0].split(' ');
-                            rowAnnotations.push({ text, points });
+                            const id = imageUrl;
+                            rowAnnotations.push({ text, points, imageUrl, id });
                         } 
                     });
                     newAnnotations.push({ type: 'Annotation', data: rowAnnotations });
@@ -193,37 +199,13 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         setAnnotations(newAnnotations); // Setting annotations
     };
 
+    // Debug the annotations
     useEffect(() => {
         console.log("Annotations:", annotations);
     }, [annotations]);
 
-    // version 1: Simple Carousel viewer
-    // // Change the image based on which thumbnail was selected
-    // const handleThumbnailClick = (thumbnailUrl: string) => {
-    //     const index = thumbnailUrls.indexOf(thumbnailUrl);
-    //     if (index !== -1) {
-    //         setCurrentImage(imageUrls[index]);
-    //     }
-    // };
-    
-    // const renderCarouselItems = () => {
-    //     return thumbnailUrls.map((thumbnailUrl, index) => (
-    //         <div key={index} className="h-[500px] flex align-center justify-center"
-    //         onClick={() => handleThumbnailClick(thumbnailUrl)}
-    //         >
-    //             <img 
-    //                 src={currentImage === imageUrls[index] ? currentImage : thumbnailUrl}
-    //                 alt={`Thumbnail ${index + 1}`} 
-    //                 className="max-w-full max-h-full object-contain"
-    //             />
-    //         </div>
-    //     ));
-    // };
-    // end of version 1
-
-
-    // version 2 - OpenSeadragon (Initialize one OSD viewer per image)
-
+   
+    // Declare the OpenSeadragon viewer reference
     const viewerRef = useRef<HTMLDivElement>(null);
 
     // Handle thumbnail click
@@ -270,82 +252,66 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         ));
     };
 
-
-
-    // Ensure OpenSeadragon is initialized only once per image
+    // Initialize OpenSeadragon viewer and Annotorious annotations
     useEffect(() => {
-
-        if (!isXmlParsed || !imageUrls.length) {
-            return; // Wait for XML parsing and image URLs to be available
+        if (!isXmlParsed || !imageUrls.length || !currentImage || !viewerRef.current) {
+            return; // Ensure prerequisites are met
         }
-        
-        console.log('isXmlParsed:', isXmlParsed);
-        console.log('currentImage:', currentImage);
-        console.log('viewerRef.current:', viewerRef.current);
-        console.log('current image:', currentImage);
-        
-        if (isXmlParsed && currentImage && viewerRef.current) {
-            // viewerRef.current.innerHTML = ''; // Clear any previous viewer instances
-
-            // Clear any previous viewer instances and insert testing text
-            viewerRef.current.innerHTML = '<p>Testing text...</p>'; 
-
-            const viewer = OpenSeadragon({
-                element: viewerRef.current,
-                tileSources: {
-                    type: 'image',
-                    url: currentImage || imageUrls[0],
-                },
-                // Additional OpenSeadragon options...
-                // Here I need to extend the maxZoom (like up to x2 or x3)
-            });
-
-            
-            // test
-
-            // Add annotations to the viewer
-            const config = {};
-
-            Annotorious(viewer, config);   
-            
-            const anno = Annotorious(viewer, config);
-            anno.clearAnnotations();
-
-            annotations.forEach(annotation => {
-                annotation.data.forEach(annotationData => {
-                    const annoAnnotation = createAnnotoriousAnnotation(annotationData, currentImage);
-                    if (annoAnnotation !== null) {
-                        anno.addAnnotation(annoAnnotation);
-                    }
-                });
-            });
-
-            // end of test
-            
-            viewer.addHandler('open', () => {
-                console.log('OpenSeadragon viewer opened image successfully:', currentImage);
-            });
     
-            return () => {
-                // Clean up viewer on component unmount or when the current image changes
-                viewer.destroy();
-                // Clear the annotations
-                anno.destroy();
-            };
-        } else {
-            console.log('Current image or viewerRef.current is null, skipping OpenSeadragon initialization');
-        }
+        // Initialize OpenSeadragon viewer
+        const viewer = OpenSeadragon({
+            element: viewerRef.current,
+            tileSources: {
+                type: 'image',
+                url: currentImage,
+            },
+            maxZoomLevel: 4,
+            gestureSettingsMouse: {
+                clickToZoom: false, // Disable zoom on click
+            },
+            // Additional OpenSeadragon configuration...
+        });
+    
+        // Initialize Annotorious with the viewer
+        const config = {};
+        const anno = Annotorious(viewer, config);
+        // Make annotations read-only, cannot create new or edit existing annotations
+        anno.readOnly = true; 
+    
+        // Filter annotations for the current image
+        const relevantAnnotations = annotations.flatMap(annotation => 
+            annotation.data.filter(annotationData => 
+                annotationData.imageUrl === currentImage
+            )
+        );
 
-    }, [isXmlParsed, currentImage]);
+        // Add filtered annotations to Annotorious
+        relevantAnnotations.forEach(annotationData => {
+            const annoAnnotation = createAnnotoriousAnnotation(annotationData, currentImage);
+            if (annoAnnotation) {
+                anno.addAnnotation(annoAnnotation);
+            }
+        });
+    
+        // Debug the OpenSeadragon viewer
+        viewer.addHandler('open', () => {
+            console.log('OpenSeadragon viewer opened image successfully:', currentImage);
+        });
+        
+        return () => {
+            viewer.destroy(); // Clean up viewer
+            anno.destroy(); // Clear annotations
+        };
+    }, [isXmlParsed, currentImage, annotations]);
+    
 
-    // end of version 2
-      
     // Log changes in selectedPhase
     useEffect(() => {
         // console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
-        // Here, you can add any logic that needs to run when selectedPhase changes
+        // Here, add any logic that needs to run when selectedPhase changes
 
-    }, [selectedPhase]); // The dependency array includes selectedPhase to watch for its changes
+    }, [selectedPhase]);
+
 
     return (
         <div className="">
