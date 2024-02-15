@@ -33,6 +33,11 @@ body {
 }
 
 /* Move the OpenSeadragon container to the right */
-.openseadragon-container {
+/* .openseadragon-container {
   margin-left: 25px;
+} */
+
+/* Hot-fix for the margins of the thumbnail carousel */
+.carousel .thumbs-wrapper {
+  margin: 0px !important;
 }

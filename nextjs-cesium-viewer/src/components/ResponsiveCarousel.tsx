@@ -1,6 +1,6 @@
 'use client'    // Client component
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { Carousel } from "react-responsive-carousel";
 import XMLParser from "./XMLParser";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
@@ -38,8 +38,8 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
         return null;
     }
 
+    // Transform the points array into a string of space-separated coordinates
     const points = annotationData.points.filter(point => point !== '').map(point => point.replace(',', ' ')).join(', ');
-    console.log(points);
 
     return {
         "@context": "http://www.w3.org/ns/anno.jsonld",
@@ -48,7 +48,6 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
         "body": {
             "type": "TextualBody",
             "value": annotationData.text,
-            // "format": "text/plain"
             "purpose": "commenting"
         },
         "target": {
@@ -71,7 +70,13 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
 
     const [isXmlParsed, setIsXmlParsed] = useState(false);
-    const [currentImage, setCurrentImage] = useState<string | null>(null);
+    let [currentImage, setCurrentImage] = useState<string | null>(null);
+
+    // Log changes in selectedPhase
+    // useEffect(() => {
+    //     // console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
+    //     // Here, add any logic that needs to run when selectedPhase changes
+    // }, [selectedPhase]);
 
     // Handle the parsed data from the database's XML
     const handleParsedData = (data: any) => {
@@ -157,6 +162,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                         // }
                         if (index === 0) {
                             firstImageUrl = imageUrl;
+                            currentImage = imageUrl;
                         }
                     }
                 }
@@ -174,7 +180,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                             // Create single annotation object with embedded arrays for text and points
                             const text = annotationText.children[0];
                             const points = annotationPoint.children[0].split(' ');
-                            const id = imageUrl;
+                            const id = `${imageUrl}-${index}`; // Append index to imageUrl to create a unique ID
                             rowAnnotations.push({ text, points, imageUrl, id });
                         } 
                     });
@@ -188,25 +194,69 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             }
 
         });
+
+        
     
         setImageUrls(newImageUrls); // Setting image URLs
         setCurrentImage(firstImageUrl); // Setting the first image as the current image
         setThumbnailUrls(newThumbnailUrls); // Setting thumbnail URLs
-        setIsXmlParsed(true); // Setting the XML as parsed
         setAuthors(newAuthors); // Setting authors
         setDates(newDates); // Setting dates
         setDescriptions(newDescriptions); // Setting descriptions
-        setAnnotations(newAnnotations); // Setting annotations
+        setAnnotations(newAnnotations); // Setting annotations 
+        setIsXmlParsed(true); // Setting the XML as parsed
     };
-
-    // Debug the annotations
-    useEffect(() => {
-        console.log("Annotations:", annotations);
-    }, [annotations]);
-
-   
+  
     // Declare the OpenSeadragon viewer reference
     const viewerRef = useRef<HTMLDivElement>(null);
+
+    // Initialize OpenSeadragon viewer and Annotorious annotations
+    useEffect(() => {
+        if (!isXmlParsed || !imageUrls.length || !currentImage || !viewerRef) {
+            return; // Ensure prerequisites are met
+        }
+
+        // Initialize OpenSeadragon viewer
+        const viewer = OpenSeadragon({
+            element: viewerRef.current!,
+            tileSources: {
+                type: 'image',
+                url: currentImage,
+            },
+            maxZoomLevel: 4,
+            gestureSettingsMouse: {
+                clickToZoom: false, // Disable zoom on click
+            },
+            // Additional OpenSeadragon configuration...
+        });
+
+        // Initialize Annotorious with the viewer
+        const config = {};
+        const anno = Annotorious(viewer, config);
+        // Make annotations read-only, cannot create new or edit existing annotations
+        anno.readOnly = true; 
+    
+        // Filter annotations for the current image
+        const relevantAnnotations = annotations.flatMap(annotation => 
+            annotation.data.filter(annotationData => 
+                annotationData.imageUrl === currentImage
+            )
+        );
+
+        // Add filtered annotations to Annotorious
+        relevantAnnotations.forEach(annotationData => {
+            const annoAnnotation = createAnnotoriousAnnotation(annotationData, currentImage);
+            if (annoAnnotation) {
+                anno.addAnnotation(annoAnnotation);
+            }
+        });
+    
+        return () => {
+            viewer.destroy(); // Clean up viewer
+            // anno.destroy(); // Clear annotations
+        };
+    }, [isXmlParsed, currentImage, annotations, viewerRef.current]);
+    
 
     // Handle thumbnail click
     const handleThumbnailClick = (thumbnailUrl: string) => {
@@ -233,113 +283,73 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         });
     };
 
-    // Render carousel items
+    // Render carousel items without OpenSeadragon viewer
     const renderCarouselItems = () => {
         return thumbnailUrls.map((thumbnailUrl, index) => (
-            <div key={index} className="h-[500px] flex align-center justify-center"
-                onClick={() => handleThumbnailClick(thumbnailUrl)}
-            >
-                {currentImage === imageUrls[index] && viewerRef ? (
-                    <div ref={viewerRef} key={currentImage} className="openseadragon-container" style={{ width: '100%', height: '500px' }} />
-                ) : (
-                    <img 
-                        src={thumbnailUrl}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="max-w-full max-h-full object-contain"
-                    />
-                )}
-            </div>
+            <div key={index} className="display-flex overflow-x-auto whitespace-nowrap"
+                onClick={() => handleThumbnailClick(thumbnailUrl)} />
         ));
     };
 
-    // Initialize OpenSeadragon viewer and Annotorious annotations
-    useEffect(() => {
-        if (!isXmlParsed || !imageUrls.length || !currentImage || !viewerRef.current) {
-            return; // Ensure prerequisites are met
-        }
-    
-        // Initialize OpenSeadragon viewer
-        const viewer = OpenSeadragon({
-            element: viewerRef.current,
-            tileSources: {
-                type: 'image',
-                url: currentImage,
-            },
-            maxZoomLevel: 4,
-            gestureSettingsMouse: {
-                clickToZoom: false, // Disable zoom on click
-            },
-            // Additional OpenSeadragon configuration...
-        });
-    
-        // Initialize Annotorious with the viewer
-        const config = {};
-        const anno = Annotorious(viewer, config);
-        // Make annotations read-only, cannot create new or edit existing annotations
-        anno.readOnly = true; 
-    
-        // Filter annotations for the current image
-        const relevantAnnotations = annotations.flatMap(annotation => 
-            annotation.data.filter(annotationData => 
-                annotationData.imageUrl === currentImage
-            )
-        );
+    // test - old version of renderCustomThumbnails
 
-        // Add filtered annotations to Annotorious
-        relevantAnnotations.forEach(annotationData => {
-            const annoAnnotation = createAnnotoriousAnnotation(annotationData, currentImage);
-            if (annoAnnotation) {
-                anno.addAnnotation(annoAnnotation);
-            }
-        });
-    
-        // Debug the OpenSeadragon viewer
-        viewer.addHandler('open', () => {
-            console.log('OpenSeadragon viewer opened image successfully:', currentImage);
-        });
-        
-        return () => {
-            viewer.destroy(); // Clean up viewer
-            anno.destroy(); // Clear annotations
-        };
-    }, [isXmlParsed, currentImage, annotations]);
-    
+    // // Render carousel items
+    // const renderCarouselItems = () => {
+    //     return thumbnailUrls.map((thumbnailUrl, index) => (
+    //         <div key={index} className="h-[500px] flex align-center justify-center"
+    //             onClick={() => handleThumbnailClick(thumbnailUrl)}
+    //         >
+    //             {
+    //             currentImage === imageUrls[index]  ? (
+    //                 <div ref={viewerRef} key={currentImage} className="openseadragon-container" style={{ width: '100%', height: '500px' }} />
+    //             ) : (
+    //                 <img 
+    //                     src={thumbnailUrl}
+    //                     alt={`Thumbnail ${index + 1}`}
+    //                     className="max-w-full max-h-full object-contain"
+    //                 />
+    //             )}
+    //         </div>
+    //     ));
+    // };
 
-    // Log changes in selectedPhase
-    useEffect(() => {
-        // console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
-        // Here, add any logic that needs to run when selectedPhase changes
-
-    }, [selectedPhase]);
+    // end of test - old version of renderCustomThumbnails
 
 
     return (
-        <div className="">
-
+        <div>
             {/* Parse the .xml only once, so it doesn't try to parse it infinitely */}
             {!isXmlParsed && <XMLParser url={xmlUrl} onParsed={handleParsedData} />}
-
             
             {/* Render the Carousel after the .xml is parsed */}
             {isXmlParsed &&
                 // React.Fragment docs: https://legacy.reactjs.org/docs/fragments.html
                 // Return multiple elements without adding extra nodes to the DOM
                 <React.Fragment>
-                    {/* Image Carousel */}
-                    <Carousel
-                        showThumbs={true}
-                        renderThumbs={renderCustomThumbnails}
-                        showArrows={true}
-                        showStatus={true}
-                        showIndicators={false}
-                        infiniteLoop={true}
-                        dynamicHeight={false}
-                        selectedItem={currentImage ? imageUrls.indexOf(currentImage) : 0}
-                        onChange={(newIndex) => setCurrentImage(imageUrls[newIndex])}
-                    >
-                        {renderCarouselItems()}
-                    </Carousel>
-
+                    {/* Always present OpenSeadragon viewer container */}
+                    <div 
+                        ref={viewerRef} 
+                        className="openseadragon-container" 
+                        style={{ width: '100%', height: '500px', display: currentImage ? 'block' : 'none' }}
+                        />
+                    
+                    {/* Thumbnail Carousel */}
+                    <div className="flex overflow-x-auto">
+                        <Carousel
+                            showThumbs={true}
+                            renderThumbs={renderCustomThumbnails}
+                            showArrows={false}
+                            showStatus={true}
+                            showIndicators={false}
+                            infiniteLoop={true}
+                            dynamicHeight={false}
+                            selectedItem={currentImage ? imageUrls.indexOf(currentImage) : 0}
+                            onChange={(newIndex) => setCurrentImage(imageUrls[newIndex])}
+                        >
+                            {renderCarouselItems()}
+                        </Carousel>
+                    </div>
+                    
                     <br />
                     <hr className='border-slate-500' />
 
@@ -397,7 +407,6 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                     </div>
                 </React.Fragment>
             }
-            
         </div>
     );
     
