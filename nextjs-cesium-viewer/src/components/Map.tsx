@@ -1,6 +1,6 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useState } from "react";
 import Modal from './Modal';
@@ -9,8 +9,6 @@ import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, 
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 
 import "cesium/Build/Cesium/Widgets/widgets.css"
-import { debug } from "console";
-
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZWYyNTk3YS02M2Q1LTRhZjctODc1NC05NzA5YjlkMGMzNTkiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDMwMDczNjZ9.D1C9jwUVvtc09v6HJtZ3pWGBzAjA3mQZPaRs8Gis4WY';
@@ -18,6 +16,7 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZWYyN
 const tilesets: Cesium3DTileset[] = [];
 let boxIdCounter = 0;
 let boxEntities: Entity[] = []; // Global variable to store box entities
+
 
 const Map = () => {
 
@@ -48,6 +47,9 @@ const Map = () => {
                 const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2401793); // IX
                 primitives.add(tileset_Phase_IX);
                 tileset_Phase_IX.show = true;
+                tileset_Phase_IX.style = new Cesium3DTileStyle({
+                    color : 'vec4(3.0, 3.0, 3.0, 3.0)',
+                 });
                 tilesets.push(tileset_Phase_IX);
                 // X
                 const tileset_Phase_X = await Cesium3DTileset.fromIonAssetId(2401794); // X
@@ -68,6 +70,9 @@ const Map = () => {
                 const tileset_Phase_XIII = await Cesium3DTileset.fromIonAssetId(2401804); // XIII
                 primitives.add(tileset_Phase_XIII);
                 tileset_Phase_XIII.show = false;
+                tileset_Phase_XIII.style = new Cesium3DTileStyle({
+                    color : 'vec4(3.0, 3.0, 3.0, 3.0)',
+                 });
                 tilesets.push(tileset_Phase_XIII);
 
                 // ------
@@ -129,10 +134,10 @@ const Map = () => {
                 });
                 viewer.container.appendChild(resetButton);
 
-
                 // ------
                 // Lights
 
+                viewer.shadows = false; // Disable shadows
                 // Create directional light
                 const dirLightIntensity = 10.0;
                 const dirLightDirection = new Cartesian3(0.25, 0.88, 0.40);
@@ -314,6 +319,61 @@ const Map = () => {
 
         initializeViewer();
     }, []); 
+
+    // Add the button after the viewer has been initialized
+    useEffect(() => {
+        if (viewer) {
+            // Function to log camera configurations in JSON format
+            const logCameraConfig = () => {
+                const camera = viewer.camera;
+                const cameraConfig = {
+                    position: {
+                        x: camera.position.x,
+                        y: camera.position.y,
+                        z: camera.position.z
+                    },
+                    direction: {
+                        x: camera.direction.x,
+                        y: camera.direction.y,
+                        z: camera.direction.z
+                    },
+                    up: {
+                        x: camera.up.x,
+                        y: camera.up.y,
+                        z: camera.up.z
+                    }
+                };
+                // Convert cameraConfig object to JSON string with pretty print
+                const cameraConfigStr = JSON.stringify(cameraConfig, null, 2);
+                console.log(cameraConfigStr);
+                // Create a Blob from the JSON string
+                const blob = new Blob([cameraConfigStr], { type: 'text/plain' });
+                // Create a URL for the Blob
+                const url = URL.createObjectURL(blob);
+                // Create a temporary link to trigger the download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'cameraConfig.txt'; // File name for the download
+                document.body.appendChild(a); // Append the link to the document
+                a.click(); // Trigger the download
+                document.body.removeChild(a); // Clean up
+                URL.revokeObjectURL(url); // Free up resources by revoking the blob URL
+            };
+
+            // Create the button for logging camera configurations
+            const logCameraButton = document.createElement('button');
+            logCameraButton.textContent = "Log Camera Config";
+            logCameraButton.classList.add('cesium-button');
+            logCameraButton.addEventListener("click", logCameraConfig);
+
+            // Get the Cesium toolbar container element to append the button
+            const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
+            if (toolbar) {
+                // Insert the Log Camera Config button into the toolbar
+                toolbar.insertBefore(logCameraButton, toolbar.firstChild);
+            }
+        }
+    }, [viewer]); // Viewer dependency, so it runs after viewer is initialized.
     
     
     return (
