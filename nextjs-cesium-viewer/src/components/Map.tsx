@@ -341,6 +341,12 @@ const Map = () => {
                         x: camera.up.x,
                         y: camera.up.y,
                         z: camera.up.z
+                    },
+                    frustum: {
+                        fov: (camera.frustum as PerspectiveFrustum).fov,
+                        aspectRatio: (camera.frustum as PerspectiveFrustum).aspectRatio,
+                        near: camera.frustum.near,
+                        far: camera.frustum.far
                     }
                 };
                 // Convert cameraConfig object to JSON string with pretty print
