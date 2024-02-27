@@ -1,6 +1,6 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useState } from "react";
 import Modal from './Modal';
@@ -9,9 +9,11 @@ import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, 
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 
 import "cesium/Build/Cesium/Widgets/widgets.css"
+import { config } from "process";
+import test from "node:test";
 
 // This is the default access token
-Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZWYyNTk3YS02M2Q1LTRhZjctODc1NC05NzA5YjlkMGMzNTkiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDMwMDczNjZ9.D1C9jwUVvtc09v6HJtZ3pWGBzAjA3mQZPaRs8Gis4WY';
+Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
 
 const tilesets: Cesium3DTileset[] = [];
 let boxIdCounter = 0;
@@ -19,6 +21,7 @@ let boxEntities: Entity[] = []; // Global variable to store box entities
 
 
 const Map = () => {
+    const [cameraConfig, setCameraConfig] = useState({});
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
     const [viewer, setViewer] = useState<Viewer>();
@@ -40,45 +43,83 @@ const Map = () => {
                 const scene = viewer.scene;
                 const primitives = viewer.scene.primitives;
 
-                // ------
-                // Tilesets
+                // // ------
+                // // Tilesets settings
 
-                // IX
-                const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2401793); // IX
-                primitives.add(tileset_Phase_IX);
-                tileset_Phase_IX.show = true;
-                tileset_Phase_IX.style = new Cesium3DTileStyle({
-                    color : 'vec4(3.0, 3.0, 3.0, 3.0)',
-                 });
-                tilesets.push(tileset_Phase_IX);
-                // X
-                const tileset_Phase_X = await Cesium3DTileset.fromIonAssetId(2401794); // X
-                primitives.add(tileset_Phase_X);
-                tileset_Phase_X.show = false;
-                tilesets.push(tileset_Phase_X);
-                // XI
-                const tileset_Phase_XI = await Cesium3DTileset.fromIonAssetId(2401797); // XI
-                primitives.add(tileset_Phase_XI);
-                tileset_Phase_XI.show = false;
-                tilesets.push(tileset_Phase_XI);
-                // XII
-                const tileset_Phase_XII = await Cesium3DTileset.fromIonAssetId(2401801); // XII
-                primitives.add(tileset_Phase_XII);
-                tileset_Phase_XII.show = false;
-                tilesets.push(tileset_Phase_XII);
-                // XIII
-                const tileset_Phase_XIII = await Cesium3DTileset.fromIonAssetId(2401804); // XIII
-                primitives.add(tileset_Phase_XIII);
-                tileset_Phase_XIII.show = false;
-                tileset_Phase_XIII.style = new Cesium3DTileStyle({
-                    color : 'vec4(3.0, 3.0, 3.0, 3.0)',
-                 });
-                tilesets.push(tileset_Phase_XIII);
+                // const tilesetStyleIncreasedColor = new Cesium3DTileStyle({
+                //     color: 'vec4(2.0, 2.0, 2.0, 3.0)', 
+                // });
+
+                // // IX
+                // // id: 2470191
+                // // const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2401793); // IX
+                // const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2474014); // IX
+                // primitives.add(tileset_Phase_IX);
+                // tileset_Phase_IX.show = true;
+                // tilesets.push(tileset_Phase_IX);
+                // // X
+                // const tileset_Phase_X = await Cesium3DTileset.fromIonAssetId(2401794); // X
+                // primitives.add(tileset_Phase_X);
+                // tileset_Phase_X.show = false;
+                // tileset_Phase_X.style = tilesetStyleIncreasedColor;
+                // tilesets.push(tileset_Phase_X);
+                // // XI
+                // const tileset_Phase_XI = await Cesium3DTileset.fromIonAssetId(2401797); // XI
+                // primitives.add(tileset_Phase_XI);
+                // tileset_Phase_XI.show = false;
+                // tileset_Phase_XI.style = tilesetStyleIncreasedColor;
+                // tilesets.push(tileset_Phase_XI);
+                // // XII
+                // const tileset_Phase_XII = await Cesium3DTileset.fromIonAssetId(2401801); // XII
+                // primitives.add(tileset_Phase_XII);
+                // tileset_Phase_XII.show = false;
+                // tileset_Phase_XII.style = tilesetStyleIncreasedColor;
+                // tilesets.push(tileset_Phase_XII);
+                // // XIII
+                // const tileset_Phase_XIII = await Cesium3DTileset.fromIonAssetId(2401804); // XIII
+                // primitives.add(tileset_Phase_XIII);
+                // tileset_Phase_XIII.show = false;
+                // tileset_Phase_XIII.style = tilesetStyleIncreasedColor;
+                // tileset_Phase_XIII.maximumScreenSpaceError = 11;
+                // tilesets.push(tileset_Phase_XIII);
+
+                // test
+
+                // const position = Cartesian3.fromDegrees(
+                //     1.8835915438,
+                //     42.1074826297,
+                //     644.889999998
+                // );
+                // const heading = CesiumMath.toRadians(21.5+90);
+                // const pitch = CesiumMath.toRadians(-8.5);
+                // const roll = CesiumMath.toRadians(6);
+                // const hpr = new HeadingPitchRoll(heading, pitch, roll);
+                // const orientation = Transforms.headingPitchRollQuaternion(
+                //     position,
+                //     hpr
+                // );
+
+                // const test_model = await IonResource.fromAssetId(2474038);
+                // console.log(test_model);
+                // const entity = viewer.entities.add({
+                //     name: 'test_model',
+                //     position: position,
+                //     model: {
+                //         uri: test_model,
+                //     },
+                // });
+                // console.log(entity);
+                
+                // viewer.trackedEntity = entity;
+
+                // end of test
+
 
                 // ------
                 // Camera settings
-                await viewer.zoomTo(tileset_Phase_IX);
-                // await viewer.zoomTo(tilesetExterior);
+
+                // await viewer.zoomTo(tileset_Phase_IX);
+                // await viewer.zoomTo(entity);
                 viewer.camera.position = new Cartesian3(4736954.40901528, 155726.14313851847, 4254884.18938475);
                 viewer.camera.direction = new Cartesian3(-0.42410389201848225, 0.8530220500056251, 0.30412048760150384);
                 viewer.camera.up = new Cartesian3(0.7062752621207551, 0.10134975317909911, 0.7006450468295589);
@@ -110,20 +151,19 @@ const Map = () => {
 
                 const resetCamera = () => {
                 
-        
-                for (let i = 0; i < primitives.length; i++) {
-                    const primitive = primitives.get(i);
-        
-                    if (primitive instanceof Cesium3DTileset) {
-                    viewer.flyTo(primitive, {
-                        offset: new HeadingPitchRange(
-                        CesiumMath.toRadians(100),
-                        CesiumMath.toRadians(0),
-                        35
-                        ),
-                    });
+                    for (let i = 0; i < primitives.length; i++) {
+                        const primitive = primitives.get(i);
+            
+                        if (primitive instanceof Cesium3DTileset) {
+                            viewer.flyTo(primitive, {
+                                offset: new HeadingPitchRange(
+                                CesiumMath.toRadians(100),
+                                CesiumMath.toRadians(0),
+                                35
+                                ),
+                            });
+                        }
                     }
-                }
                 };
 
                 const resetButton = document.createElement('button');
@@ -135,12 +175,18 @@ const Map = () => {
                 viewer.container.appendChild(resetButton);
 
                 // ------
-                // Lights
+                // Light settings
 
                 viewer.shadows = false; // Disable shadows
                 // Create directional light
-                const dirLightIntensity = 10.0;
-                const dirLightDirection = new Cartesian3(0.25, 0.88, 0.40);
+                const dirLightIntensity = 3.0;
+                const dirLightInitialDirection = new Cartesian3(
+                    viewer.camera.direction.x,
+                    viewer.camera.direction.y,
+                    viewer.camera.direction.z,
+                );
+                let dirLightDirection = dirLightInitialDirection;
+                
                 const dirLight = new DirectionalLight({
                     direction: Cartesian3.normalize(
                         dirLightDirection,
@@ -168,17 +214,40 @@ const Map = () => {
 
                 lightToggle.appendChild(checkboxLight);
 
+                // test
+
+                const updateLightDirection = () => {
+                    const cameraDirection = viewer.camera.direction;
+                    dirLight.direction = new Cartesian3(
+                        cameraDirection.x,
+                        cameraDirection.y,
+                        cameraDirection.z
+                    );
+                };
+
+                // end of test
+
                 // Event listener for toggle light button
                 lightToggle.addEventListener('click', () => {
                     // Toggle the checkbox's checked state
                     checkboxLight.checked = !checkboxLight.checked;
                     // Toggle the light intensity between our custom value and the default value (2.0)
-                    scene.light.intensity = checkboxLight.checked ? dirLightIntensity : 2.0;
+
+                    // Toggle/Update the direction and intensity of light every frame
+                    if(checkboxLight.checked){
+                        scene.light.intensity = dirLightIntensity;
+                        viewer.scene.postRender.addEventListener(updateLightDirection);
+                    } else {
+                        scene.light.intensity = 2.0;
+                        viewer.scene.postRender.removeEventListener(updateLightDirection);
+                        dirLightDirection = dirLightInitialDirection;
+                    }
                 });
 
 
                 // ------
-                // Modal
+                // Modal settings
+
                 // Create a custom button in the Cesium's existing toolbar
                 const carouselButton = document.createElement('button');
                 carouselButton.classList.add('cesium-button');
@@ -191,7 +260,7 @@ const Map = () => {
 
 
                 // ------
-                // Phases Dropdown Menu
+                // Phases Dropdown Menu settings
                 const phasesDropdown = document.createElement('select');
                 phasesDropdown.id = 'toolbar';
                 phasesDropdown.classList.add('cesium-button');
@@ -205,36 +274,36 @@ const Map = () => {
                     phasesDropdown.appendChild(option);
                 });
 
-                // Dropdown event listener
-                phasesDropdown.addEventListener('change', (event) => {
-                    const selectedOption = event.target as HTMLSelectElement;
-                    const selectedPhaseId = parseInt(selectedOption.value); // Translate it to int
-                    const selectedPhaseText = selectedOption.options[selectedOption.selectedIndex].text;
+                // // Dropdown event listener
+                // phasesDropdown.addEventListener('change', (event) => {
+                //     const selectedOption = event.target as HTMLSelectElement;
+                //     const selectedPhaseId = parseInt(selectedOption.value); // Translate it to int
+                //     const selectedPhaseText = selectedOption.options[selectedOption.selectedIndex].text;
 
-                    // Hide all the phase tilesets
-                    for (let tileset of tilesets) {
-                        tileset.show = false;
-                    }
+                //     // Hide all the phase tilesets
+                //     for (let tileset of tilesets) {
+                //         tileset.show = false;
+                //     }
 
-                    // Show the selected phase tileset
-                    if (selectedPhaseId == 2401793) {
-                        tileset_Phase_IX.show = true;
-                    }
-                    else if (selectedPhaseId == 2401794) {
-                        tileset_Phase_X.show = true;
-                    }
-                    else if (selectedPhaseId == 2401797) {
-                        tileset_Phase_XI.show = true;
-                    }
-                    else if (selectedPhaseId == 2401801) {
-                        tileset_Phase_XII.show = true;
-                    }
-                    else if (selectedPhaseId == 2401804) {
-                        tileset_Phase_XIII.show = true;
-                    }
+                //     // Show the selected phase tileset
+                //     if (selectedPhaseId == 2401793) {
+                //         tileset_Phase_IX.show = true;
+                //     }
+                //     else if (selectedPhaseId == 2401794) {
+                //         tileset_Phase_X.show = true;
+                //     }
+                //     else if (selectedPhaseId == 2401797) {
+                //         tileset_Phase_XI.show = true;
+                //     }
+                //     else if (selectedPhaseId == 2401801) {
+                //         tileset_Phase_XII.show = true;
+                //     }
+                //     else if (selectedPhaseId == 2401804) {
+                //         tileset_Phase_XIII.show = true;
+                //     }
 
-                    setSelectedPhase(selectedPhaseText);
-                });
+                //     setSelectedPhase(selectedPhaseText);
+                // });
 
                 // Create the Debug button
                 const toggleDebug = document.createElement('button');
@@ -261,8 +330,9 @@ const Map = () => {
                     });
                 });
                 
+
                 // ------
-                // Debug Boxes
+                // Debug Boxes settings
 
                 // Define your phase box data array (replace this with actual data)
                 const phaseBoxData: PhaseBoxDataType[] = [
@@ -292,7 +362,7 @@ const Map = () => {
 
 
                 // ------
-                // Toolbar 
+                // Toolbar settings
 
                 // Get the Cesium toolbar container element
                 const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
