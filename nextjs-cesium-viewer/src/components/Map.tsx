@@ -4,29 +4,33 @@ import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, Pers
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useState } from "react";
 import Modal from './Modal';
-
 import { phases, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
-
 import "cesium/Build/Cesium/Widgets/widgets.css"
-import { config } from "process";
-import test from "node:test";
+
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
 
-const tilesets: Cesium3DTileset[] = [];
 let boxIdCounter = 0;
 let boxEntities: Entity[] = []; // Global variable to store box entities
 
+type CesiumModel = {
+    id: number;
+    name: string;
+    entity: Entity | null;
+};
 
 const Map = () => {
     const [cameraConfig, setCameraConfig] = useState({});
 
+    const models: CesiumModel[] = [];
+    let currentModelEntity: Entity | null = null;
+
     const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
     const [viewer, setViewer] = useState<Viewer>();
     const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
-    const [selectedPhase, setSelectedPhase] = useState<string | null>('Phase IX'); // Initialize it to Phase IX
+    const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
 
     // Initialize the Cesium Viewer
     useEffect(() => {
@@ -43,76 +47,45 @@ const Map = () => {
                 const scene = viewer.scene;
                 const primitives = viewer.scene.primitives;
 
-                // // ------
-                // // Tilesets settings
+                // ------
+                // Model settings
 
-                // const tilesetStyleIncreasedColor = new Cesium3DTileStyle({
-                //     color: 'vec4(2.0, 2.0, 2.0, 3.0)', 
-                // });
+                const modelPosition = Cartesian3.fromDegrees(1.88355, 42.10733, 644);
+                const heading = CesiumMath.toRadians(21.5 + 90);
+                const pitch = CesiumMath.toRadians(-8.5);
+                const roll = CesiumMath.toRadians(6);
+                const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
+                const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
 
-                // // IX
-                // // id: 2470191
-                // // const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2401793); // IX
-                // const tileset_Phase_IX = await Cesium3DTileset.fromIonAssetId(2474014); // IX
-                // primitives.add(tileset_Phase_IX);
-                // tileset_Phase_IX.show = true;
-                // tilesets.push(tileset_Phase_IX);
-                // // X
-                // const tileset_Phase_X = await Cesium3DTileset.fromIonAssetId(2401794); // X
-                // primitives.add(tileset_Phase_X);
-                // tileset_Phase_X.show = false;
-                // tileset_Phase_X.style = tilesetStyleIncreasedColor;
-                // tilesets.push(tileset_Phase_X);
-                // // XI
-                // const tileset_Phase_XI = await Cesium3DTileset.fromIonAssetId(2401797); // XI
-                // primitives.add(tileset_Phase_XI);
-                // tileset_Phase_XI.show = false;
-                // tileset_Phase_XI.style = tilesetStyleIncreasedColor;
-                // tilesets.push(tileset_Phase_XI);
-                // // XII
-                // const tileset_Phase_XII = await Cesium3DTileset.fromIonAssetId(2401801); // XII
-                // primitives.add(tileset_Phase_XII);
-                // tileset_Phase_XII.show = false;
-                // tileset_Phase_XII.style = tilesetStyleIncreasedColor;
-                // tilesets.push(tileset_Phase_XII);
-                // // XIII
-                // const tileset_Phase_XIII = await Cesium3DTileset.fromIonAssetId(2401804); // XIII
-                // primitives.add(tileset_Phase_XIII);
-                // tileset_Phase_XIII.show = false;
-                // tileset_Phase_XIII.style = tilesetStyleIncreasedColor;
-                // tileset_Phase_XIII.maximumScreenSpaceError = 11;
-                // tilesets.push(tileset_Phase_XIII);
+                // only store the models' metadata for now
+                const modelAssetIds = [2477247, 2477248, 2477249, 2477250, 2477251];
+                modelAssetIds.forEach((assetId, i) => {
+                    const model = {
+                        id: assetId,
+                        name: `Model Phase ${i + 9}`, // Adjust phase naming as needed
+                        entity: null, // Initially, there's no entity loaded
+                    };
+                    models.push(model);
+                });
 
-                // test
+                // Load the first model by default and store its entity reference
+                const firstModelUri = await IonResource.fromAssetId(modelAssetIds[0]);
+                const firstModelEntity = viewer.entities.add({
+                    position: modelPosition,
+                    orientation: new ConstantProperty(orientation),
+                    model: {
+                        uri: firstModelUri,
+                        show: true, // Show immediately after loading
+                    },
+                });
 
-                // const position = Cartesian3.fromDegrees(
-                //     1.8835915438,
-                //     42.1074826297,
-                //     644.889999998
-                // );
-                // const heading = CesiumMath.toRadians(21.5+90);
-                // const pitch = CesiumMath.toRadians(-8.5);
-                // const roll = CesiumMath.toRadians(6);
-                // const hpr = new HeadingPitchRoll(heading, pitch, roll);
-                // const orientation = Transforms.headingPitchRollQuaternion(
-                //     position,
-                //     hpr
-                // );
-
-                // const test_model = await IonResource.fromAssetId(2474038);
-                // console.log(test_model);
-                // const entity = viewer.entities.add({
-                //     name: 'test_model',
-                //     position: position,
-                //     model: {
-                //         uri: test_model,
-                //     },
-                // });
-                // console.log(entity);
-                
-                // viewer.trackedEntity = entity;
-
-                // end of test
+                // Update the corresponding model in the `models` array to include the entity reference
+                const firstModelIndex = models.findIndex(model => model.id === modelAssetIds[0]);
+                if (firstModelIndex !== -1) {
+                    models[firstModelIndex].entity = firstModelEntity;
+                }
+                // Update the currentModelEntity reference
+                currentModelEntity = firstModelEntity;
 
 
                 // ------
@@ -150,19 +123,14 @@ const Map = () => {
                 });
 
                 const resetCamera = () => {
-                
-                    for (let i = 0; i < primitives.length; i++) {
-                        const primitive = primitives.get(i);
-            
-                        if (primitive instanceof Cesium3DTileset) {
-                            viewer.flyTo(primitive, {
-                                offset: new HeadingPitchRange(
+                    if (currentModelEntity) {
+                        viewer.flyTo(currentModelEntity, {
+                            offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
                                 CesiumMath.toRadians(0),
                                 35
-                                ),
-                            });
-                        }
+                            ),
+                        });
                     }
                 };
 
@@ -214,8 +182,6 @@ const Map = () => {
 
                 lightToggle.appendChild(checkboxLight);
 
-                // test
-
                 const updateLightDirection = () => {
                     const cameraDirection = viewer.camera.direction;
                     dirLight.direction = new Cartesian3(
@@ -225,7 +191,6 @@ const Map = () => {
                     );
                 };
 
-                // end of test
 
                 // Event listener for toggle light button
                 lightToggle.addEventListener('click', () => {
@@ -261,12 +226,12 @@ const Map = () => {
 
                 // ------
                 // Phases Dropdown Menu settings
+                // Load the 3D models on demand
+
                 const phasesDropdown = document.createElement('select');
-                phasesDropdown.id = 'toolbar';
+                phasesDropdown.id = 'phases-menu';
                 phasesDropdown.classList.add('cesium-button');
                 phasesDropdown.innerHTML = 'Phases';    // Phases Toolbar button name
-
-                // Populate dropdown with options
                 phases.forEach(phase => {
                     const option = document.createElement('option');
                     option.value = phase.id.toString();
@@ -274,36 +239,42 @@ const Map = () => {
                     phasesDropdown.appendChild(option);
                 });
 
-                // // Dropdown event listener
-                // phasesDropdown.addEventListener('change', (event) => {
-                //     const selectedOption = event.target as HTMLSelectElement;
-                //     const selectedPhaseId = parseInt(selectedOption.value); // Translate it to int
-                //     const selectedPhaseText = selectedOption.options[selectedOption.selectedIndex].text;
+                // Dropdown event listener
+                phasesDropdown.addEventListener('change', async (event) => {
+                    const selectedPhaseId = parseInt((event.target as HTMLSelectElement).value);
+                    models.forEach((model) => {
+                        // Hide any previously shown model
+                        if (model.entity) model.entity.show = false;
+                    });
+                    
+                    let selectedModel = models.find(model => model.id === selectedPhaseId);
+                    if (selectedModel) {
+                        if (!selectedModel.entity) {
+                            // Model not yet loaded; load it now
+                            const modelUri = await IonResource.fromAssetId(selectedModel.id);
+                            selectedModel.entity = viewer.entities.add({
+                                position: modelPosition,
+                                orientation: new ConstantProperty(orientation),
+                                model: {
+                                    uri: modelUri,
+                                    show: true, // Show immediately after loading
+                                },
+                            });
+                            // Update the currentModelEntity reference
+                            currentModelEntity = selectedModel.entity;
+                        } else {
+                            // Model already loaded; just show it
+                            selectedModel.entity.show = true;
+                            // Update the currentModelEntity reference
+                            currentModelEntity = selectedModel.entity;
+                        }
+                        
 
-                //     // Hide all the phase tilesets
-                //     for (let tileset of tilesets) {
-                //         tileset.show = false;
-                //     }
+                    }
+                });
 
-                //     // Show the selected phase tileset
-                //     if (selectedPhaseId == 2401793) {
-                //         tileset_Phase_IX.show = true;
-                //     }
-                //     else if (selectedPhaseId == 2401794) {
-                //         tileset_Phase_X.show = true;
-                //     }
-                //     else if (selectedPhaseId == 2401797) {
-                //         tileset_Phase_XI.show = true;
-                //     }
-                //     else if (selectedPhaseId == 2401801) {
-                //         tileset_Phase_XII.show = true;
-                //     }
-                //     else if (selectedPhaseId == 2401804) {
-                //         tileset_Phase_XIII.show = true;
-                //     }
-
-                //     setSelectedPhase(selectedPhaseText);
-                // });
+                // ------
+                // Debug settings
 
                 // Create the Debug button
                 const toggleDebug = document.createElement('button');
@@ -329,10 +300,6 @@ const Map = () => {
                         entity.show = checkboxDebug.checked;
                     });
                 });
-                
-
-                // ------
-                // Debug Boxes settings
 
                 // Define your phase box data array (replace this with actual data)
                 const phaseBoxData: PhaseBoxDataType[] = [

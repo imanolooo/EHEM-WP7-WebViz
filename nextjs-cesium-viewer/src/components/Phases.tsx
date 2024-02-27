@@ -1,12 +1,13 @@
 // ------
 // Phase-related
 export const phases = [
-    { id: 2401793, text: "Phase IX" },
-    { id: 2401794, text: "Phase X" },
-    { id: 2401797, text: "Phase XI" },
-    { id: 2401801, text: "Phase XII" },
-    { id: 2401804, text: "Phase XIII" }
+    { id: 2477247, text: "Phase IX" },
+    { id: 2477248, text: "Phase X" },
+    { id: 2477249, text: "Phase XI" },
+    { id: 2477250, text: "Phase XII" },
+    { id: 2477251, text: "Phase XIII" }
 ];
+
 
 // Phase IX
 export const phaseIXPoints_main = [
