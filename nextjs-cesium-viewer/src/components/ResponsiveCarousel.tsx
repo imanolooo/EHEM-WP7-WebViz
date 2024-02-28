@@ -1,11 +1,12 @@
 'use client'    // Client component
 
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useSearchParams } from 'next/navigation'
 import { Carousel } from "react-responsive-carousel";
 import XMLParser from "./XMLParser";
-import "react-responsive-carousel/lib/styles/carousel.min.css";
 import OpenSeadragon from 'openseadragon';
 import * as Annotorious from '@recogito/annotorious-openseadragon';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
 
@@ -32,12 +33,12 @@ const imgsUrlPrefix = 'https://ehem.virvig.eu/imgs/';
 const thumbnailsUrlPrefix = 'https://ehem.virvig.eu/thumbs/';
 // example: https://ehem.virvig.eu/thumbs/GM000013.jpg
 
-const GraphicMaterialsXmlUrl = './xml_exports/Graphic_Materials.xml';
-const AnnotationsXmlUrl = './xml_exports/Annotations.xml';
-const ArchitecturalPhasesXmlUrl = './xml_exports/Architectural_Phases.xml';
-const ArchitecturalSpacesXmlUrl = './xml_exports/Architectural_Spaces.xml';
-const Link_GraphicMaterialsArchitecturalPhasesXmlUrl = './xml_exports/Graphic_Materials_link_Architectural_Phases.xml';
-const Link_GraphicMaterialsArchitecturalSpacesXmlUrl = './xml_exports/Graphic_Materials_link_Architectural_Spaces.xml';
+const GraphicMaterialsXmlUrl = './Graphic_Materials.xml';
+const AnnotationsXmlUrl = './Annotations.xml';
+const ArchitecturalPhasesXmlUrl = './Architectural_Phases.xml';
+const ArchitecturalSpacesXmlUrl = './Architectural_Spaces.xml';
+const Link_GraphicMaterialsArchitecturalPhasesXmlUrl = './Graphic_Materials_link_Architectural_Phases.xml';
+const Link_GraphicMaterialsArchitecturalSpacesXmlUrl = './Graphic_Materials_link_Architectural_Spaces.xml';
 
 
 // Create an Annotorious annotation from the annotation data
@@ -70,23 +71,20 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
 
 
 const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }) => {
+    // Get the app version from the URL
+    const searchParams = useSearchParams();
+    const appVersion = searchParams.get('version');
+    // States to store the parsed data
     const [imageUrls, setImageUrls] = useState<string[]>([]);
     const [thumbnailUrls, setThumbnailUrls] = useState<string[]>([]);
     const [authors, setAuthors] = useState<string[]>([]);
     const [dates, setDates] = useState<string[]>([]);
     const [titles, setTitles] = useState<string[]>([]);
-
     const [graphMatIds, setGraphMatIds] = useState<any[]>([]);
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
-
-    let [currentImage, setCurrentImage] = useState<string | null>(null);
-
-    // Log changes in selectedPhase
-    // useEffect(() => {
-    //     // console.log("Selected Phase in ResponsiveCarousel:", selectedPhase);
-    //     // Here, add any logic that needs to run when selectedPhase changes
-    // }, [selectedPhase]);
-
+    let   [currentImage, setCurrentImage] = useState<string | null>(null);
+    const [isCurrentImageSet, setIsCurrentImageSet] = useState(false);
+    // Boolean states to check if the XMLs are parsed
     const [isGraphicMaterialsXmlParsed, setIsGraphicMaterialsXmlParsed] = useState(false);
     const [isAnnotationsXmlParsed, setIsAnnotationsXmlParsed] = useState(false);
     const [isArchitecturalPhasesXmlParsed, setIsArchitecturalPhasesXmlParsed] = useState(false);
@@ -112,7 +110,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         const GraphMat_Titles = []; // Title (row.children[2])
         const GraphMat_Authors = []; // Authors (row.children[4])
         const GraphMat_Dates = []; // Dates (row.children[10])
-        const GraphMat_Version = []; // Version (row.children[12])
+        const GraphMat_Version: any[] = []; // Version (row.children[12])
         const GraphMat_ImageUrls = []; // ImageUrls (row.children[13])
         const GraphMat_ThumbnailUrls = []; // ThumbnailUrls (row.children[13]), same as imgUrls but with a different prefix
         // Get the ROWS from the XML data
@@ -141,26 +139,67 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                 const thumbnailUrl = `${thumbnailsUrlPrefix}${encodedFilename}`;
                 GraphMat_ImageUrls.push(imageUrl);
                 GraphMat_ThumbnailUrls.push(thumbnailUrl);
-
-                if (i === 3) {
-                    setCurrentImage(imageUrl); // Set the first image as the current image (if it's the first one in the list
-                }
             } else {
                 GraphMat_ImageUrls.push('Unknown ImageUrl');
                 GraphMat_ThumbnailUrls.push('Unknown ThumbnailUrl');
             }
         }
+        
+        // Filter function based on appVersion and GraphMat_Version
+        const filterByAppVersion = (index: number) => {
+            // No URL version --> General public
+            if (!appVersion) {
+                return GraphMat_Version[index] === 'Yes, public';
+            // URL version == 'restorer' --> EHEM internal use
+            } else if (appVersion === 'restorer') {
+                return GraphMat_Version[index] === 'Yes, EHEM internal use'
+                        || GraphMat_Version[index] === 'Yes, public';
+            }
+            else if (appVersion === 'researcher') {
+                return GraphMat_Version[index] === 'Yes, EHEM internal use'
+                || GraphMat_Version[index] === 'Yes, public'
+                || GraphMat_Version[index] === 'No';
+            }
+        };
 
-        // General
-        setTitles(GraphMat_Titles);
-        setAuthors(GraphMat_Authors);
-        setDates(GraphMat_Dates);
-        // Important
-        setGraphMatIds(GraphMat_Ids);
-        setImageUrls(GraphMat_ImageUrls);
-        setThumbnailUrls(GraphMat_ThumbnailUrls);
+        // Apply the filter based on appVersion
+        const filteredIndexes = GraphMat_Version.map((_, index) => index).filter(filterByAppVersion);
+
+        // Utility to filter array by indexes
+        const filterArrayByIndexes = (array: any[], indexes: number[]) => indexes.map(index => array[index]);
+
+        // After filtering, set the current image to the first image of the filtered array
+        if (filteredIndexes.length > 0) {
+            const firstFilteredIndex = filteredIndexes[0];
+            const firstImageUrl = GraphMat_ImageUrls[firstFilteredIndex];
+            if (firstImageUrl) {
+                // Set the first filtered image as the current image
+                setCurrentImage(firstImageUrl);
+            }
+        } else {
+            // Set a default image just in case the filtering criteria are not met
+            setCurrentImage('defaultImageURL');
+        }
+
+        // Set data based on appVersion
+        setTitles(filterArrayByIndexes(GraphMat_Titles, filteredIndexes));
+        setAuthors(filterArrayByIndexes(GraphMat_Authors, filteredIndexes));
+        setDates(filterArrayByIndexes(GraphMat_Dates, filteredIndexes));
+        setGraphMatIds(filterArrayByIndexes(GraphMat_Ids, filteredIndexes));
+        setImageUrls(filterArrayByIndexes(GraphMat_ImageUrls, filteredIndexes));
+        setThumbnailUrls(filterArrayByIndexes(GraphMat_ThumbnailUrls, filteredIndexes));
+
+        // finished parsing and filtering
         setIsGraphicMaterialsXmlParsed(true);
     };
+
+    // Set the first image after filtering as the current image
+    useEffect(() => {
+        if(!isCurrentImageSet){
+            setCurrentImage(imageUrls[0]);
+            if(currentImage) { setIsCurrentImageSet(true); }
+        }
+    });
     
     // Parse and store Annotations
     const handleAnnotationsParsedData = (data: any) => {
@@ -261,140 +300,6 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
 
         setIsArchitecturalSpacesXmlParsed(true);
     };
-
-    // ---
-    // old parsing of single XML
-    // // Handle the parsed data from the database's XML
-    // const old_handleParsedData = (data: any) => {
-
-    //     // Get the RESULTSET from the XML data
-    //     const RESULTSET = data.children[4];
-    //     if (!RESULTSET || !RESULTSET.children) {
-    //         console.error('Invalid or missing RESULTSET in XML data');
-    //         return;
-    //     }
-    //     const rows = RESULTSET.children; // Each row is a <ROW> element / entry in database
-    
-    //     // Initialize the new arrays
-    //     const newImageUrls: string[] = [];
-    //     const newThumbnailUrls:string[] = [];
-    //     let firstImageUrl: string | null = null;
-    //     const newAuthors: string[] = [];
-    //     const newDates: string[] = [];
-    //     const newDescriptions: string[] = [];
-    //     const newAnnotations: Annotation[] = [];
-    
-
-    //     // Loop through each row in the XML data to get the required information
-    //     rows.forEach((row: any, index: number) => {
-
-    //         // Skip the last row, that contains 'https://ehem.virvig.eu/imgs/GM0064.png'
-    //         // which is empty and causes errors.
-    //         if (index < rows.length - 1) {
-
-    //             // Get the author
-    //             if (row.children && row.children[1] && row.children[1].children &&
-    //                 row.children[1].children[0].children) {
-    //                 const author = row.children[1].children[0].children[0];
-    //                 if (author && typeof author === 'string') {
-    //                     newAuthors.push(author);
-    //                 } else {
-    //                     newAuthors.push('Unknown author'); // Fallback for missing author
-    //                 }
-    //             } else {
-    //                 newAuthors.push('Unknown author'); // Also a fallback for missing author data
-    //             }
-
-    //             // Get the dates
-    //             if (row.children && row.children[3] && row.children[3].children &&
-    //                 row.children[3].children[0].children) {
-    //                 const date = row.children[3].children[0].children[0];
-
-    //                 if (date && typeof date === 'string') {
-    //                     newDates.push(date);
-    //                 } else {
-    //                     newDates.push('Unknown date'); // Fallback for missing date
-    //                 }
-    //             } else {
-    //                 newDates.push('Unknown date'); // Also a fallback for missing date data
-    //             }
-
-    //             // Get the descriptions
-    //             if (row.children && row.children[4] && row.children[4].children &&
-    //                 row.children[4].children[0].children) {
-    //                 const description = row.children[4].children[0].children[0];
-
-    //                 if (description && typeof description === 'string') {
-    //                     newDescriptions.push(description);
-    //                 } else {
-    //                     newDescriptions.push('No description.'); // Fallback for missing description
-    //                 }
-    //             } else {
-    //                 newDescriptions.push('No description.'); // Also a fallback for missing description data
-    //             }
-
-    //             // Get the image URLs
-    //             var imageUrl = '';
-    //             if (row.children && row.children[6] && row.children[6].children) {
-    //                 const imageFilename = row.children[6].children[0].children[0];
-    //                 if (imageFilename && typeof imageFilename === 'string') {
-    //                     const encodedFilename = encodeURIComponent(imageFilename);
-    //                     imageUrl = `${imgsUrlPrefix}${encodedFilename}`;
-    //                     const thumbnailUrl = `${thumbnailsUrlPrefix}${encodedFilename}`;
-        
-    //                     // if (imageUrl !== 'https://ehem.virvig.eu/imgs/GM0064.png') {
-    //                         newImageUrls.push(imageUrl);
-    //                         newThumbnailUrls.push(thumbnailUrl);
-    //                     // }
-    //                     if (index === 0) {
-    //                         firstImageUrl = imageUrl;
-    //                         currentImage = imageUrl;
-    //                     }
-    //                 }
-    //             }
-
-    //             // Get the annotations
-    //             const annotationsText = row.children[16];
-    //             const annotationsPoints = row.children[17];
-
-    //             // Process annotations from both columns
-    //             if (annotationsText && annotationsText.children && annotationsPoints && annotationsPoints.children) {
-    //                 const rowAnnotations: AnnotationData[] = [];
-    //                 annotationsText.children.forEach((annotationText: any, index: number) => {
-    //                     const annotationPoint = annotationsPoints.children[index];
-    //                     if (annotationPoint) {
-    //                         // Create single annotation object with embedded arrays for text and points
-    //                         const text = annotationText.children[0];
-    //                         const points = annotationPoint.children[0].split(' ');
-    //                         const id = `${imageUrl}-${index}`; // Append index to imageUrl to create a unique ID
-    //                         rowAnnotations.push({ text, points, imageUrl, id });
-    //                     } 
-    //                 });
-    //                 newAnnotations.push({ type: 'Annotation', data: rowAnnotations });
-    //             }
-    //             else {
-    //                 // If no annotations exist for the row, store an empty annotation
-    //                 newAnnotations.push({ type: 'Annotation', data: [] });
-    //             }
-                    
-    //         }
-
-    //     });
-
-        
-    
-    //     setImageUrls(newImageUrls); // Setting image URLs
-    //     setCurrentImage(firstImageUrl); // Setting the first image as the current image
-    //     setThumbnailUrls(newThumbnailUrls); // Setting thumbnail URLs
-    //     setAuthors(newAuthors); // Setting authors
-    //     setDates(newDates); // Setting dates
-    //     setDescriptions(newDescriptions); // Setting descriptions
-    //     setAnnotations(newAnnotations); // Setting annotations 
-    //     setIsXmlParsed(true); // Setting the XML as parsed
-    // };
-  
-    // Declare the OpenSeadragon viewer reference
-    // ---
 
     // Declare the OpenSeadragon viewer reference
     const viewerRef = useRef<HTMLDivElement>(null);
