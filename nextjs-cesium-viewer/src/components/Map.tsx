@@ -1,6 +1,6 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource, JulianDate, ClockRange, ClockStep } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useState } from "react";
 import Modal from './Modal';
@@ -21,6 +21,7 @@ type CesiumModel = {
     entity: Entity | null;
 };
 
+
 const Map = () => {
     const [cameraConfig, setCameraConfig] = useState({});
 
@@ -31,6 +32,53 @@ const Map = () => {
     const [viewer, setViewer] = useState<Viewer>();
     const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
     const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
+
+    // utility for getting the current time
+    // useEffect(() => {
+    //     const handleKeyDown = (event: { key: any; }) => {
+    //     switch (event.key) {
+    //     case 'G':
+    //         // Start animating forward
+    //         if (viewer) {
+    //             viewer.clock.multiplier = 4000; // Adjust speed as needed
+    //             viewer.clock.shouldAnimate = true;
+    //         }
+    //         break;
+    //     case 'F':
+    //         // Start animating backward
+    //         if (viewer) {
+    //             viewer.clock.multiplier = -4000; // Adjust speed as needed
+    //             viewer.clock.shouldAnimate = true;
+    //         }
+    //         break;
+    //     case 'T':
+    //         // Log the current date and time
+    //         if (viewer) {
+    //             const currentTime = viewer.clock.currentTime;
+    //             const date = JulianDate.toDate(currentTime);
+    //             console.log(date.toString());
+    //         }
+    //         break;
+    //     }
+    //     };
+    
+    // const handleKeyUp = (event: { key: string; }) => {
+    //     if (event.key === 'G' || event.key === 'F') {
+    //         // Stop animating
+    //         if (viewer) {
+    //             viewer.clock.shouldAnimate = false;
+    //         }
+    //     }
+    // };
+
+    // document.addEventListener('keydown', handleKeyDown);
+    //     document.addEventListener('keyup', handleKeyUp);
+    
+    //     return () => {
+    //     document.removeEventListener('keydown', handleKeyDown);
+    //     document.removeEventListener('keyup', handleKeyUp);
+    //     };
+    // }, [viewer]);
 
     // Initialize the Cesium Viewer
     useEffect(() => {
@@ -45,12 +93,20 @@ const Map = () => {
                 });
                 setViewer(viewer);
                 const scene = viewer.scene;
-                const primitives = viewer.scene.primitives;
+
+
+                // ------
+                // Light settings
+                const currentTime = JulianDate.fromDate(new Date(2024, 3, 5, 17, 0, 0, 0));
+                viewer.clock.currentTime = currentTime.clone();                
+                // Enable the lighting based on the sun's position
+                viewer.scene.globe.enableLighting = true;
+
 
                 // ------
                 // Model settings
 
-                const modelPosition = Cartesian3.fromDegrees(1.88355, 42.10733, 644);
+                const modelPosition = Cartesian3.fromDegrees(1.88364, 42.107485, 644);
                 const heading = CesiumMath.toRadians(21.5 + 90);
                 const pitch = CesiumMath.toRadians(-8.5);
                 const roll = CesiumMath.toRadians(6);
@@ -58,18 +114,17 @@ const Map = () => {
                 const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
 
                 // only store the models' metadata for now
-                const modelAssetIds = [2477247, 2477248, 2477249, 2477250, 2477251];
-                modelAssetIds.forEach((assetId, i) => {
+                phases.forEach(phase => {
                     const model = {
-                        id: assetId,
-                        name: `Model Phase ${i + 9}`, // Adjust phase naming as needed
+                        id: phase.id,
+                        name: phase.text,
                         entity: null, // Initially, there's no entity loaded
                     };
                     models.push(model);
                 });
 
                 // Load the first model by default and store its entity reference
-                const firstModelUri = await IonResource.fromAssetId(modelAssetIds[0]);
+                const firstModelUri = await IonResource.fromAssetId(phases[0].id);
                 const firstModelEntity = viewer.entities.add({
                     position: modelPosition,
                     orientation: new ConstantProperty(orientation),
@@ -80,7 +135,7 @@ const Map = () => {
                 });
 
                 // Update the corresponding model in the `models` array to include the entity reference
-                const firstModelIndex = models.findIndex(model => model.id === modelAssetIds[0]);
+                const firstModelIndex = models.findIndex(model => model.id === phases[0].id);
                 if (firstModelIndex !== -1) {
                     models[firstModelIndex].entity = firstModelEntity;
                 }
@@ -142,74 +197,7 @@ const Map = () => {
                 });
                 viewer.container.appendChild(resetButton);
 
-                // ------
-                // Light settings
-
-                viewer.shadows = false; // Disable shadows
-                // Create directional light
-                const dirLightIntensity = 3.0;
-                const dirLightInitialDirection = new Cartesian3(
-                    viewer.camera.direction.x,
-                    viewer.camera.direction.y,
-                    viewer.camera.direction.z,
-                );
-                let dirLightDirection = dirLightInitialDirection;
                 
-                const dirLight = new DirectionalLight({
-                    direction: Cartesian3.normalize(
-                        dirLightDirection,
-                        new Cartesian3()),
-                    intensity: dirLightIntensity, 
-                    color: Color.WHITE 
-                });
-
-                // Set the light to the scene
-                scene.light = dirLight;
-                scene.light.intensity = 2.0; // Default light intensity
-
-                // Create the toggle light button
-                const lightToggle = document.createElement('button');
-                lightToggle.classList.add('cesium-button');
-                lightToggle.textContent = "Light";
-
-                // Create the checkbox for the toggle light button
-                const checkboxLight = document.createElement('input');
-                checkboxLight.type = 'checkbox';
-                checkboxLight.id = 'toggle-light-checkbox';
-                checkboxLight.style.justifyItems = 'center';
-                checkboxLight.style.alignSelf = 'center'; 
-                checkboxLight.checked = false;
-
-                lightToggle.appendChild(checkboxLight);
-
-                const updateLightDirection = () => {
-                    const cameraDirection = viewer.camera.direction;
-                    dirLight.direction = new Cartesian3(
-                        cameraDirection.x,
-                        cameraDirection.y,
-                        cameraDirection.z
-                    );
-                };
-
-
-                // Event listener for toggle light button
-                lightToggle.addEventListener('click', () => {
-                    // Toggle the checkbox's checked state
-                    checkboxLight.checked = !checkboxLight.checked;
-                    // Toggle the light intensity between our custom value and the default value (2.0)
-
-                    // Toggle/Update the direction and intensity of light every frame
-                    if(checkboxLight.checked){
-                        scene.light.intensity = dirLightIntensity;
-                        viewer.scene.postRender.addEventListener(updateLightDirection);
-                    } else {
-                        scene.light.intensity = 2.0;
-                        viewer.scene.postRender.removeEventListener(updateLightDirection);
-                        dirLightDirection = dirLightInitialDirection;
-                    }
-                });
-
-
                 // ------
                 // Modal settings
 
@@ -269,7 +257,8 @@ const Map = () => {
                             currentModelEntity = selectedModel.entity;
                         }
                         
-
+                        console.log('Selected model position: ', selectedModel.entity.position);
+                        console.log('Current model position: ', currentModelEntity.position);
                     }
                 });
 
@@ -343,9 +332,9 @@ const Map = () => {
                     // Insert the Reset Camera button before the Phases Dropdown
                     toolbar.insertBefore(resetButton, phasesDropdown);
                     // Insert the Debug button before the Reset Camera
-                    toolbar.insertBefore(toggleDebug, resetButton);
+                    // toolbar.insertBefore(toggleDebug, resetButton);
                     // Insert the Light button before the Debug button
-                    toolbar.insertBefore(lightToggle, toggleDebug);
+                    // toolbar.insertBefore(lightToggle, toggleDebug);
                 }   
 
 
