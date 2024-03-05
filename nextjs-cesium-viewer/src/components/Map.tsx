@@ -106,7 +106,7 @@ const Map = () => {
                 // ------
                 // Model settings
 
-                const modelPosition = Cartesian3.fromDegrees(1.88364, 42.107485, 644);
+                const modelPosition = Cartesian3.fromDegrees(1.88364, 42.107485, 643);
                 const heading = CesiumMath.toRadians(21.5 + 90);
                 const pitch = CesiumMath.toRadians(-2.0);
                 const roll = CesiumMath.toRadians(0);
