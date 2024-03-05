@@ -108,7 +108,7 @@ const Map = () => {
 
                 const modelPosition = Cartesian3.fromDegrees(1.88364, 42.107485, 644);
                 const heading = CesiumMath.toRadians(21.5 + 90);
-                const pitch = CesiumMath.toRadians(-8.5);
+                const pitch = CesiumMath.toRadians(-2.0);
                 const roll = CesiumMath.toRadians(0);
                 const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
                 const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
