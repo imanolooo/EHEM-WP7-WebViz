@@ -41,11 +41,11 @@ export default () => {
 
         // circleEntity.show = true;
         const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-       //-----Marios-------
+        //-----Marios-------
         var destinationPosition: Cartesian3 | null = null
 
-      
-      // yellow circle
+
+        // yellow circle
         const intersectionPointEntity = new Entity({
           position: new Cartesian3(0, 0, 0),
           point: {
@@ -362,7 +362,7 @@ export default () => {
             // Assuming your JSON file has an array of locations
             // locations = data.locations;
             currentPhase = 'Phase Now';
-
+            addAnnotations(currentPhase);
             // Function to set the camera to the current location and update description
             function setCameraToLocation(index: number) {
               const location = phases[currentPhase]?.locations[index];
@@ -447,9 +447,9 @@ export default () => {
 
 
 
-        
 
-            
+
+
             //escape -> camera move normally
             document.addEventListener('keyup', function (event) {
               if (event.key === 'Escape') {
@@ -466,8 +466,8 @@ export default () => {
                     currentLabelEntity.label.show = new ConstantProperty(false);
                   }
                 }
-                
-                
+
+
 
               }
             });
@@ -553,7 +553,7 @@ export default () => {
                 if (firstframe) {
                   SelectedPositions = positions;
                   firstframe = false;
-                 }
+                }
                 // console.log("pos" + positions);
                 // console.log("dest" + destinationPosition);
                 // Check if there is an existing labelDescriptionEntity and hide it
@@ -581,7 +581,7 @@ export default () => {
                 if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3)) {
                   console.log(phases[currentPhase].locations[i].labeldesciption);
 
-                  
+
                   if (labelDescriptionEntity) {
                     if (labelDescriptionEntity.label) {
                       labelDescriptionEntity.label.show = new ConstantProperty(true);
@@ -609,7 +609,7 @@ export default () => {
             }, ScreenSpaceEventType.LEFT_CLICK);
 
 
-         
+
 
             //Story Mode Button to increase the index
             function onNextButtonClick() {
@@ -633,7 +633,7 @@ export default () => {
               currentIndex += 1;
             }
 
-           
+
 
             nextButton?.addEventListener('click', onNextButtonClick);
 
@@ -644,7 +644,7 @@ export default () => {
           .catch(error => {
             console.error('Error fetching JSON:', error);
           });
-          //-------end Marios----------
+        //-------end Marios----------
 
         const addPhaseNow = async () => {
           hideAllTilesets();
@@ -657,6 +657,7 @@ export default () => {
           hideEntities();
           showEntitiesNow();
           currentPhase = "Phase Now";
+          addAnnotations(currentPhase);
           currentIndex = 0;
 
         };
@@ -671,6 +672,7 @@ export default () => {
           hideEntities();
           showEntitiesOne();
           currentPhase = "Phase One";
+          addAnnotations(currentPhase);
           currentIndex = 0;
 
         };
@@ -686,6 +688,7 @@ export default () => {
           hideEntities();
           showEntitiesTwo();
           currentPhase = "Phase Two";
+          addAnnotations(currentPhase);
           currentIndex = 0;
 
         };
@@ -698,6 +701,7 @@ export default () => {
           hideEntities();
           showEntitiesThree();
           currentPhase = "Phase Three";
+          addAnnotations(currentPhase);
           currentIndex = 0;
 
         };
@@ -710,6 +714,7 @@ export default () => {
           hideEntities();
           showEntitiesFour();
           currentPhase = "Phase Four";
+          addAnnotations(currentPhase);
           currentIndex = 0;
 
         };
@@ -725,7 +730,7 @@ export default () => {
           }
         };
         const hideEntities = async () => {
-          
+
           // Remove the current label entity
           if (currentLabelEntity) {
             viewer.entities.remove(currentLabelEntity);
@@ -738,613 +743,668 @@ export default () => {
 
         };
 
-        //Annotations for phaseNow
-        //Add a sample point on the map
-        var Holly = viewer.entities.add({
-          name: 'My Point',
-          position: Cartesian3.fromDegrees(32.4451568427, 34.8468619172, 470),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '5',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //---Marios-----
+        const addAnnotations = async (Phase: any) => {
+          fetch(jsonFilePath)
+            .then(response => response.json())
+            .then((data: Record<string, any>) => {
 
-          }
-        });
 
-        // Add a sample point on the map
-        var Tomb = viewer.entities.add({
-          name: 'My Point 2',
-          position: Cartesian3.fromDegrees(32.4452111387, 34.8469302888, 471.5),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '6',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+              for (var phase in data) {
+                if (phase == Phase) {
+                  if (data.hasOwnProperty(phase)) {
+                    var locations = data[phase].locations;
 
-          }
-        });
+                    for (var i = 0; i < locations.length; i++) {
+                      var location = locations[i];
+                      if (location.labeltext) {
+                        var entity = viewer.entities.add({
+                          position: Cartesian3.fromDegrees(
+                            location.lon,
+                            location.lat,
+                            location.height
+                          ),
+                          point: {
+                            pixelSize: 30,
+                            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                          },
+                          label: {
+                            text: location.labeltext,
+                            font: '14px sans-serif',
+                            fillColor: Color.WHITE,
+                            style: LabelStyle.FILL_AND_OUTLINE,
+                            outlineWidth: 2,
+                            outlineColor: Color.WHITE,
+                            pixelOffset: new Cartesian2(0, 0),
+                            eyeOffset: new Cartesian3(0, 0, 0),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-        // Add a sample point on the map
-        var Hagiasterion = viewer.entities.add({
-          name: 'Hagiasterion',
-          position: Cartesian3.fromDegrees(32.4451838261, 34.8468564217, 475.5),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '3',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                          }
+                        });
 
-          }
-        });
 
-        // Add a sample point on the map
-        var SecondCell = viewer.entities.add({
-          name: 'SecondCell',
-          position: Cartesian3.fromDegrees(32.4451669844, 34.8468502703, 478.3),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '2',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
+                      }
+                    }
+                  }
+                }
+              }
 
-          }
-        });
 
-        // Add a sample point on the map
-        var BaptistCell = viewer.entities.add({
-          name: 'BaptistCell',
-          position: Cartesian3.fromDegrees(32.4452343032, 34.84693573, 477.5),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '1',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-          }
-        });
-
-        // Add a sample point on the map
-        var Rock = viewer.entities.add({
-          name: 'Rock',
-          position: Cartesian3.fromDegrees(32.4453239321, 34.8469644945, 468.2),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '4',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-
-          }
-        });
-
-        // Add a sample point on the map
-        var Refectory = viewer.entities.add({
-          name: 'Refectory',
-          position: Cartesian3.fromDegrees(32.4452766161, 34.846958311, 470),
-          point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-            text: '7',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-
-          }
-        });
-        //Annotations for phaseOne
-        // Add a sample point on the map
-        var HermitagePhaseOne = viewer.entities.add({
-          name: 'Hermitage',
-          show: false,
-          position: Cartesian3.fromDegrees(32.4452064114, 34.8469146477, 471.5),
-          point: {
-              pixelSize: 30,
-              color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-              text: '1',
-              font: '14px sans-serif',
-              fillColor: Color.WHITE,
-              style: LabelStyle.FILL_AND_OUTLINE,
-              outlineWidth: 2,
-              outlineColor: Color.WHITE,
-              pixelOffset: new Cartesian2(0, 0),
-              eyeOffset: new Cartesian3(0, 0, 0),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY
-
-          }
-      });
-
-      // Add a sample point on the map
-      var TombPhaseOne = viewer.entities.add({
-          name: 'Tomb',
-          show: false,
-          position: Cartesian3.fromDegrees(32.4451764455, 34.846951005, 472),
-          point: {
-              pixelSize: 30,
-              color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY
-          },
-          label: {
-              text: '2',
-              font: '14px sans-serif',
-              fillColor: Color.WHITE,
-              style: LabelStyle.FILL_AND_OUTLINE,
-              outlineWidth: 2,
-              outlineColor: Color.WHITE,
-              pixelOffset: new Cartesian2(0, 0),
-              eyeOffset: new Cartesian3(0, 0, 0),
-              disableDepthTestDistance: Number.POSITIVE_INFINITY
-
-          }
-      });
-
-      //Annotations for phaseTwo
-       // Add a sample point on the map
-       var PartitionWall = viewer.entities.add({
-        name: 'Tomb',
-        show: false,
-        position: Cartesian3.fromDegrees(32.4451723875, 34.8468801129, 470.6),
-        point: {
-            pixelSize: 30,
-            color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-        },
-        label: {
-            text: '1',
-            font: '14px sans-serif',
-            fillColor: Color.WHITE,
-            style: LabelStyle.FILL_AND_OUTLINE,
-            outlineWidth: 2,
-            outlineColor: Color.WHITE,
-            pixelOffset: new Cartesian2(0, 0),
-            eyeOffset: new Cartesian3(0, 0, 0),
-            disableDepthTestDistance: Number.POSITIVE_INFINITY
-
+            })
+            .catch(error => {
+              console.error('Error fetching JSON:', error);
+            });
         }
+         //--- End Marios-----
+        //Annotations for phaseNow
+        //         //Add a sample point on the map
+        //         var Holly = viewer.entities.add({
+        //           name: 'My Point',
+        //           position: Cartesian3.fromDegrees(32.4451568427, 34.8468619172, 470),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '5',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-        
-    });
-    var TheodorosApsudes = viewer.entities.add({
-      name: 'Tomb',
-      show: false,
-      position: Cartesian3.fromDegrees(32.4452026923, 34.8469262386, 470.35),
-      point: {
-          pixelSize: 30,
-          color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-          disableDepthTestDistance: Number.POSITIVE_INFINITY
-      },
-      label: {
-          text: '3',
-          font: '14px sans-serif',
-          fillColor: Color.WHITE,
-          style: LabelStyle.FILL_AND_OUTLINE,
-          outlineWidth: 2,
-          outlineColor: Color.WHITE,
-          pixelOffset: new Cartesian2(0, 0),
-          eyeOffset: new Cartesian3(0, 0, 0),
-          disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           }
+        //         });
 
-      }
+        //         // Add a sample point on the map
+        //         var Tomb = viewer.entities.add({
+        //           name: 'My Point 2',
+        //           position: Cartesian3.fromDegrees(32.4452111387, 34.8469302888, 471.5),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '6',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-      
-  });
+        //           }
+        //         });
 
-  var Archaggelies = viewer.entities.add({
-    name: 'Tomb',
-    show: false,
-    position: Cartesian3.fromDegrees(32.4451812705, 34.8468924212, 472),
-    point: {
-        pixelSize: 30,
-        color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-        disableDepthTestDistance: Number.POSITIVE_INFINITY
-    },
-    label: {
-        text: '2',
-        font: '14px sans-serif',
-        fillColor: Color.WHITE,
-        style: LabelStyle.FILL_AND_OUTLINE,
-        outlineWidth: 2,
-        outlineColor: Color.WHITE,
-        pixelOffset: new Cartesian2(0, 0),
-        eyeOffset: new Cartesian3(0, 0, 0),
-        disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //         // Add a sample point on the map
+        //         var Hagiasterion = viewer.entities.add({
+        //           name: 'Hagiasterion',
+        //           position: Cartesian3.fromDegrees(32.4451838261, 34.8468564217, 475.5),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '3',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-    }
+        //           }
+        //         });
 
-    
-});
+        //         // Add a sample point on the map
+        //         var SecondCell = viewer.entities.add({
+        //           name: 'SecondCell',
+        //           position: Cartesian3.fromDegrees(32.4451669844, 34.8468502703, 478.3),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '2',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-var WesternWall = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451551314, 34.8468991368, 470.7),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '4',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           }
+        //         });
 
-  }
+        //         // Add a sample point on the map
+        //         var BaptistCell = viewer.entities.add({
+        //           name: 'BaptistCell',
+        //           position: Cartesian3.fromDegrees(32.4452343032, 34.84693573, 477.5),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '1',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  
-});
+        //           }
+        //         });
 
- //Annotations for phaseThree
- var FormerEntrance = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451762028, 34.8468771079, 470.2),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '1',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //         // Add a sample point on the map
+        //         var Rock = viewer.entities.add({
+        //           name: 'Rock',
+        //           position: Cartesian3.fromDegrees(32.4453239321, 34.8469644945, 468.2),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '4',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        //           }
+        //         });
 
-  
-});
+        //         // Add a sample point on the map
+        //         var Refectory = viewer.entities.add({
+        //           name: 'Refectory',
+        //           position: Cartesian3.fromDegrees(32.4452766161, 34.846958311, 470),
+        //           point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //             text: '7',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
- 
- var Niche = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451547156, 34.8468833242, 470.2),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '2',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           }
+        //         });
+        //         //Annotations for phaseOne
+        //         // Add a sample point on the map
+        //         var HermitagePhaseOne = viewer.entities.add({
+        //           name: 'Hermitage',
+        //           show: false,
+        //           position: Cartesian3.fromDegrees(32.4452064114, 34.8469146477, 471.5),
+        //           point: {
+        //               pixelSize: 30,
+        //               color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //               disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //               text: '1',
+        //               font: '14px sans-serif',
+        //               fillColor: Color.WHITE,
+        //               style: LabelStyle.FILL_AND_OUTLINE,
+        //               outlineWidth: 2,
+        //               outlineColor: Color.WHITE,
+        //               pixelOffset: new Cartesian2(0, 0),
+        //               eyeOffset: new Cartesian3(0, 0, 0),
+        //               disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        //           }
+        //       });
 
-  
-});
+        //       // Add a sample point on the map
+        //       var TombPhaseOne = viewer.entities.add({
+        //           name: 'Tomb',
+        //           show: false,
+        //           position: Cartesian3.fromDegrees(32.4451764455, 34.846951005, 472),
+        //           point: {
+        //               pixelSize: 30,
+        //               color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //               disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           },
+        //           label: {
+        //               text: '2',
+        //               font: '14px sans-serif',
+        //               fillColor: Color.WHITE,
+        //               style: LabelStyle.FILL_AND_OUTLINE,
+        //               outlineWidth: 2,
+        //               outlineColor: Color.WHITE,
+        //               pixelOffset: new Cartesian2(0, 0),
+        //               eyeOffset: new Cartesian3(0, 0, 0),
+        //               disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-//Annotations for phaseThree
-var Mary = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451513321, 34.8468842952, 470.2),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '3',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //           }
+        //       });
 
-  }
+        //       //Annotations for phaseTwo
+        //        // Add a sample point on the map
+        //        var PartitionWall = viewer.entities.add({
+        //         name: 'Tomb',
+        //         show: false,
+        //         position: Cartesian3.fromDegrees(32.4451723875, 34.8468801129, 470.6),
+        //         point: {
+        //             pixelSize: 30,
+        //             color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //         },
+        //         label: {
+        //             text: '1',
+        //             font: '14px sans-serif',
+        //             fillColor: Color.WHITE,
+        //             style: LabelStyle.FILL_AND_OUTLINE,
+        //             outlineWidth: 2,
+        //             outlineColor: Color.WHITE,
+        //             pixelOffset: new Cartesian2(0, 0),
+        //             eyeOffset: new Cartesian3(0, 0, 0),
+        //             disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  
-});
-//Annotations for phaseThree
-var Cross = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451970642, 34.8468648869, 470.25),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '3',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //         }
 
-  }
 
-  
-});
-//Annotations for phaseThree
-var Crucifixion  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451992899, 34.8468657818, 472.5),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '4',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //     });
+        //     var TheodorosApsudes = viewer.entities.add({
+        //       name: 'Tomb',
+        //       show: false,
+        //       position: Cartesian3.fromDegrees(32.4452026923, 34.8469262386, 470.35),
+        //       point: {
+        //           pixelSize: 30,
+        //           color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //           disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //       },
+        //       label: {
+        //           text: '3',
+        //           font: '14px sans-serif',
+        //           fillColor: Color.WHITE,
+        //           style: LabelStyle.FILL_AND_OUTLINE,
+        //           outlineWidth: 2,
+        //           outlineColor: Color.WHITE,
+        //           pixelOffset: new Cartesian2(0, 0),
+        //           eyeOffset: new Cartesian3(0, 0, 0),
+        //           disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        //       }
 
-  
-});
-var Hagioscope  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451788051, 34.8468448891, 474),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '5',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        //   });
 
-  
-});
+        //   var Archaggelies = viewer.entities.add({
+        //     name: 'Tomb',
+        //     show: false,
+        //     position: Cartesian3.fromDegrees(32.4451812705, 34.8468924212, 472),
+        //     point: {
+        //         pixelSize: 30,
+        //         color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //         disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //     },
+        //     label: {
+        //         text: '2',
+        //         font: '14px sans-serif',
+        //         fillColor: Color.WHITE,
+        //         style: LabelStyle.FILL_AND_OUTLINE,
+        //         outlineWidth: 2,
+        //         outlineColor: Color.WHITE,
+        //         pixelOffset: new Cartesian2(0, 0),
+        //         eyeOffset: new Cartesian3(0, 0, 0),
+        //         disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-var NewCell  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451687884, 34.8468896403, 470),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '6',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //     }
 
-  }
 
-  
-});
+        // });
 
-//Annotations for phaseFour
-var Tombphase4  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4452156214, 34.846924974, 470.5),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '1',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        // var WesternWall = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451551314, 34.8468991368, 470.7),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '4',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        //   }
 
-  
-});
 
-var pointedstonearch  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451535523, 34.8468218361, 471.5),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '2',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
+        // });
 
-  }
+        //  //Annotations for phaseThree
+        //  var FormerEntrance = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451762028, 34.8468771079, 470.2),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '1',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  
-});
+        //   }
 
-var Pantokrator  = viewer.entities.add({
-  name: 'Tomb',
-  show: false,
-  position: Cartesian3.fromDegrees(32.4451618957, 34.8468937629, 471.2),
-  point: {
-      pixelSize: 30,
-      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
-  },
-  label: {
-      text: '3',
-      font: '14px sans-serif',
-      fillColor: Color.WHITE,
-      style: LabelStyle.FILL_AND_OUTLINE,
-      outlineWidth: 2,
-      outlineColor: Color.WHITE,
-      pixelOffset: new Cartesian2(0, 0),
-      eyeOffset: new Cartesian3(0, 0, 0),
-      disableDepthTestDistance: Number.POSITIVE_INFINITY
 
-  }
+        // });
 
-  
-});
+
+        //  var Niche = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451547156, 34.8468833242, 470.2),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '2',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+
+        // //Annotations for phaseThree
+        // var Mary = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451513321, 34.8468842952, 470.2),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '3',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+        // //Annotations for phaseThree
+        // var Cross = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451970642, 34.8468648869, 470.25),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '3',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+        // //Annotations for phaseThree
+        // var Crucifixion  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451992899, 34.8468657818, 472.5),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '4',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+        // var Hagioscope  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451788051, 34.8468448891, 474),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '5',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+
+        // var NewCell  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451687884, 34.8468896403, 470),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '6',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+
+        // //Annotations for phaseFour
+        // var Tombphase4  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4452156214, 34.846924974, 470.5),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '1',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+
+        // var pointedstonearch  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451535523, 34.8468218361, 471.5),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '2',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
+
+        // var Pantokrator  = viewer.entities.add({
+        //   name: 'Tomb',
+        //   show: false,
+        //   position: Cartesian3.fromDegrees(32.4451618957, 34.8468937629, 471.2),
+        //   point: {
+        //       pixelSize: 30,
+        //       color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+        //   },
+        //   label: {
+        //       text: '3',
+        //       font: '14px sans-serif',
+        //       fillColor: Color.WHITE,
+        //       style: LabelStyle.FILL_AND_OUTLINE,
+        //       outlineWidth: 2,
+        //       outlineColor: Color.WHITE,
+        //       pixelOffset: new Cartesian2(0, 0),
+        //       eyeOffset: new Cartesian3(0, 0, 0),
+        //       disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+        //   }
+
+
+        // });
 
 
         const showEntitiesNow = async () => {
-          Holly.show = true;
-          SecondCell.show = true;
-          BaptistCell.show = true;
-          Rock.show = true;
-          Hagiasterion.show = true;
-          Tomb.show = true;
-          Refectory.show = true;
+          // Holly.show = true;
+          // SecondCell.show = true;
+          // BaptistCell.show = true;
+          // Rock.show = true;
+          // Hagiasterion.show = true;
+          // Tomb.show = true;
+          // Refectory.show = true;
         };
         const showEntitiesOne = async () => {
-          
-          TombPhaseOne.show = true;
-          HermitagePhaseOne.show = true;
-          
+
+          // TombPhaseOne.show = true;
+          // HermitagePhaseOne.show = true;
+
         };
         const showEntitiesTwo = async () => {
-          
-          PartitionWall.show = true;
-          TheodorosApsudes.show = true;
-          Archaggelies.show = true;
-          WesternWall.show=true;
-          
+
+          // PartitionWall.show = true;
+          // TheodorosApsudes.show = true;
+          // Archaggelies.show = true;
+          // WesternWall.show=true;
+
         };
         const showEntitiesThree = async () => {
-          
-          FormerEntrance.show = true;
-         // Mary.show = true;
-         Niche.show=true;
-         Cross.show=true;
-         Crucifixion.show=true;
-         Hagioscope.show=true;
-         NewCell.show=true;
-          
-          
+
+          //   FormerEntrance.show = true;
+          //  // Mary.show = true;
+          //  Niche.show=true;
+          //  Cross.show=true;
+          //  Crucifixion.show=true;
+          //  Hagioscope.show=true;
+          //  NewCell.show=true;
+
+
         };
         const showEntitiesFour = async () => {
-          Tombphase4.show=true;
-          pointedstonearch.show=true;
-          Pantokrator.show=true;
-         
-          
-          
+          // Tombphase4.show=true;
+          // pointedstonearch.show=true;
+          // Pantokrator.show=true;
+
+
+
         };
 
         // ------
