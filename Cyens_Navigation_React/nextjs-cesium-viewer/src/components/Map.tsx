@@ -41,9 +41,11 @@ export default () => {
 
         // circleEntity.show = true;
         const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-        var isRKeyPressed = false;
+       //-----Marios-------
         var destinationPosition: Cartesian3 | null = null
-       
+
+      
+      // yellow circle
         const intersectionPointEntity = new Entity({
           position: new Cartesian3(0, 0, 0),
           point: {
@@ -56,6 +58,7 @@ export default () => {
         });
 
         viewer.entities.add(intersectionPointEntity);
+        //-----end Marios------
 
 
 
@@ -330,6 +333,8 @@ export default () => {
             }
           }
         };
+
+        //-----Marios-----
         // Path to your JSON file
         const jsonFilePath = 'data.json';
 
@@ -442,17 +447,10 @@ export default () => {
 
 
 
-            // var isRKeyPressed = false;
+        
 
-            // Add a listener for keydown event to detect when 'R' key is pressed
-            // document.addEventListener('keydown', function (event) {
-            //   if (event.key === 'r' || event.key === 'R') {
-
-            //     isRKeyPressed = true;
-            //   }
-            // });
-
-            // Add a listener for keyup event to detect when 'R' key is released
+            
+            //escape -> camera move normally
             document.addEventListener('keyup', function (event) {
               if (event.key === 'Escape') {
                 // isRKeyPressed = false;
@@ -474,6 +472,7 @@ export default () => {
               }
             });
 
+            //click on 3d object and zoom camera to this position
             var destinationPosition: Cartesian3 | null = null
             var positions: Cartesian3 | null = null;
             var SelectedPositions: Cartesian3 | null = null;
@@ -546,15 +545,17 @@ export default () => {
                 viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
               }
 
+
+              //add label descriptions for every positions from the data.json
               for (var i = 0; i < phases[currentPhase].locations.length; i++) {
 
                 positions = Cartesian3.fromDegrees(phases[currentPhase].locations[i].lon, phases[currentPhase].locations[i].lat, phases[currentPhase].locations[i].height);
                 if (firstframe) {
                   SelectedPositions = positions;
                   firstframe = false;
-                }
-                console.log("pos" + positions);
-                console.log("dest" + destinationPosition);
+                 }
+                // console.log("pos" + positions);
+                // console.log("dest" + destinationPosition);
                 // Check if there is an existing labelDescriptionEntity and hide it
 
 
@@ -576,11 +577,11 @@ export default () => {
                     disableDepthTestDistance: Number.POSITIVE_INFINITY,
                   },
                 });
-
+                //check if the clicked position is the same position with the data.json file -> to show the labeldescriptions
                 if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3)) {
                   console.log(phases[currentPhase].locations[i].labeldesciption);
 
-                  // Create the second label
+                  
                   if (labelDescriptionEntity) {
                     if (labelDescriptionEntity.label) {
                       labelDescriptionEntity.label.show = new ConstantProperty(true);
@@ -608,14 +609,9 @@ export default () => {
             }, ScreenSpaceEventType.LEFT_CLICK);
 
 
-            // viewer.scene.postRender.addEventListener(function () {
-            //   if (isRKeyPressed && defined(destinationPosition)) {
-            //     // const transform = Transforms.eastNorthUpToFixedFrame(destinationPosition);
-            //     // viewer.scene.camera.lookAtTransform(transform);
-            //   }
-            // });
+         
 
-
+            //Story Mode Button to increase the index
             function onNextButtonClick() {
               viewer.scene.camera.lookAtTransform(originalPosition);
               intersectionPointEntity.show = false;
@@ -637,7 +633,7 @@ export default () => {
               currentIndex += 1;
             }
 
-            // Add event listener for the next button
+           
 
             nextButton?.addEventListener('click', onNextButtonClick);
 
@@ -648,6 +644,7 @@ export default () => {
           .catch(error => {
             console.error('Error fetching JSON:', error);
           });
+          //-------end Marios----------
 
         const addPhaseNow = async () => {
           hideAllTilesets();
@@ -1078,7 +1075,7 @@ var WesternWall = viewer.entities.add({
   
 });
 
- //Annotations for phaseThree
+ 
  var Niche = viewer.entities.add({
   name: 'Tomb',
   show: false,
@@ -1214,7 +1211,7 @@ var NewCell  = viewer.entities.add({
       disableDepthTestDistance: Number.POSITIVE_INFINITY
   },
   label: {
-      text: '5',
+      text: '6',
       font: '14px sans-serif',
       fillColor: Color.WHITE,
       style: LabelStyle.FILL_AND_OUTLINE,
@@ -1229,6 +1226,81 @@ var NewCell  = viewer.entities.add({
   
 });
 
+//Annotations for phaseFour
+var Tombphase4  = viewer.entities.add({
+  name: 'Tomb',
+  show: false,
+  position: Cartesian3.fromDegrees(32.4452156214, 34.846924974, 470.5),
+  point: {
+      pixelSize: 30,
+      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+  },
+  label: {
+      text: '1',
+      font: '14px sans-serif',
+      fillColor: Color.WHITE,
+      style: LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      outlineColor: Color.WHITE,
+      pixelOffset: new Cartesian2(0, 0),
+      eyeOffset: new Cartesian3(0, 0, 0),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+  }
+
+  
+});
+
+var pointedstonearch  = viewer.entities.add({
+  name: 'Tomb',
+  show: false,
+  position: Cartesian3.fromDegrees(32.4451535523, 34.8468218361, 471.5),
+  point: {
+      pixelSize: 30,
+      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+  },
+  label: {
+      text: '2',
+      font: '14px sans-serif',
+      fillColor: Color.WHITE,
+      style: LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      outlineColor: Color.WHITE,
+      pixelOffset: new Cartesian2(0, 0),
+      eyeOffset: new Cartesian3(0, 0, 0),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+  }
+
+  
+});
+
+var Pantokrator  = viewer.entities.add({
+  name: 'Tomb',
+  show: false,
+  position: Cartesian3.fromDegrees(32.4451618957, 34.8468937629, 471.2),
+  point: {
+      pixelSize: 30,
+      color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+  },
+  label: {
+      text: '3',
+      font: '14px sans-serif',
+      fillColor: Color.WHITE,
+      style: LabelStyle.FILL_AND_OUTLINE,
+      outlineWidth: 2,
+      outlineColor: Color.WHITE,
+      pixelOffset: new Cartesian2(0, 0),
+      eyeOffset: new Cartesian3(0, 0, 0),
+      disableDepthTestDistance: Number.POSITIVE_INFINITY
+
+  }
+
+  
+});
 
 
         const showEntitiesNow = async () => {
@@ -1267,7 +1339,9 @@ var NewCell  = viewer.entities.add({
           
         };
         const showEntitiesFour = async () => {
-          
+          Tombphase4.show=true;
+          pointedstonearch.show=true;
+          Pantokrator.show=true;
          
           
           
