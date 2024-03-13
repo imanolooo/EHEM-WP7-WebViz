@@ -715,13 +715,7 @@ const Map = () => {
                         }
         
         
-                        document.addEventListener('keypress', (event) => {   // Carlos
-                              if (event.key=='f')
-                              {
-                                  var firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
-                                  firstPersonCameraController.start();
-                              }
-                            }, false);
+                        
 
         
                     })
@@ -755,6 +749,14 @@ const Map = () => {
                     // toolbar.insertBefore(lightToggle, toggleDebug);
                     toolbar.insertBefore(nextButton, resetButton);
                 }   
+
+                document.addEventListener('keypress', (event) => {   // Carlos
+                    if (event.key=='f')
+                    {
+                        var firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
+                        firstPersonCameraController.start();
+                    }
+                  }, false);
 
 
             } catch (error) {
