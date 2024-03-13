@@ -1,6 +1,6 @@
 // ------
 // Phase-related
-export const phases = [
+export const phasesInfo = [
     // Tilesets
     // { id: 2477247, text: "Phase IX" },
     // { id: 2477248, text: "Phase X" },
@@ -9,11 +9,16 @@ export const phases = [
     // { id: 2477251, text: "Phase XIII" }
 
     // GLB models
-    { id: 2486360, text: "Phase IX" },
-    { id: 2486363, text: "Phase X" },
-    { id: 2486367, text: "Phase XI" },
-    { id: 2486368, text: "Phase XII" },
-    { id: 2486372, text: "Phase XIII" }
+    // { id: 2486360, text: "Phase IX" },
+    // { id: 2486363, text: "Phase X" },
+    // { id: 2486367, text: "Phase XI" },
+    // { id: 2486368, text: "Phase XII" },
+    // { id: 2486372, text: "Phase XIII" }
+    { id: 2499177, text: "Phase IX" },
+    { id: 2499172, text: "Phase X" },
+    { id: 2499176, text: "Phase XI" },
+    { id: 2499174, text: "Phase XII" },
+    { id: 2499173, text: "Phase XIII" }
 ];
 
 

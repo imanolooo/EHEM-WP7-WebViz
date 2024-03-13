@@ -1,0 +1,404 @@
+{
+  "Phase Now": {
+    "locations": [ 
+      {
+        "lon": 32.4452343032,    
+        "lat": 34.84693573,
+        "height": 477.5,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "labeltext":"1",
+        "font": "'14px sans-serif'",
+        "descriptions": "Saint John Baptist Cell",
+        "labeldesciption":"Saint John Baptist Cell"
+       
+      },
+      {
+        "lon": 32.4451669844,  
+        "lat": 34.8468502703,
+        "height": 478.3,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "labeltext":"2",
+        "font": "'14px sans-serif'",
+        "descriptions": "Neophytos Second Cell: New Zion",
+        "labeldesciption":"Neophytos Second Cell: New Zion"
+       
+      },
+      {
+        "lon": 32.4451838261,
+        "lat": 34.8468564217,
+        "height": 475.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 0,
+        "labeltext":"3",
+        "font": "'14px sans-serif'",
+        "descriptions": "Hagiasterion",
+        "labeldesciption": "Hagiasterion"
+      },
+      {
+        "lon": 32.4453239321,    
+        "lat": 34.8469644945,
+        "height": 468.2,
+        "heading": 55,
+        "pitch": 0,
+        "move": 0,
+        "labeltext":"4",
+        "font": "'14px sans-serif'",
+        "descriptions": "Two Rock-cut structures",
+        "labeldesciption": "Two Rock-cut structures"
+       
+      },
+      {
+        "lon": 32.4451568427,    
+        "lat": 34.8468619172,
+        "height": 470,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"5",
+        "font": "'14px sans-serif'",
+        "descriptions": "Church of the Holly Cross",
+        "labeldesciption": "Church of the Holly Cross"
+
+       
+      },
+      {
+        "lon": 32.4452111387,      
+        "lat": 34.8469302888,
+        "height": 471.5,
+        "heading": 30,
+        "pitch": -30,
+        "move": 1,
+        "labeltext":"6",
+        "font": "'14px sans-serif'",
+        "descriptions": "Tomb",
+        "labeldesciption": "Tomb"
+       
+      },
+      {
+        "lon": 32.4452766161,      
+        "lat": 34.846958311,
+        "height": 470,
+        "heading": 60,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"7",
+        "font": "'14px sans-serif'",
+        "descriptions": "Refectory",
+        "labeldesciption": "Refectory"
+      }
+    ]
+  },
+  "Phase One": {
+    "locations": [
+      {
+        "lon": 32.4453018815,
+        "lat": 34.8469146477,
+        "height": 471,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'25px sans-serif'",
+        "descriptions": "CYENS is creating a digital 3D model of the Hermitage based\n on a hypothetical plan from June 24th, 1160.\nNeophytos transformed the cave into an ascetic retreat and\n built an altar and his tomb out of rock.\nHe dedicated the altar to the Holy Cross on September 14th, 1160.\nThe east curtain wall has a surviving arched window\n that may suggest a door opening below it. " 
+      },
+      {
+        "lon":  32.4453018815,
+        "lat": 34.8469146477,
+        "height": 471,
+        "heading": -30,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "",
+        "image":"/images_engklistra/1stPhase.png",
+        "image_width":500,
+        "image_height":370,
+        "pixelOffset":200
+      },
+      {
+        "lon": 32.4452064114,  
+        "lat": 34.8469146477,
+        "height": 471.5,
+        "heading": -30,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"1",
+        "font": "'14px sans-serif'",
+        "descriptions": "Hermitage",
+        "labeldesciption":"Hermitage"
+        
+      },
+      {
+        "lon": 32.4451764455, 
+        "lat": 34.846951005,
+        "height": 472,
+        "heading": -30,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"2",
+        "font": "'14px sans-serif'",
+        "descriptions": "Tomb and Altar - \nSaint Neophytos carved his own tomb over his first year (1160) of stay in Tala. ",
+        "labeldesciption": "Tomb and Altar - \nSaint Neophytos carved his own tomb over his first year (1160) of stay in Tala. "
+        
+      }
+    ]
+  },
+  "Phase Two": {
+    "locations": [
+      {
+        "lon": 32.4453119956,
+        "lat": 34.8468883247,
+        "height": 471,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'25px sans-serif'",
+        "descriptions": "Neophytos was ordained priest by Bishop Basilieios Kinnamos of Paphos around 1170.\n By 1183, the Enkleistra had developed into a small monastery\n with a few monks and a subsidy from the bishop.\n The partition wall was built to separate Neophytos' cell from the rest of the Enkleistra. \nA painting campaign in 1183 included a painting of Neophytos \nbetween Archangels by the artist Theodoros Apsudes.\n The western part of the Enkleistra was partially carved and painted by the same year." 
+      },
+      {
+        "lon": 32.4453119956,
+        "lat": 34.8468883247,
+        "height": 471,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "",
+        "image":"/images_engklistra/2ndPhase.png",
+        "image_width":750,
+        "image_height":470,
+        "pixelOffset":200
+
+      },
+      {
+        "lon": 32.4451723875,  
+        "lat": 34.8468801129,
+        "height": 470.6,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"1",
+        "font": "'14px sans-serif'",
+        "descriptions": "Possibly just after 1170, the partition wall was built,\n maybe, to separate his cell from the rest of the Enkleistra\n - as he named it in Greek - making his cell private and essentially confining himself.",
+        "labeldesciption": "Possibly just after 1170, the partition wall was built,\n maybe, to separate his cell from the rest of the Enkleistra\n - as he named it in Greek - making his cell private and essentially confining himself. "
+        
+      },
+      {
+        "lon": 32.4451812705,  
+        "lat": 34.8468924212,
+        "height": 472,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"2",
+        "font": "'14px sans-serif'",
+        "descriptions": "In this campaign, the extraordinary painting with Neophytos between Archangels is also ascribed",
+        "labeldesciption": "In this campaign, the extraordinary painting with Neophytos between Archangels is also ascribed"
+        
+      },
+      {
+        "lon": 32.4452026923,    
+        "lat": 34.8469262386,
+        "height": 470.35,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"3",
+        "font": "'14px sans-serif'",
+        "descriptions": "Beside his bed shelf, desk and niches,\n a wall painting is inscribed: with the year 1183 which corresponds to an early\n - if not the earliest - painting campaign and with the name of its artist Theodoros Apsudes. ",
+        "labeldesciption": "Beside his bed shelf, desk and niches,\n a wall painting is inscribed: with the year 1183 which corresponds to an early\n - if not the earliest - painting campaign and with the name of its artist Theodoros Apsudes.  "
+        
+      },
+      {
+        "lon": 32.4451551314,      
+        "lat": 34.8468991368,
+        "height": 470.7,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"4",
+        "font": "'14px sans-serif'",
+        "descriptions": "By 1183, the western part of the Enkleistra was at least partially carved and painted as well ",
+        "labeldesciption": "By 1183, the western part of the Enkleistra was at least partially carved and painted as well"
+        
+      }
+    ]
+  },
+  "Phase Three": {
+    "locations": [
+      {
+        "lon": 32.4453119956,
+        "lat": 34.8468883247,
+        "height": 471,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'30px sans-serif'",
+        "descriptions": "Between 1183 and 1214, the Enkleistra complex was expanded,\n with the cave refectory and cave church of the Holy Cross taking their current shape by 1196.\n Wall paintings were added in 1196,\n and the decorative program of this painting campaign is still preserved to a significant extent.\n Neophytos' new cell was dedicated to New Zion \nand the cell of Saint John the Baptist was hollowed up higher on the cliff,\n responding to the needs of the monastic community.\n The Holy Cross church features a monk beside stylites saints, possibly Neophytos or Esaias.\n The development of the complex in multiple levels along the cliff presents challenges in creating 3D models." 
+      },
+      {
+        "lon": 32.4453119956,
+        "lat": 34.8468883247,
+        "height": 471,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "",
+        "image":"/images_engklistra/3rdPhase.png",
+        "image_width":850,
+        "image_height":400,
+        "pixelOffset":200
+
+      },
+      {
+        "lon": 32.4451762028,    
+        "lat": 34.8468771079,
+        "height": 470.2,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"1",
+        "font": "'14px sans-serif'",
+        "descriptions": "The former entrance to the Enkleistra was enlarged.\n This opening may have now closed only by low parapet slabs,\n dividing the bema from the naos.",
+        "labeldesciption": "The former entrance to the Enkleistra was enlarged.\n This opening may have now closed only by low parapet slabs,\n dividing the bema from the naos. "
+        
+      },
+      {
+        "lon": 32.4451547156,        
+        "lat":34.8468833242, 
+        "height": 470.2,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"2",
+        "font": "'14px sans-serif'",
+        "descriptions": "The niche in the west wall of the bema may have functioned as the prothesis niche;\n  for the painted cryptograms in it stand for a text recited in the Presanctified ritual\n  which typically took place in the Prothesis.",
+        "labeldesciption": "The niche in the west wall of the bema may have functioned as the prothesis niche;\n  for the painted cryptograms in it stand for a text recited in the Presanctified ritual\n  which typically took place in the Prothesis. "
+        
+      },
+      {
+        "lon": 32.4451970642,       
+        "lat": 34.8468648869,
+        "height":  470.25,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"3",
+        "font": "'14px sans-serif'",
+        "descriptions": "In the naos, Neophytos displayed the cross relic he had acquired in an east-facing niche,\n accommodating a wooden cross with a cavity at its centre - today at the same museum.",
+        "labeldesciption": "In the naos, Neophytos displayed the cross relic he had acquired in an east-facing niche,\n accommodating a wooden cross with a cavity at its centre - today at the same museum."
+        
+      }
+      ,
+      {
+        "lon": 32.4451992899,        
+        "lat":  34.8468657818,
+        "height":  472.5,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"4",
+        "font": "'14px sans-serif'",
+        "descriptions": "Above and flanking the cross are two archangels dressed as liturgical deacons,\n and above them, appropriately, is a mural of the Crucifixion of Christ.",
+        "labeldesciption": "Above and flanking the cross are two archangels dressed as liturgical deacons,\n and above them, appropriately, is a mural of the Crucifixion of Christ."
+        
+      },
+      {
+        "lon": 32.4451788051,          
+        "lat":  34.8468448891,
+        "height":  474,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"5",
+        "font": "'14px sans-serif'",
+        "descriptions": "An Hagioscope, namely a shaft on the vault of the church\n - beside its entrance - opened to connect the latter with the Hagiasterion of Neophytos on the upper storey,\n from where he attended the liturgy.",
+        "labeldesciption": "An Hagioscope, namely a shaft on the vault of the church\n - beside its entrance - opened to connect the latter with the Hagiasterion of Neophytos on the upper storey,\n from where he attended the liturgy."
+        
+      },
+      {
+        "lon": 32.4451687884,            
+        "lat":  34.8468896403,
+        "height":  470,
+        "heading": -15,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"6",
+        "font": "'14px sans-serif'",
+        "descriptions": " In the post-1196 expansion sub-phase, Neophytos’ new cell dedicated to New Zion\n and the cell of Saint John the Baptist were hollowed up higher up the cliff in the top level of the Enkleistra",
+        "labeldesciption": "In the post-1196 expansion sub-phase, Neophytos’ new cell dedicated to New Zion\n and the cell of Saint John the Baptist were hollowed up higher up the cliff in the top level of the Enkleistra"
+        
+      }
+
+    ]
+  },
+  "Phase Four": {
+    "locations": [
+      {
+        "lon": 32.4453865624,
+        "lat": 34.8469183075,
+        "height": 470,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "font": "'30px sans-serif'",
+        "descriptions": "After Neophytos' death in 1215, his tomb was walled off as per his wishes.\n The exterior east wall of the Enkleistra was restored in 1502/3,\n which included the addition of a pointed stone arch enclosing the tomb.\n During this restoration, a templon with one opening in its center was installed,\n incorporating the previously mentioned icons.\n These icons were recorded before the 1963 restoration and\n are being integrated into hypothetical 3D models in the EHEM project." 
+      },
+      {
+        "lon": 32.4453709186,
+        "lat": 34.8469120172,
+        "height": 470,
+        "heading": 0,
+        "pitch": 0,
+        "move": 0,
+        "descriptions": "",
+        "image":"/images_engklistra/4thPhase.png",
+        "image_width":800,
+        "image_height":500,
+        "pixelOffset":200
+
+      },
+      {
+        "lon": 32.4452156214,  
+        "lat": 34.846924974,
+        "height": 470.5,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"1",
+        "font": "'14px sans-serif'",
+        "descriptions": " Fulfilling his testament, his tomb, in his initial cell at the site, was walled off",
+        "labeldesciption": "Fulfilling his testament, his tomb, in his initial cell at the site, was walled off"
+
+      },
+      {
+        "lon": 32.4451535523,  
+        "lat": 34.8468218361,
+        "height": 471.5,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"2",
+        "font": "'14px sans-serif'",
+        "descriptions": "Pointed stone arch in the exterior east wall, enclosing the Neopthytos’ tomb\n could coincide with the first major restoration of the Enkleistra and its wall paintings in 1502/3,\n based on its similarity with other contemporary remnants from Cyprus.",
+        "labeldesciption": "Pointed stone arch in the exterior east wall, enclosing the Neopthytos’ tomb\n could coincide with the first major restoration of the Enkleistra and its wall paintings in 1502/3,\n based on its similarity with other contemporary remnants from Cyprus."
+
+      },
+      {
+        "lon": 32.4451618957,   
+        "lat": 34.8468937629,
+        "height":  471.2,
+        "heading": 0,
+        "pitch": 0,
+        "move": 1,
+        "labeltext":"3",
+        "font": "'14px sans-serif'",
+        "descriptions": "The Pantokrator on the ceiling of the bema",
+        "labeldesciption": "The Pantokrator on the ceiling of the bema"
+
+      }
+    ]
+}
+}

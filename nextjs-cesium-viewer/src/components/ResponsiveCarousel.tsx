@@ -1,6 +1,6 @@
 'use client'    // Client component
 
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import React, { useState, useEffect, useRef, useLayoutEffect, use } from "react";
 import { useSearchParams } from 'next/navigation'
 import { Carousel } from "react-responsive-carousel";
 import XMLParser from "./XMLParser";
@@ -9,11 +9,6 @@ import * as Annotorious from '@recogito/annotorious-openseadragon';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
-
-
-interface ResponsiveCarouselProps {
-    selectedPhase?: string | null;
-}
 
 interface AnnotationData {
     text: string;
@@ -27,6 +22,14 @@ interface Annotation {
     type: string;
     data: AnnotationData[];
 }
+
+const keyToPhaseUUID: { [key: string]: string } = {
+    '1': "3499571232320707957443215480729307058623549712539786656438",
+    '2': "2025080909350698142359024115616879762766565409414772530811",
+    '3': "5622945963191582858360417193921260502800211757871433641928",
+    '4': "5207883142471703088573806435335977945904842489348384582030"
+};
+
 
 
 const imgsUrlPrefix = 'https://ehem.virvig.eu/imgs/';
@@ -70,7 +73,7 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
 }
 
 
-const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }) => {
+const ResponsiveCarousel: React.FC = () => {
     // Get the app version from the URL
     const searchParams = useSearchParams();
     const appVersion = searchParams.get('version');
@@ -81,9 +84,25 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
     const [dates, setDates] = useState<string[]>([]);
     const [titles, setTitles] = useState<string[]>([]);
     const [graphMatIds, setGraphMatIds] = useState<any[]>([]);
+    const [architecturalPhases, setArchitecturalPhases] = useState<any[]>([]);
+    const [architecturalPhasesDates, setArchitecturalPhasesDates] = useState<any[]>([]);
+    const [architecturalSpaces, setArchitecturalSpaces] = useState<any[]>([]);
+    const [architecturalSpacesNames, setArchitecturalSpacesNames] = useState<any[]>([]);
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
     let   [currentImage, setCurrentImage] = useState<string | null>(null);
     const [isCurrentImageSet, setIsCurrentImageSet] = useState(false);
+
+    // test
+    const [graphicMaterialToSpace, setGraphicMaterialToSpace] = useState<Map<string, string>>(new Map());
+    const [graphicMaterialToPhase, setGraphicMaterialToPhase] = useState<Map<string, string>>(new Map());
+    const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
+    const [selectedSpace, setSelectedSpace] = useState<string | null>(null);
+    const [filteredThumbnailUrls, setFilteredThumbnailUrls] = useState<string[]>([]);
+    const [filteredImageUrls, setFilteredImageUrls] = useState<string[]>([]);
+
+
+    // end of test
+
     // Boolean states to check if the XMLs are parsed
     const [isGraphicMaterialsXmlParsed, setIsGraphicMaterialsXmlParsed] = useState(false);
     const [isAnnotationsXmlParsed, setIsAnnotationsXmlParsed] = useState(false);
@@ -192,14 +211,6 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
         // finished parsing and filtering
         setIsGraphicMaterialsXmlParsed(true);
     };
-
-    // Set the first image after filtering as the current image
-    useEffect(() => {
-        if(!isCurrentImageSet){
-            setCurrentImage(imageUrls[0]);
-            if(currentImage) { setIsCurrentImageSet(true); }
-        }
-    });
     
     // Parse and store Annotations
     const handleAnnotationsParsedData = (data: any) => {
@@ -270,6 +281,8 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             ArchPhases_Ids.push(row_data[10] && row_data[10].children && row_data[10].children[0] ? row_data[10].children[0] : 'No ID'); 
         };
         
+        setArchitecturalPhases(ArchPhases_UUIDNumbers);
+        setArchitecturalPhasesDates(ArchPhases_Dates);
         setIsArchitecturalPhasesXmlParsed(true);
     };
 
@@ -298,8 +311,125 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             ArchSpaces_Ids.push(row_data[16] && row_data[16].children && row_data[16].children[0] ? row_data[16].children[0] : 'No ID');
         }
 
+        setArchitecturalSpaces(ArchSpaces_UUIDNumbers);
+        setArchitecturalSpacesNames(ArchSpaces_Names);
         setIsArchitecturalSpacesXmlParsed(true);
     };
+
+    // test
+
+    const handleGraphicMaterialSpaceLinks = (data: any) => {
+        const tempMap = new Map<string, string>();
+    
+        for (let i = 3; i < data.children.length; i++) {
+            const ROW = data.children[i];
+            if (!ROW || !ROW.children) {
+                console.error('Invalid or missing ROW in XML data.');
+                continue;
+            }
+            const row_data = ROW.children;
+    
+            const graphicMatId = row_data[0] && row_data[0].children && row_data[0].children[0] ? row_data[0].children[0] : 'Unknown GraphicMatId';
+            const spaceId = row_data[2] && row_data[2].children && row_data[2].children[0] ? row_data[2].children[0] : 'Unknown SpaceId';
+    
+            if (graphicMatId !== 'Unknown GraphicMatId' && spaceId !== 'Unknown SpaceId') {
+                tempMap.set(graphicMatId, spaceId);
+            }
+        }
+    
+        setGraphicMaterialToSpace(tempMap);
+        setIsLink_GraphicMaterialsArchitecturalSpacesXmlParsed(true);
+
+        console.log("test", graphicMaterialToSpace);
+    };
+    
+    const handleGraphicMaterialPhaseLinks = (data: any) => {
+        const tempMap = new Map<string, string>();
+    
+        for (let i = 3; i < data.children.length; i++) {
+            const ROW = data.children[i];
+            if (!ROW || !ROW.children) {
+                console.error('Invalid or missing ROW in XML data.');
+                continue;
+            }
+            const row_data = ROW.children;
+    
+            const graphicMatId = row_data[0] && row_data[0].children && row_data[0].children[0] ? row_data[0].children[0] : 'Unknown GraphicMatId';
+            const phaseId = row_data[3] && row_data[3].children && row_data[3].children[0] ? row_data[3].children[0] : 'Unknown PhaseId';
+    
+            if (graphicMatId !== 'Unknown GraphicMatId' && phaseId !== 'Unknown PhaseId') {
+                tempMap.set(graphicMatId, phaseId);
+            }
+        }
+    
+        setGraphicMaterialToPhase(tempMap);
+        setIsLink_GraphicMaterialsArchitecturalPhasesXmlParsed(true);
+    };
+    
+    // end of test
+
+    // Set the first image after filtering as the current image
+    // and initialize the selected phase and space
+    useEffect(() => {
+        if(!isCurrentImageSet){
+            setCurrentImage(imageUrls[0]);
+            if(currentImage) { setIsCurrentImageSet(true); }
+        }
+        if(!selectedPhase) { setSelectedPhase("all"); }
+        if(!selectedSpace) { setSelectedSpace("all"); }
+    });
+
+    
+    // test
+
+    useEffect(() => {
+        console.log("graphicMaterialToPhase Map:", Array.from(graphicMaterialToPhase));
+        console.log("graphicMaterialToSpace Map:", Array.from(graphicMaterialToSpace));
+        console.log("Selected phaseId for filtering:", selectedPhase);
+        console.log("Selected spaceId for filtering:", selectedSpace);
+    }, [selectedPhase, selectedSpace]);
+
+
+    useEffect(() => {
+        let filteredIds: string[] = [];
+        let newFilteredThumbnailUrls: string[] = [];
+        let newFilteredImageUrls: string[] = [];
+    
+        if (selectedPhase !== "all" || selectedSpace !== "all") {
+            if (selectedPhase !== "all") {
+                filteredIds.push(...Array.from(graphicMaterialToPhase)
+                    .filter(([_, phaseId]) => phaseId === selectedPhase)
+                    .map(([graphicMatId, _]) => graphicMatId));
+            }
+            if (selectedSpace !== "all") {
+                const spaceFilteredIds = Array.from(graphicMaterialToSpace)
+                    .filter(([_, spaceId]) => spaceId === selectedSpace)
+                    .map(([graphicMatId, _]) => graphicMatId);
+                filteredIds = filteredIds.length > 0 ? filteredIds.filter(id => spaceFilteredIds.includes(id)) : spaceFilteredIds;
+            }
+    
+            // Filter thumbnails and images by the filtered IDs
+            newFilteredImageUrls = imageUrls.filter((_, index) => filteredIds.includes(graphMatIds[index]));
+            newFilteredThumbnailUrls = thumbnailUrls.filter((_, index) => filteredIds.includes(graphMatIds[index]));
+        } else {
+            // Show all thumbnails and images if "Show All" is selected
+            newFilteredThumbnailUrls = [...thumbnailUrls];
+            newFilteredImageUrls = [...imageUrls];
+        }
+    
+        setFilteredImageUrls(newFilteredImageUrls);
+        setFilteredThumbnailUrls(newFilteredThumbnailUrls);
+
+        console.log('Filtered image URLs:', newFilteredImageUrls);
+        console.log('Filtered thumbnail URLs:', newFilteredThumbnailUrls);
+    
+        // Update the current image to the first in the filtered list or reset if empty
+        setCurrentImage(newFilteredImageUrls.length > 0 ? newFilteredImageUrls[0] : null);
+    
+    }, [selectedPhase, selectedSpace, graphicMaterialToPhase, graphicMaterialToSpace, graphMatIds, imageUrls, thumbnailUrls]);
+    
+    // end of test
+
 
     // Declare the OpenSeadragon viewer reference
     const viewerRef = useRef<HTMLDivElement>(null);
@@ -308,7 +438,8 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
     useEffect(() => {
         if (!isGraphicMaterialsXmlParsed || !isAnnotationsXmlParsed 
             || !isArchitecturalPhasesXmlParsed || !isArchitecturalSpacesXmlParsed 
-            || !imageUrls.length || !currentImage || !viewerRef.current) {
+            || !imageUrls.length || !filteredImageUrls.length
+            || !currentImage || !viewerRef.current) {
                 // console.log('Prerequisites not met: ', isGraphicMaterialsXmlParsed, isAnnotationsXmlParsed, isArchitecturalPhasesXmlParsed, isArchitecturalSpacesXmlParsed, imageUrls.length, currentImage, viewerRef);
             return; // Ensure prerequisites are met
         }
@@ -359,15 +490,15 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
 
     // Handle thumbnail click
     const handleThumbnailClick = (thumbnailUrl: string) => {
-        const index = thumbnailUrls.indexOf(thumbnailUrl);
+        const index = filteredThumbnailUrls.indexOf(thumbnailUrl);
         if (index !== -1) {
-            setCurrentImage(imageUrls[index]);
+            setCurrentImage(filteredImageUrls[index]);
         }
     };
 
     // Render custom thumbnails
     const renderCustomThumbnails = () => {
-        return thumbnailUrls.map((thumbnailUrl, index) => {
+        return filteredThumbnailUrls.map((thumbnailUrl, index) => {
             // You can access the current image or any other state here as needed
             const isSelected = currentImage === imageUrls[index];
             return (
@@ -384,12 +515,52 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
     
     // Render carousel items without OpenSeadragon viewer
     const renderCarouselItems = () => {
-        return thumbnailUrls.map((thumbnailUrl, index) => (
+        return filteredThumbnailUrls.map((thumbnailUrl, index) => (
             <div key={index} className="display-flex overflow-x-auto whitespace-nowrap"
                 onClick={() => handleThumbnailClick(thumbnailUrl)} />
         ));
     };
 
+    // useEffect(() => {
+    //     let filteredUrls = [...imageUrls]; // Start with all images
+    
+    //     if (selectedPhase !== "all" || selectedSpace !== "all") {
+    //         let filteredIds: string[] = [];
+    
+    //         if (selectedPhase !== "all") {
+    //             // Filter graphic material IDs by the selected phase
+    //             filteredIds.push(...Array.from(graphicMaterialToPhase)
+    //                 .filter(([_, phaseId]) => phaseId === selectedPhase)
+    //                 .map(([graphicMatId, _]) => graphicMatId));
+    //         }
+    
+    //         if (selectedSpace !== "all") {
+    //             // Filter graphic material IDs by the selected space, 
+    //             // or intersect with previously filtered IDs if phase was also selected
+    //             const spaceFilteredIds = Array.from(graphicMaterialToSpace)
+    //                 .filter(([_, spaceId]) => spaceId === selectedSpace)
+    //                 .map(([graphicMatId, _]) => graphicMatId);
+    
+    //             if (filteredIds.length > 0) {
+    //                 // Intersect phase and space filters if both are selected
+    //                 filteredIds = filteredIds.filter(id => spaceFilteredIds.includes(id));
+    //             } else {
+    //                 // If only space was selected
+    //                 filteredIds.push(...spaceFilteredIds);
+    //             }
+    //         }
+    
+    //         // Filter URLs by the resulting set of graphic material IDs
+    //         filteredUrls = imageUrls.filter((_, index) => filteredIds.includes(graphMatIds[index]));
+    //     }
+    
+    //     // Update the current image to the first in the filtered list or reset if empty
+    //     setCurrentImage(filteredUrls.length > 0 ? filteredUrls[0] : null);
+    
+    // }, [selectedPhase, selectedSpace, graphicMaterialToPhase, graphicMaterialToSpace, graphMatIds, imageUrls]);
+    
+    
+    // end of test
 
     return (
         <div>
@@ -398,13 +569,41 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
             {isGraphicMaterialsXmlParsed && !isAnnotationsXmlParsed && <XMLParser url={AnnotationsXmlUrl} onParsed={handleAnnotationsParsedData } />}
             {!isArchitecturalPhasesXmlParsed && <XMLParser url={ArchitecturalPhasesXmlUrl} onParsed={handleArchitecturalPhasesParsedData } />}
             {!isArchitecturalSpacesXmlParsed && <XMLParser url={ArchitecturalSpacesXmlUrl} onParsed={handleArchitecturalSpacesParsedData } />}
-            
+            {!isLink_GraphicMaterialsArchitecturalPhasesXmlParsed 
+            && isGraphicMaterialsXmlParsed && isArchitecturalPhasesXmlParsed
+            && <XMLParser url={Link_GraphicMaterialsArchitecturalPhasesXmlUrl} onParsed={handleGraphicMaterialPhaseLinks } />}
+            {!isLink_GraphicMaterialsArchitecturalSpacesXmlParsed 
+            && isGraphicMaterialsXmlParsed && isArchitecturalSpacesXmlParsed
+            && <XMLParser url={Link_GraphicMaterialsArchitecturalSpacesXmlUrl} onParsed={handleGraphicMaterialSpaceLinks } />}
+
             {/* Render the Carousel after the .xml is parsed */}
             {isGraphicMaterialsXmlParsed && isAnnotationsXmlParsed
             && isArchitecturalPhasesXmlParsed && isArchitecturalSpacesXmlParsed &&
                 // React.Fragment docs: https://legacy.reactjs.org/docs/fragments.html
                 // Return multiple elements without adding extra nodes to the DOM
                 <React.Fragment>
+                    {/* Simple UI */}
+                    {/* Dropdown for selecting a phase */}
+                    <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black">
+                        <option value="all">Show All</option>
+                        {architecturalPhases.map((phaseId, index) => (
+                            <option key={phaseId} value={phaseId} className="text-black">
+                                {architecturalPhasesDates[index]}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Dropdown for selecting a space */}
+                    <select onChange={(e) => setSelectedSpace(e.target.value)} defaultValue="all" className="text-black">
+                        <option value="all">Show All</option>
+                        {architecturalSpaces.map((spaceId, index) => (
+                            <option key={spaceId} value={spaceId} className="text-black">
+                                {architecturalSpacesNames[index]}
+                            </option>
+                        ))}
+                    </select>
+
+
                     {/* Always present OpenSeadragon viewer container */}
                     <div 
                         ref={viewerRef} 
@@ -471,6 +670,7 @@ const ResponsiveCarousel: React.FC<ResponsiveCarouselProps> = ({ selectedPhase }
                 </React.Fragment>
             }
         </div>
+
     );
     
 }

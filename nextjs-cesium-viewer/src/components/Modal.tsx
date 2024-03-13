@@ -7,11 +7,10 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     openModal: () => void;
-    selectedPhase?: string | null;
     children?: React.ReactNode; // Make children optional
   }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, openModal, selectedPhase, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, openModal, children }) => {
 
   const modalContentRef = useRef<HTMLDivElement>(null);
   
@@ -48,7 +47,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, openModal, selectedPhase
               Close
           </button>
           <div className="flex flex-col w-full h-full">
-              <ResponsiveCarousel selectedPhase={selectedPhase} />    
+              <ResponsiveCarousel />    
           </div>
       </div>
   </div>
