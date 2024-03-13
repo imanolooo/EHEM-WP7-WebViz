@@ -7,7 +7,7 @@ import Modal from './Modal';
 import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 import "cesium/Build/Cesium/Widgets/widgets.css"
-
+import {FirstPersonCameraController} from './FirstPersonNavigation';
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
@@ -715,6 +715,14 @@ const Map = () => {
                         }
         
         
+                        document.addEventListener('keypress', (event) => {   // Carlos
+                              if (event.key=='f')
+                              {
+                                  var firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
+                                  firstPersonCameraController.start();
+                              }
+                            }, false);
+
         
                     })
                     .catch(error => {
