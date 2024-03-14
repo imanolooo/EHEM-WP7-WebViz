@@ -82,7 +82,7 @@ _onClockTick(clock:any) {
     {
         this._currentSpeed /= this._forwardInertia;  // friction
     }
-    console.log(this._currentSpeed);
+    //console.log(this._currentSpeed);
 
     if(this._direction === DIRECTION_FORWARD)
         Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
@@ -233,7 +233,7 @@ _onClockTick(clock:any) {
         let deltaPitchInDegree = (deltaY * ROTATE_SPEED);
         let newPitchInDegree = currentPitchInDegree + deltaPitchInDegree;
 
-        console.log( "rotationSpeed: " + ROTATE_SPEED + " deltaY: " + deltaY + " deltaPitchInDegree" + deltaPitchInDegree);
+        //console.log( "rotationSpeed: " + ROTATE_SPEED + " deltaY: " + deltaY + " deltaPitchInDegree" + deltaPitchInDegree);
 
         if( newPitchInDegree > MAX_PITCH_IN_DEGREE * 2 && newPitchInDegree < 360 - MAX_PITCH_IN_DEGREE) {
             newPitchInDegree = 360 - MAX_PITCH_IN_DEGREE;
