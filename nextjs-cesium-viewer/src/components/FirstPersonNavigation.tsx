@@ -31,10 +31,8 @@ class FirstPersonCameraController{
     scratchNextCartographic: any;
     _direction: any;	
     _screenSpaceEventHandler: any;
-    _disconectOnClockTick: any;
     _mousePosition: any;
     _startMousePosition: any;
-    _heading: any;
 
     constructor(options:any) 
     {
@@ -56,7 +54,6 @@ class FirstPersonCameraController{
         this.scratchNextPosition = new Cartesian3();
         this.scratchTerrainConsideredNextPosition = new Cartesian3();
         this.scratchNextCartographic = new Cartographic();
-        this._disconectOnClockTick = false;
 
     }
 
@@ -156,7 +153,7 @@ _onClockTick(clock:any) {
         canvas.addEventListener("keydown", this._onKeyDown.bind(this));
         canvas.addEventListener("keyup", this._onKeyUp.bind(this));
         canvas.addEventListener("wheel", this._onMouseWheel.bind(this));
-        this._disconectOnClockTick = this._cesiumViewer.clock.onTick.addEventListener(this._onClockTick, this); // check
+        this._cesiumViewer.clock.onTick.addEventListener(this._onClockTick, this); 
     };
 
     _onMouseLButtonClicked(movement:any) 
@@ -268,6 +265,8 @@ _onClockTick(clock:any) {
     start() {
         this._enabled = true;
         this._enableDefaultScreenSpaceCameraController(false);
+        
+/*
         let currentCameraPosition = this._camera.position;
         let cartographic = new Cartographic();
         let globe = this._cesiumViewer.scene.globe;
@@ -298,6 +297,7 @@ _onClockTick(clock:any) {
                 roll : 0.0
             }
         });
+        */
 
         return true;
     };
