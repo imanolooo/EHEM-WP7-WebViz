@@ -5,20 +5,23 @@ import { Math as CesiumMath } from 'cesium';
 
  // Author: Carlos Andújar
  // Partially based on: https://github.com/3DGISKing/CesiumJsFirstPersonCameraController 
- const DIRECTION_FORWARD = 0;
- const DIRECTION_BACKWARD = 1;
- const DIRECTION_LEFT = 2;
- const DIRECTION_RIGHT = 3;
- const DIRECTION_UP = 4;
- const DIRECTION_DOWN = 5;
+ const DIRECTION_WHEEL_FORWARD = 0;
+ const DIRECTION_WHEEL_BACKWARD = 1;
+ const DIRECTION_FORWARD = 2;
+ const DIRECTION_BACKWARD = 3;
+ const DIRECTION_LEFT = 4;
+ const DIRECTION_RIGHT = 5;
+ const DIRECTION_UP = 6;
+ const DIRECTION_DOWN = 7;
 
- const HUMAN_EYE_HEIGHT = 5.65; //1.70
+ // const HUMAN_EYE_HEIGHT = 5.65; //1.70
  const MAX_PITCH_IN_DEGREE = 88;
  const ROTATE_SPEED = 3;
  const DIRECTION_NONE = -1;
  
 class FirstPersonCameraController{
     _currentSpeed: number;
+    _defaultSpeed: number;
     _forwardInertia: number;
     _speedWheelSensitivity: number;
     _continuousMotion: boolean;
@@ -43,6 +46,7 @@ class FirstPersonCameraController{
         this._forwardInertia = 1.5; // the closer to 1.0, the longer it takes to stop
         this._speedWheelSensitivity = 900; // the lower, the faster
         this._continuousMotion = true; // whether mouse wheel initiates but not stops motion
+        this._defaultSpeed = 0.02; // speed for WASD motion 
         this._enabled = false;
         this._cesiumViewer = options.cesiumViewer;
         this._canvas = this._cesiumViewer.canvas;
@@ -72,6 +76,7 @@ _onClockTick(clock:any) {
     if(this._direction === DIRECTION_NONE)
         return;
 
+
     let distance = this._currentSpeed * dt;
     if (this._continuousMotion) 
     {
@@ -84,11 +89,18 @@ _onClockTick(clock:any) {
     }
     //console.log(this._currentSpeed);
 
+    
+    if(this._direction === DIRECTION_WHEEL_FORWARD)
+        Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
+    else if(this._direction === DIRECTION_WHEEL_BACKWARD)
+        Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
+    else
+        distance = this._defaultSpeed * dt; // for WASD motion
+
     if(this._direction === DIRECTION_FORWARD)
         Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
     else if(this._direction === DIRECTION_BACKWARD)
         Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
-    
     else if(this._direction === DIRECTION_LEFT)
         Cartesian3.multiplyByScalar(this._camera.right, -1, this.scratchCurrentDirection);
     else if(this._direction === DIRECTION_RIGHT)
@@ -134,7 +146,10 @@ _onClockTick(clock:any) {
     });
 
     if (Math.abs(this._currentSpeed) < 0.001) 
-        this._direction = DIRECTION_NONE;
+    {
+        //this._direction = DIRECTION_NONE;
+        this._currentSpeed = 0;
+    }
     
 };
 
@@ -178,7 +193,7 @@ _onClockTick(clock:any) {
                 this._currentSpeed += (-event.deltaY) / (this._speedWheelSensitivity * 10); 
         else
             this._currentSpeed += (-event.deltaY) / this._speedWheelSensitivity; 
-        this._direction = DIRECTION_FORWARD;
+        this._direction = DIRECTION_WHEEL_FORWARD;
     };
 
 
@@ -195,22 +210,27 @@ _onClockTick(clock:any) {
         this._mousePosition = movement.endPosition;
     };
 
-    _onKeyDown(event:any) {
+    _onKeyDown(event:any) { 
         const keyCode = event.keyCode;
 
         this._direction = DIRECTION_NONE;
 
+        console.log(keyCode);
         switch (keyCode) {
             case "W".charCodeAt(0):
+            case 38: // up
                 this._direction = DIRECTION_FORWARD;
                 return;
             case "S".charCodeAt(0):
+            case 40: // down
                 this._direction = DIRECTION_BACKWARD;
                 return;
             case "D".charCodeAt(0):
+            case 39: // right
                 this._direction = DIRECTION_RIGHT;
                 return;
             case "A".charCodeAt(0):
+            case 37: // left
                 this._direction = DIRECTION_LEFT;
                 return;
 
