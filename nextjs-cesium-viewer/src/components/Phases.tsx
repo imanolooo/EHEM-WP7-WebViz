@@ -1,19 +1,21 @@
 // ------
 // Phase-related
-export const phasesInfo = [
-    // Tilesets
-    // { id: 2477247, text: "Phase IX" },
-    // { id: 2477248, text: "Phase X" },
-    // { id: 2477249, text: "Phase XI" },
-    // { id: 2477250, text: "Phase XII" },
-    // { id: 2477251, text: "Phase XIII" }
+//     // Tilesets
+//     // { id: 2477247, text: "Phase IX" },
+//     // { id: 2477248, text: "Phase X" },
+//     // { id: 2477249, text: "Phase XI" },
+//     // { id: 2477250, text: "Phase XII" },
+//     // { id: 2477251, text: "Phase XIII" }
 
-    // GLB models
-    // { id: 2486360, text: "Phase IX" },
-    // { id: 2486363, text: "Phase X" },
-    // { id: 2486367, text: "Phase XI" },
-    // { id: 2486368, text: "Phase XII" },
-    // { id: 2486372, text: "Phase XIII" }
+//     // GLB models
+//     // { id: 2486360, text: "Phase IX" },
+//     // { id: 2486363, text: "Phase X" },
+//     // { id: 2486367, text: "Phase XI" },
+//     // { id: 2486368, text: "Phase XII" },
+//     // { id: 2486372, text: "Phase XIII" }
+
+export const phasesInfo = [
+    // GLB models (new - translated origin)
     { id: 2499177, text: "Phase IX" },
     { id: 2499172, text: "Phase X" },
     { id: 2499176, text: "Phase XI" },

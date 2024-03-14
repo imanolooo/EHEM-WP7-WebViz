@@ -339,8 +339,6 @@ const ResponsiveCarousel: React.FC = () => {
     
         setGraphicMaterialToSpace(tempMap);
         setIsLink_GraphicMaterialsArchitecturalSpacesXmlParsed(true);
-
-        console.log("test", graphicMaterialToSpace);
     };
     
     const handleGraphicMaterialPhaseLinks = (data: any) => {
@@ -382,12 +380,12 @@ const ResponsiveCarousel: React.FC = () => {
     
     // test
 
-    useEffect(() => {
-        console.log("graphicMaterialToPhase Map:", Array.from(graphicMaterialToPhase));
-        console.log("graphicMaterialToSpace Map:", Array.from(graphicMaterialToSpace));
-        console.log("Selected phaseId for filtering:", selectedPhase);
-        console.log("Selected spaceId for filtering:", selectedSpace);
-    }, [selectedPhase, selectedSpace]);
+    // useEffect(() => {
+    //     console.log("graphicMaterialToPhase Map:", Array.from(graphicMaterialToPhase));
+    //     console.log("graphicMaterialToSpace Map:", Array.from(graphicMaterialToSpace));
+    //     console.log("Selected phaseId for filtering:", selectedPhase);
+    //     console.log("Selected spaceId for filtering:", selectedSpace);
+    // }, [selectedPhase, selectedSpace]);
 
 
     useEffect(() => {
@@ -419,9 +417,6 @@ const ResponsiveCarousel: React.FC = () => {
     
         setFilteredImageUrls(newFilteredImageUrls);
         setFilteredThumbnailUrls(newFilteredThumbnailUrls);
-
-        console.log('Filtered image URLs:', newFilteredImageUrls);
-        console.log('Filtered thumbnail URLs:', newFilteredThumbnailUrls);
     
         // Update the current image to the first in the filtered list or reset if empty
         setCurrentImage(newFilteredImageUrls.length > 0 ? newFilteredImageUrls[0] : null);
