@@ -7,13 +7,17 @@ import Modal from './Modal';
 import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 import "cesium/Build/Cesium/Widgets/widgets.css"
-
+import {FirstPersonCameraController} from './FirstPersonNavigation';
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
 
 let boxIdCounter = 0;
 let boxEntities: Entity[] = []; // Global variable to store box entities
+
+const NAV_MODE_DEFAULT = "0";
+const NAV_MODE_FLY = "1";
+const NAV_MODE_FLY_EXPERT = "2";
 let currentCameraMode = 'exterior'; // Assume the camera starts in exterior mode
 
 type CesiumModel = {
@@ -32,6 +36,9 @@ const Map = () => {
     const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
     const [viewer, setViewer] = useState<Viewer>();
     const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
+    const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
+    const [selectedNavMode, setSelectedNavMode] = useState<string | null>(); 
+    const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
 
     // utility for getting the current time
     // useEffect(() => {
@@ -92,7 +99,8 @@ const Map = () => {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
                     timeline: false,    // Disable timebar at the bottom
                     animation: false,    // Disable animation (clock-like) widget
-                    creditContainer: document.createElement("none") // Remove the logo and credits of Cesium Ion
+                    creditContainer: document.createElement("none"), // Remove the logo and credits of Cesium Ion
+                    vrButton: true
                 });
                 setViewer(viewer);
                 const scene = viewer.scene;
@@ -233,6 +241,7 @@ const Map = () => {
                 var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
                 document.addEventListener('keydown', function (e) {
+                    if (firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
                     if (e.key === 'w' || e.key === 'W')
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
@@ -333,6 +342,47 @@ const Map = () => {
                 });
 
                 // ------
+                // Navigation Modes Dropdown Menu settings
+                
+                const navModeDropdown = document.createElement('select');
+                navModeDropdown.id = 'nav-menu';
+                navModeDropdown.classList.add('cesium-button');
+                navModeDropdown.innerHTML = 'Navigation';    // Toolbar button name
+
+                const option1 = document.createElement('option');
+                option1.value = NAV_MODE_DEFAULT;
+                option1.textContent = "Navigation: default (globe)"
+                navModeDropdown.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = NAV_MODE_FLY;
+                option2.textContent = "Navigation: Fly-through";
+                navModeDropdown.appendChild(option2);
+
+                const option3 = document.createElement('option');
+                option3.value = NAV_MODE_FLY_EXPERT;
+                option3.textContent = "Navigation: Fly-through (expert)";
+                navModeDropdown.appendChild(option3);
+
+
+                // Nav Modes Dropdown event listener
+                navModeDropdown.addEventListener('change', async (event) => {
+                    const id = (event.target as HTMLSelectElement).value;                    
+                    //console.log('Selected Nav Mode: ', id);
+                    if (id === NAV_MODE_FLY) {
+                        firstPersonCameraController.start();
+                        firstPersonCameraController._continuousMotion = false;
+                    }
+                    else if (id === NAV_MODE_FLY_EXPERT) {
+                        firstPersonCameraController.start();
+                        firstPersonCameraController._continuousMotion = true;
+                    }
+                    else if (id === NAV_MODE_DEFAULT) {
+                        firstPersonCameraController.stop();
+                    }
+                });
+
+                // ------
                 // Debug settings
 
                 // Create the Debug button
@@ -388,379 +438,383 @@ const Map = () => {
 
 
 
-//                 // test 
+                // test 
 
-//                 const nextButton = document.createElement("button");
-//                 nextButton.textContent = "Story Mode(Next Location)";
-//                 nextButton.classList.add('cesium-button');
-//                 viewer.container.appendChild(nextButton);
+                const nextButton = document.createElement("button");
+                nextButton.textContent = "Story Mode(Next Location)";
+                nextButton.classList.add('cesium-button');
+                viewer.container.appendChild(nextButton);
 
-//                 //-----Marios-----
+                //-----Marios-----
 
-//                 // Path to your JSON file
-//                 const jsonFilePath = 'data.json';
+                // Path to your JSON file
+                const jsonFilePath = 'data.json';
 
-//                 // Variable to store the phases and their locations
-//                 var phases: Record<string, { locations: Array<any> }> = {};
+                // Variable to store the phases and their locations
+                var phases: Record<string, { locations: Array<any> }> = {};
 
-//                 // Variable to store the locations
-//                 // const locations: any[] = [];
-//                 var currentIndex = 0;
+                // Variable to store the locations
+                // const locations: any[] = [];
+                var currentIndex = 0;
 
-//                 // Variable to store the current label entity
-//                 let currentLabelEntity: Entity | null = null;
-//                 let labelTextEntity: Entity | null = null;
-//                 let labelDescriptionEntity: Entity | null = null;
-
-
-//                 // Variable to store the current phase
-//                 var currentPhase = '';
-
-//                 // Fetch the JSON data
-//                 fetch(jsonFilePath)
-//                 .then(response => response.json())
-//                 .then((data: Record<string, any>) => {
-//                     phases = data;
-//                     // Assuming your JSON file has an array of locations
-//                     // locations = data.locations;
-//                     currentPhase = 'Phase Now';
-//                     addAnnotations(currentPhase);
-//                     // Function to set the camera to the current location and update description
-//                     function setCameraToLocation(index: number) {
-//                     const location = phases[currentPhase]?.locations[index];
-//                     if (!location) return;
-
-//                     const destination = Cartesian3.fromDegrees(
-//                         location.lon,
-//                         location.lat,
-//                         location.height
-//                     );
-
-//                     // Calculate vector from camera to destination
-//                     const cameraPosition = viewer.camera.positionWC.clone();
-//                     const direction = new Cartesian3();
-//                     Cartesian3.subtract(destination, cameraPosition, direction);
-
-//                     // Set a desired distance (e.g., 1000 meters) from the destination
-//                     const distance = -1.0;
-//                     Cartesian3.normalize(direction, direction);
-//                     Cartesian3.multiplyByScalar(direction, distance, direction);
-
-//                     const finalDestination = Cartesian3.add(
-//                         destination,
-//                         direction,
-//                         new Cartesian3()
-//                     );
-
-//                     // Remove the current label entity
-//                     if (currentLabelEntity) {
-//                         viewer.entities.remove(currentLabelEntity);
-//                         currentLabelEntity = null;
-//                     }
-
-//                     // Create a label for the current location
-//                     if (location.descriptions || location.image) {
-//                         currentLabelEntity = viewer.entities.add({
-//                         position: destination,
-//                         label: {
-//                             text: location.descriptions,
-//                             show: false,
-//                             font: location.font,
-//                             fillColor: Color.WHITE,
-//                             outlineColor: Color.BLACK,
-//                             outlineWidth: 2,
-//                             style: LabelStyle.FILL_AND_OUTLINE,
-//                             verticalOrigin: VerticalOrigin.BOTTOM,
-//                             pixelOffset: new Cartesian2(0, 40),
-//                             backgroundColor: Color.fromCssColorString(
-//                             'rgba(0,0,0,0.7)'
-//                             ),
-//                             showBackground: true,
-//                             backgroundPadding: new Cartesian2(8, 4),
-//                             disableDepthTestDistance: Number.POSITIVE_INFINITY,
-//                         },
-//                         billboard: {
-//                             image: location.image,
-//                             show: false,
-//                             verticalOrigin: VerticalOrigin.BOTTOM,
-//                             width: location.image_width,
-//                             height: location.image_height,
-//                             pixelOffset: new Cartesian2(0, location.pixelOffset),
-//                         },
-//                         });
-
-//                     }
-
-//                     if (phases[currentPhase].locations[index].move == 1) {
-//                         viewer.scene.camera.flyTo({
-//                         destination: finalDestination,
-//                         orientation: {
-//                             heading: CesiumMath.toRadians(location.heading),
-//                             pitch: CesiumMath.toRadians(location.pitch),
-//                             roll: viewer.camera.roll,
-//                         },
-//                         duration: 3.0,
-//                         complete: function () { },
-//                         });
-//                     } else if (phases[currentPhase].locations[index].move == 0) {
-//                         resetCamera();
-//                     }
-//                     }
-// -
-//                     //escape -> camera move normally
-//                     document.addEventListener('keyup', function (event) {
-//                     if (event.key === 'Escape') {
-//                         // isRKeyPressed = false;
-//                         viewer.scene.camera.lookAtTransform(originalPosition);
-//                         intersectionPointEntity.show = false;
-//                         if (tempLabel) {
-//                         if (tempLabel.label) {
-//                             tempLabel.label.show = new ConstantProperty(false);
-//                         }
-//                         }
-//                         if (currentLabelEntity) {
-//                         if (currentLabelEntity.label) {
-//                             currentLabelEntity.label.show = new ConstantProperty(false);
-//                         }
-//                         }
+                // Variable to store the current label entity
+                let currentLabelEntity: Entity | null = null;
+                let labelTextEntity: Entity | null = null;
+                let labelDescriptionEntity: Entity | null = null;
 
 
+                // Variable to store the current phase
+                var currentPhase = '';
 
-//                     }
-//                     });
+                // Fetch the JSON data
+                fetch(jsonFilePath)
+                .then(response => response.json())
+                .then((data: Record<string, any>) => {
+                    phases = data;
+                    // Assuming your JSON file has an array of locations
+                    // locations = data.locations;
+                    currentPhase = 'Phase Now';
+                    addAnnotations(currentPhase);
+                    // Function to set the camera to the current location and update description
+                    function setCameraToLocation(index: number) {
+                    const location = phases[currentPhase]?.locations[index];
+                    if (!location) return;
 
-//                     //click on 3d object and zoom camera to this position
-//                     var destinationPosition: Cartesian3 | null = null
-//                     var positions: Cartesian3 | null = null;
-//                     var SelectedPositions: Cartesian3 | null = null;
-//                     var tempLabel: Entity;
-//                     let firstframe = true;
+                    const destination = Cartesian3.fromDegrees(
+                        location.lon,
+                        location.lat,
+                        location.height
+                    );
 
-//                     const originalPosition = viewer.scene.camera.transform.clone();
+                    // Calculate vector from camera to destination
+                    const cameraPosition = viewer.camera.positionWC.clone();
+                    const direction = new Cartesian3();
+                    Cartesian3.subtract(destination, cameraPosition, direction);
 
-//                     viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
+                    // Set a desired distance (e.g., 1000 meters) from the destination
+                    const distance = -1.0;
+                    Cartesian3.normalize(direction, direction);
+                    Cartesian3.multiplyByScalar(direction, distance, direction);
 
-//                     viewer.scene.camera.lookAtTransform(originalPosition);
-//                     var pickedObject = viewer.scene.pick(movement.position);
-//                     if (defined(pickedObject)) {
-//                         if (defined(pickedObject.id)) {
-//                         destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
-//                         } else {
-//                         destinationPosition = viewer.scene.pickPosition(movement.position);
-//                         }
-//                         intersectionPointEntity.show = false;
-//                         if (tempLabel) {
-//                         if (tempLabel.label) {
-//                             tempLabel.label.show = new ConstantProperty(false);
-//                         }
-//                         }
-//                         if (currentLabelEntity) {
-//                         if (currentLabelEntity.label) {
-//                             currentLabelEntity.label.show = new ConstantProperty(false);
-//                         }
-//                         }
-//                         // destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
+                    const finalDestination = Cartesian3.add(
+                        destination,
+                        direction,
+                        new Cartesian3()
+                    );
 
-//                         // Get the current camera distance
-//                         var currentDistance = Cartesian3.distance(viewer.camera.position, destinationPosition as Cartesian3);
+                    // Remove the current label entity
+                    if (currentLabelEntity) {
+                        viewer.entities.remove(currentLabelEntity);
+                        currentLabelEntity = null;
+                    }
 
-//                         // Adjust the destination position based on a factor (e.g., 2 times the current distance)
-//                         var adjustedDistance = 0.85 * currentDistance;
-//                         var adjustedDestination = Cartesian3.multiplyByScalar(
-//                         Cartesian3.normalize(
-//                             Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
-//                             new Cartesian3()
-//                         ),
-//                         adjustedDistance,
-//                         new Cartesian3()
-//                         );
-//                         var adjustedPointDistance = 0.995 * currentDistance;
-//                         var adjustedPointDestination = Cartesian3.multiplyByScalar(
-//                         Cartesian3.normalize(
-//                             Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
-//                             new Cartesian3()
-//                         ),
-//                         adjustedPointDistance,
-//                         new Cartesian3()
-//                         );
+                    // Create a label for the current location
+                    if (location.descriptions || location.image) {
+                        currentLabelEntity = viewer.entities.add({
+                        position: destination,
+                        label: {
+                            text: location.descriptions,
+                            show: false,
+                            font: location.font,
+                            fillColor: Color.WHITE,
+                            outlineColor: Color.BLACK,
+                            outlineWidth: 2,
+                            style: LabelStyle.FILL_AND_OUTLINE,
+                            verticalOrigin: VerticalOrigin.BOTTOM,
+                            pixelOffset: new Cartesian2(0, 40),
+                            backgroundColor: Color.fromCssColorString(
+                            'rgba(0,0,0,0.7)'
+                            ),
+                            showBackground: true,
+                            backgroundPadding: new Cartesian2(8, 4),
+                            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                        },
+                        billboard: {
+                            image: location.image,
+                            show: false,
+                            verticalOrigin: VerticalOrigin.BOTTOM,
+                            width: location.image_width,
+                            height: location.image_height,
+                            pixelOffset: new Cartesian2(0, location.pixelOffset),
+                        },
+                        });
 
-//                         viewer.camera.flyTo({
-//                         destination: Cartesian3.add(viewer.camera.position, adjustedDestination, new Cartesian3()),
-//                         orientation: {
-//                             heading: viewer.camera.heading,
-//                             pitch: viewer.camera.pitch,
-//                             roll: viewer.camera.roll
-//                         },
-//                         duration: 2.0,
+                    }
 
-
-//                         });
-
-
-//                         intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
-//                         intersectionPointEntity.show = true;
-//                         viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
-//                     }
-
-
-//                     //add label descriptions for every positions from the data.json
-//                     for (var i = 0; i < phases[currentPhase].locations.length; i++) {
-
-//                         positions = Cartesian3.fromDegrees(phases[currentPhase].locations[i].lon, phases[currentPhase].locations[i].lat, phases[currentPhase].locations[i].height);
-//                         if (firstframe) {
-//                         SelectedPositions = positions;
-//                         firstframe = false;
-//                         }
-//                         // console.log("pos" + positions);
-//                         // console.log("dest" + destinationPosition);
-//                         // Check if there is an existing labelDescriptionEntity and hide it
-
-
-//                         labelDescriptionEntity = viewer.entities.add({
-//                         position: positions,
-//                         label: {
-//                             text: phases[currentPhase].locations[i].labeldesciption,
-//                             show: false,
-//                             font: phases[currentPhase].locations[i].font,  // You can customize font for the second label as needed
-//                             fillColor: Color.WHITE,
-//                             outlineColor: Color.BLACK,
-//                             outlineWidth: 2,
-//                             style: LabelStyle.FILL_AND_OUTLINE,
-//                             verticalOrigin: VerticalOrigin.BOTTOM,
-//                             pixelOffset: new Cartesian2(0, 80),  // Adjust pixelOffset for the second label
-//                             backgroundColor: Color.fromCssColorString('rgba(0,0,0,0.7)'),
-//                             showBackground: true,
-//                             backgroundPadding: new Cartesian2(8, 4),
-//                             disableDepthTestDistance: Number.POSITIVE_INFINITY,
-//                         },
-//                         });
-//                         //check if the clicked position is the same position with the data.json file -> to show the labeldescriptions
-//                         if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3)) {
-//                         console.log(phases[currentPhase].locations[i].labeldesciption);
-
-
-//                         if (labelDescriptionEntity) {
-//                             if (labelDescriptionEntity.label) {
-//                             labelDescriptionEntity.label.show = new ConstantProperty(true);
-//                             }
-//                         }
-//                         tempLabel = labelDescriptionEntity;
-
-//                         } else if (destinationPosition && destinationPosition.equals(positions) && !positions.equals(SelectedPositions as Cartesian3)) {
-
-//                         if (tempLabel) {
-//                             if (tempLabel.label) {
-//                             tempLabel.label.show = new ConstantProperty(false);
-//                             }
-//                         }
-//                         if (labelDescriptionEntity) {
-//                             if (labelDescriptionEntity.label) {
-//                             labelDescriptionEntity.label.show = new ConstantProperty(true);
-//                             }
-//                         }
-//                         tempLabel = labelDescriptionEntity;
-
-//                         }
-//                     }
-
-//                     }, ScreenSpaceEventType.LEFT_CLICK);
+                    if (phases[currentPhase].locations[index].move == 1) {
+                        viewer.scene.camera.flyTo({
+                        destination: finalDestination,
+                        orientation: {
+                            heading: CesiumMath.toRadians(location.heading),
+                            pitch: CesiumMath.toRadians(location.pitch),
+                            roll: viewer.camera.roll,
+                        },
+                        duration: 3.0,
+                        complete: function () { },
+                        });
+                    } else if (phases[currentPhase].locations[index].move == 0) {
+                        resetCamera();
+                    }
+                    }
+-
+                    //escape -> camera move normally
+                    document.addEventListener('keyup', function (event) {
+                    if (event.key === 'Escape') {
+                        // isRKeyPressed = false;
+                        viewer.scene.camera.lookAtTransform(originalPosition);
+                        intersectionPointEntity.show = false;
+                        if (tempLabel) {
+                        if (tempLabel.label) {
+                            tempLabel.label.show = new ConstantProperty(false);
+                        }
+                        }
+                        if (currentLabelEntity) {
+                        if (currentLabelEntity.label) {
+                            currentLabelEntity.label.show = new ConstantProperty(false);
+                        }
+                        }
 
 
 
+                    }
+                    });
 
-//                     //Story Mode Button to increase the index
-//                     function onNextButtonClick() {
-//                     viewer.scene.camera.lookAtTransform(originalPosition);
-//                     intersectionPointEntity.show = false;
-//                     if (tempLabel) {
-//                         if (tempLabel.label) {
-//                         tempLabel.label.show = new ConstantProperty(false);
-//                         }
-//                     }
-//                     currentIndex = (currentIndex) % phases[currentPhase]?.locations.length;
-//                     setCameraToLocation(currentIndex);
-//                     if (currentLabelEntity) {
-//                         if (currentLabelEntity.label) {
-//                         currentLabelEntity.label.show = new ConstantProperty(true);
-//                         }
-//                         if (currentLabelEntity.billboard) {
-//                         currentLabelEntity.billboard.show = new ConstantProperty(true);
-//                         }
-//                     }
-//                     currentIndex += 1;
-//                     }
+                    //click on 3d object and zoom camera to this position
+                    var destinationPosition: Cartesian3 | null = null
+                    var positions: Cartesian3 | null = null;
+                    var SelectedPositions: Cartesian3 | null = null;
+                    var tempLabel: Entity;
+                    let firstframe = true;
+
+                    const originalPosition = viewer.scene.camera.transform.clone();
+
+                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
+
+                    viewer.scene.camera.lookAtTransform(originalPosition);
+                    var pickedObject = viewer.scene.pick(movement.position);
+                    if (defined(pickedObject)) {
+                        if (defined(pickedObject.id)) {
+                        destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
+                        } else {
+                        destinationPosition = viewer.scene.pickPosition(movement.position);
+                        }
+                        intersectionPointEntity.show = false;
+                        if (tempLabel) {
+                        if (tempLabel.label) {
+                            tempLabel.label.show = new ConstantProperty(false);
+                        }
+                        }
+                        if (currentLabelEntity) {
+                        if (currentLabelEntity.label) {
+                            currentLabelEntity.label.show = new ConstantProperty(false);
+                        }
+                        }
+                        // destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
+
+                        // Get the current camera distance
+                        var currentDistance = Cartesian3.distance(viewer.camera.position, destinationPosition as Cartesian3);
+
+                        // Adjust the destination position based on a factor (e.g., 2 times the current distance)
+                        var adjustedDistance = 0.85 * currentDistance;
+                        var adjustedDestination = Cartesian3.multiplyByScalar(
+                        Cartesian3.normalize(
+                            Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
+                            new Cartesian3()
+                        ),
+                        adjustedDistance,
+                        new Cartesian3()
+                        );
+                        var adjustedPointDistance = 0.995 * currentDistance;
+                        var adjustedPointDestination = Cartesian3.multiplyByScalar(
+                        Cartesian3.normalize(
+                            Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
+                            new Cartesian3()
+                        ),
+                        adjustedPointDistance,
+                        new Cartesian3()
+                        );
+
+                        viewer.camera.flyTo({
+                        destination: Cartesian3.add(viewer.camera.position, adjustedDestination, new Cartesian3()),
+                        orientation: {
+                            heading: viewer.camera.heading,
+                            pitch: viewer.camera.pitch,
+                            roll: viewer.camera.roll
+                        },
+                            duration: 2.0,
 
 
+                            });
 
-//                     nextButton?.addEventListener('click', onNextButtonClick);
+
+                            intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
+                            intersectionPointEntity.show = true;
+                            viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
+                        }
 
 
-//                     // Initial setup
-//                     setCameraToLocation(currentIndex);
-//                 })
-//                 .catch(error => {
-//                     console.error('Error fetching JSON:', error);
-//                 });
-//                 //-------end Marios----------
+                        //add label descriptions for every positions from the data.json
+                        for (var i = 0; i < phases[currentPhase].locations.length; i++) {
 
-//                 //---Marios-----
-//                 const addAnnotations = async (Phase: any) => {
-//                     fetch(jsonFilePath)
-//                     .then(response => response.json())
-//                     .then((data: Record<string, any>) => {
-        
-        
-//                         for (var phase in data) {
-//                         if (phase == Phase) {
-//                             if (data.hasOwnProperty(phase)) {
-//                             var locations = data[phase].locations;
-        
-//                             for (var i = 0; i < locations.length; i++) {
-//                                 var location = locations[i];
-//                                 if (location.labeltext) {
-//                                 var entity = viewer.entities.add({
-//                                     position: Cartesian3.fromDegrees(
-//                                     location.lon,
-//                                     location.lat,
-//                                     location.height
-//                                     ),
-//                                     point: {
-//                                     pixelSize: 30,
-//                                     color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
-//                                     disableDepthTestDistance: Number.POSITIVE_INFINITY
-//                                     },
-//                                     label: {
-//                                     text: location.labeltext,
-//                                     font: '14px sans-serif',
-//                                     fillColor: Color.WHITE,
-//                                     style: LabelStyle.FILL_AND_OUTLINE,
-//                                     outlineWidth: 2,
-//                                     outlineColor: Color.WHITE,
-//                                     pixelOffset: new Cartesian2(0, 0),
-//                                     eyeOffset: new Cartesian3(0, 0, 0),
-//                                     disableDepthTestDistance: Number.POSITIVE_INFINITY
-        
-//                                     }
-//                                 });
-        
-        
-//                                 }
-//                             }
-//                             }
-//                         }
-//                         }
-        
-        
-        
-//                     })
-//                     .catch(error => {
-//                         console.error('Error fetching JSON:', error);
-//                     });
-//                 }
+                            positions = Cartesian3.fromDegrees(phases[currentPhase].locations[i].lon, phases[currentPhase].locations[i].lat, phases[currentPhase].locations[i].height);
+                            if (firstframe) {
+                            SelectedPositions = positions;
+                            firstframe = false;
+                            }
+                            // console.log("pos" + positions);
+                            // console.log("dest" + destinationPosition);
+                            // Check if there is an existing labelDescriptionEntity and hide it
+
+
+                            labelDescriptionEntity = viewer.entities.add({
+                            position: positions,
+                            label: {
+                                text: phases[currentPhase].locations[i].labeldesciption,
+                                show: false,
+                                font: phases[currentPhase].locations[i].font,  // You can customize font for the second label as needed
+                                fillColor: Color.WHITE,
+                                outlineColor: Color.BLACK,
+                                outlineWidth: 2,
+                                style: LabelStyle.FILL_AND_OUTLINE,
+                                verticalOrigin: VerticalOrigin.BOTTOM,
+                                pixelOffset: new Cartesian2(0, 80),  // Adjust pixelOffset for the second label
+                                backgroundColor: Color.fromCssColorString('rgba(0,0,0,0.7)'),
+                                showBackground: true,
+                                backgroundPadding: new Cartesian2(8, 4),
+                                disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                            },
+                            });
+                            //check if the clicked position is the same position with the data.json file -> to show the labeldescriptions
+                            if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3)) {
+                            console.log(phases[currentPhase].locations[i].labeldesciption);
+
+
+                            if (labelDescriptionEntity) {
+                                if (labelDescriptionEntity.label) {
+                                labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                }
+                            }
+                            tempLabel = labelDescriptionEntity;
+
+                            } else if (destinationPosition && destinationPosition.equals(positions) && !positions.equals(SelectedPositions as Cartesian3)) {
+
+                            if (tempLabel) {
+                                if (tempLabel.label) {
+                                tempLabel.label.show = new ConstantProperty(false);
+                                }
+                            }
+                            if (labelDescriptionEntity) {
+                                if (labelDescriptionEntity.label) {
+                                labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                }
+                            }
+                            tempLabel = labelDescriptionEntity;
+
+                            }
+                        }
+
+                        }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); // changed to double click for not interfering with navigation
+
+
+                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
+                            }, ScreenSpaceEventType.LEFT_CLICK); // left click does nothing (disable default behaviour on gltf models)
     
-//                 //--- End Marios-----
 
-//                 // end of test
+                    //Story Mode Button to increase the index
+                    function onNextButtonClick() {
+                    viewer.scene.camera.lookAtTransform(originalPosition);
+                    intersectionPointEntity.show = false;
+                    if (tempLabel) {
+                        if (tempLabel.label) {
+                        tempLabel.label.show = new ConstantProperty(false);
+                        }
+                    }
+                    currentIndex = (currentIndex) % phases[currentPhase]?.locations.length;
+                    setCameraToLocation(currentIndex);
+                    if (currentLabelEntity) {
+                        if (currentLabelEntity.label) {
+                        currentLabelEntity.label.show = new ConstantProperty(true);
+                        }
+                        if (currentLabelEntity.billboard) {
+                        currentLabelEntity.billboard.show = new ConstantProperty(true);
+                        }
+                    }
+                    currentIndex += 1;
+                    }
+
+
+
+                    nextButton?.addEventListener('click', onNextButtonClick);
+
+
+                    // Initial setup
+                    setCameraToLocation(currentIndex);
+                })
+                .catch(error => {
+                    console.error('Error fetching JSON:', error);
+                });
+                //-------end Marios----------
+
+                //---Marios-----
+                const addAnnotations = async (Phase: any) => {
+                    fetch(jsonFilePath)
+                    .then(response => response.json())
+                    .then((data: Record<string, any>) => {
+        
+        
+                        for (var phase in data) {
+                        if (phase == Phase) {
+                            if (data.hasOwnProperty(phase)) {
+                            var locations = data[phase].locations;
+        
+                            for (var i = 0; i < locations.length; i++) {
+                                var location = locations[i];
+                                if (location.labeltext) {
+                                var entity = viewer.entities.add({
+                                    position: Cartesian3.fromDegrees(
+                                    location.lon,
+                                    location.lat,
+                                    location.height
+                                    ),
+                                    point: {
+                                    pixelSize: 30,
+                                    color: Color.fromCssColorString('rgba(0, 0, 0, 0.8)'),
+                                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+                                    },
+                                    label: {
+                                    text: location.labeltext,
+                                    font: '14px sans-serif',
+                                    fillColor: Color.WHITE,
+                                    style: LabelStyle.FILL_AND_OUTLINE,
+                                    outlineWidth: 2,
+                                    outlineColor: Color.WHITE,
+                                    pixelOffset: new Cartesian2(0, 0),
+                                    eyeOffset: new Cartesian3(0, 0, 0),
+                                    disableDepthTestDistance: Number.POSITIVE_INFINITY
+        
+                                    }
+                                });
+        
+        
+                                }
+                            }
+                            }
+                        }
+                        }
+        
+        
+                        
+
+        
+                    })
+                    .catch(error => {
+                        console.error('Error fetching JSON:', error);
+                    });
+                }
+    
+                //--- End Marios-----
+
+                // end of test
 
 
                 // ------
@@ -775,6 +829,8 @@ const Map = () => {
                     toolbar.insertBefore(carouselButton, modeButton);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
                     toolbar.insertBefore(phasesDropdown, carouselButton);
+                    toolbar.insertBefore(navModeDropdown, phasesDropdown);
+                    
                     // Insert the Reset Camera button before the Phases Dropdown
                     toolbar.insertBefore(resetButton, phasesDropdown);
                     // Insert the Debug button before the Reset Camera
@@ -783,6 +839,28 @@ const Map = () => {
                     // toolbar.insertBefore(lightToggle, toggleDebug);
                     // toolbar.insertBefore(nextButton, resetButton);
                 }   
+
+                // Carlos
+                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
+                setFirstPersonCameraController(firstPersonCameraController); 
+
+                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
+                    if (event.key=='f')
+                        firstPersonCameraController.start();
+                    if (event.key=='g') 
+                        firstPersonCameraController.stop();
+                  }, false);
+
+                // Carlos
+                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
+                setFirstPersonCameraController(firstPersonCameraController); 
+
+                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
+                    if (event.key=='f')
+                        firstPersonCameraController.start();
+                    if (event.key=='g') 
+                        firstPersonCameraController.stop();
+                  }, false);
 
 
             } catch (error) {
