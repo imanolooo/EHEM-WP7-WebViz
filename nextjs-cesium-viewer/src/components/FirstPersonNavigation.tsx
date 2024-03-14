@@ -9,6 +9,9 @@ import { Math as CesiumMath } from 'cesium';
  const DIRECTION_BACKWARD = 1;
  const DIRECTION_LEFT = 2;
  const DIRECTION_RIGHT = 3;
+ const DIRECTION_UP = 4;
+ const DIRECTION_DOWN = 5;
+
  const HUMAN_EYE_HEIGHT = 5.65; //1.70
  const MAX_PITCH_IN_DEGREE = 88;
  const ROTATE_SPEED = 3;
@@ -85,12 +88,16 @@ _onClockTick(clock:any) {
         Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
     else if(this._direction === DIRECTION_BACKWARD)
         Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
-    /*
+    
     else if(this._direction === DIRECTION_LEFT)
         Cartesian3.multiplyByScalar(this._camera.right, -1, this.scratchCurrentDirection);
     else if(this._direction === DIRECTION_RIGHT)
         Cartesian3.multiplyByScalar(this._camera.right, 1, this.scratchCurrentDirection);
-    */
+    else if(this._direction === DIRECTION_DOWN)
+        Cartesian3.multiplyByScalar(this._camera.up, -1, this.scratchCurrentDirection);
+    else if(this._direction === DIRECTION_UP)
+        Cartesian3.multiplyByScalar(this._camera.up, 1, this.scratchCurrentDirection);
+    
     Cartesian3.multiplyByScalar(this.scratchCurrentDirection, distance, this.scratchDeltaPosition);
 
     let currentCameraPosition = this._camera.position;
@@ -206,6 +213,14 @@ _onClockTick(clock:any) {
             case "A".charCodeAt(0):
                 this._direction = DIRECTION_LEFT;
                 return;
+
+            case "Q".charCodeAt(0):
+                    this._direction = DIRECTION_DOWN;
+                    return;
+            case "E".charCodeAt(0):
+                        this._direction = DIRECTION_UP;
+                        return;
+    
             case 90: // z
                 return;
             default:

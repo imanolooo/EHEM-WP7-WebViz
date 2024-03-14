@@ -196,6 +196,7 @@ const Map = () => {
                 var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
                 document.addEventListener('keydown', function (e) {
+                    if (firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
                     if (e.key === 'w' || e.key === 'W')
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
