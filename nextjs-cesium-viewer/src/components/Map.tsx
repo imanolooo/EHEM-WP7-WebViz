@@ -32,6 +32,7 @@ const Map = () => {
     const [viewer, setViewer] = useState<Viewer>();
     const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
     const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
+    const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
 
     // utility for getting the current time
     // useEffect(() => {
@@ -750,12 +751,15 @@ const Map = () => {
                     toolbar.insertBefore(nextButton, resetButton);
                 }   
 
-                document.addEventListener('keypress', (event) => {   // Carlos
+                // Carlos
+                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
+                setFirstPersonCameraController(firstPersonCameraController); 
+
+                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
                     if (event.key=='f')
-                    {
-                        var firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
                         firstPersonCameraController.start();
-                    }
+                    if (event.key=='g') 
+                        firstPersonCameraController.stop();
                   }, false);
 
 
