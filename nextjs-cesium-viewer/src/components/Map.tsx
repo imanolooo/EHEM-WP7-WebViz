@@ -628,10 +628,12 @@ const Map = () => {
                         }
                     }
 
-                    }, ScreenSpaceEventType.LEFT_CLICK);
+                    }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); // changed to double click for not interfering with navigation
 
 
-
+                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
+                            }, ScreenSpaceEventType.LEFT_CLICK); // left click does nothing (disable default behaviour on gltf models)
+    
 
                     //Story Mode Button to increase the index
                     function onNextButtonClick() {
