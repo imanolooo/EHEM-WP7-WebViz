@@ -15,6 +15,10 @@ Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzM
 let boxIdCounter = 0;
 let boxEntities: Entity[] = []; // Global variable to store box entities
 
+const NAV_MODE_DEFAULT = "0";
+const NAV_MODE_FLY = "1";
+const NAV_MODE_FLY_EXPERT = "2";
+
 type CesiumModel = {
     id: number;
     name: string;
@@ -32,6 +36,7 @@ const Map = () => {
     const [viewer, setViewer] = useState<Viewer>();
     const [phaseBoxes, setPhaseBoxes] = useState<JSX.Element[]>([]);    
     const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
+    const [selectedNavMode, setSelectedNavMode] = useState<string | null>(); 
     const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
 
     // utility for getting the current time
@@ -93,7 +98,8 @@ const Map = () => {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
                     timeline: false,    // Disable timebar at the bottom
                     animation: false,    // Disable animation (clock-like) widget
-                    creditContainer: document.createElement("none") // Remove the logo and credits of Cesium Ion
+                    creditContainer: document.createElement("none"), // Remove the logo and credits of Cesium Ion
+                    vrButton: true
                 });
                 setViewer(viewer);
                 const scene = viewer.scene;
@@ -295,6 +301,47 @@ const Map = () => {
                         
                         console.log('Selected model position: ', selectedModel.entity.position);
                         console.log('Current model position: ', currentModelEntity.position);
+                    }
+                });
+
+                // ------
+                // Navigation Modes Dropdown Menu settings
+                
+                const navModeDropdown = document.createElement('select');
+                navModeDropdown.id = 'nav-menu';
+                navModeDropdown.classList.add('cesium-button');
+                navModeDropdown.innerHTML = 'Navigation';    // Toolbar button name
+
+                const option1 = document.createElement('option');
+                option1.value = NAV_MODE_DEFAULT;
+                option1.textContent = "Navigation: default (globe)"
+                navModeDropdown.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = NAV_MODE_FLY;
+                option2.textContent = "Navigation: Fly-through";
+                navModeDropdown.appendChild(option2);
+
+                const option3 = document.createElement('option');
+                option3.value = NAV_MODE_FLY_EXPERT;
+                option3.textContent = "Navigation: Fly-through (expert)";
+                navModeDropdown.appendChild(option3);
+
+
+                // Nav Modes Dropdown event listener
+                navModeDropdown.addEventListener('change', async (event) => {
+                    const id = (event.target as HTMLSelectElement).value;                    
+                    //console.log('Selected Nav Mode: ', id);
+                    if (id === NAV_MODE_FLY) {
+                        firstPersonCameraController.start();
+                        firstPersonCameraController._continuousMotion = false;
+                    }
+                    else if (id === NAV_MODE_FLY_EXPERT) {
+                        firstPersonCameraController.start();
+                        firstPersonCameraController._continuousMotion = true;
+                    }
+                    else if (id === NAV_MODE_DEFAULT) {
+                        firstPersonCameraController.stop();
                     }
                 });
 
@@ -745,6 +792,8 @@ const Map = () => {
                     toolbar.insertBefore(carouselButton, modeButton);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
                     toolbar.insertBefore(phasesDropdown, carouselButton);
+                    toolbar.insertBefore(navModeDropdown, phasesDropdown);
+                    
                     // Insert the Reset Camera button before the Phases Dropdown
                     toolbar.insertBefore(resetButton, phasesDropdown);
                     // Insert the Debug button before the Reset Camera
