@@ -165,7 +165,10 @@ _onClockTick(clock:any) {
     _onMouseWheel(event:any) {
         //console.log(event.deltaY); 
         if (this._continuousMotion)
-            this._currentSpeed += (-event.deltaY) / (this._speedWheelSensitivity * 30); 
+            if (event.deltaY < 0) // accelerate
+                this._currentSpeed += (-event.deltaY) / (this._speedWheelSensitivity * 30); 
+            else // break
+                this._currentSpeed += (-event.deltaY) / (this._speedWheelSensitivity * 10); 
         else
             this._currentSpeed += (-event.deltaY) / this._speedWheelSensitivity; 
         this._direction = DIRECTION_FORWARD;
