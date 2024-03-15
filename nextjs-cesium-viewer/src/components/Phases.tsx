@@ -15,12 +15,12 @@
 //     // { id: 2486372, text: "Phase XIII" }
 
 export const phasesInfo = [
-    // GLB models (new - translated origin)
-    { id: 2499177, text: "Phase IX" },
-    { id: 2499172, text: "Phase X" },
-    { id: 2499176, text: "Phase XI" },
-    { id: 2499174, text: "Phase XII" },
-    { id: 2499173, text: "Phase XIII" }
+    // GLB models (new - translated origin - no Draco)
+    { id: 2504193, text: "Phase IX" },
+    { id: 2504189, text: "Phase X" },
+    { id: 2504192, text: "Phase XI" },
+    { id: 2504191, text: "Phase XII" },
+    { id: 2504190, text: "Phase XIII" }
 ];
 
 
