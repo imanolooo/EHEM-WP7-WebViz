@@ -25,10 +25,20 @@ type CesiumModel = {
     name: string;
     entity: Entity | null;
 };
-
+const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
 
 const Map = () => {
     const [cameraConfig, setCameraConfig] = useState({});
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const imageNames = ['ix', 'x', 'xi', 'xii', 'xiii'];
+    const imageNameToModelId = {
+        'ix': 2499177,
+        'x': 2499172,
+        'xi': 2499176,
+        'xii': 2499174,
+        'xiii': 2499173,
+    };
 
     const models: CesiumModel[] = [];
     let currentModelEntity: Entity | null = null;
@@ -88,6 +98,71 @@ const Map = () => {
     // }, [viewer]);
 
     // Initialize the Cesium Viewer
+    
+    const renderMenu = () => (
+        <div className={`fixed inset-x-0 bottom-0 z-20 bg-opacity-75 bg-black p-4 flex justify-center items-center space-x-4 overflow-x-auto ${isMenuOpen ? 'block' : 'hidden'}`}>
+            {imageNames.map((name) => (
+                <img 
+                    key={name} 
+                    src={`/${name}.jpg`} 
+                    alt={`Select ${name}`} 
+                    className="h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200" 
+                    onClick={() => selectImage(name)}
+                />
+            ))}
+            <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                className="absolute top-0 right-0 mt-4 mr-4 bg-blue-500 text-white p-2 rounded">
+                {isMenuOpen ? 'Close' : 'Open'} Phase Selection
+            </button>
+        </div>
+    );
+    
+    const selectImage = (imageName: string) => {
+        const index = imageNames.indexOf(imageName);
+        if (index !== -1) {
+            const modelId = phasesInfo[index].id; // Assuming the orders match
+            setSelectedImage(String(modelId)); // Now storing the model ID instead
+        }
+    };
+    
+
+    const loadModel = async (modelId: number) => {
+        models.forEach((model) => {
+            // Hide any previously shown model
+            if (model.entity) model.entity.show = false;
+        });
+    
+        let selectedModel = models.find(model => model.id === modelId);
+        if (selectedModel) {
+            if (!selectedModel.entity) {
+                // Model not yet loaded; load it now
+                const modelUri = await IonResource.fromAssetId(selectedModel.id);
+                if (viewer) {
+                    selectedModel.entity = viewer.entities.add({
+                        position: modelPosition,
+                        orientation: new ConstantProperty(orientation),
+                        model: {
+                            uri: modelUri,
+                            show: true, // Show immediately after loading
+                        },
+                    });
+                }
+            } else {
+                // Model already loaded; just show it
+                selectedModel.entity.show = true;
+            }
+            // Update the currentModelEntity reference
+            currentModelEntity = selectedModel.entity;
+        }
+    };
+    
+    useEffect(() => {
+        if (selectedImage !== null) {
+            loadModel(Number(selectedImage));
+        }
+    }, [selectedImage]); // Dependency array includes selectedImage
+
     useEffect(() => {
         const initializeViewer = async () => {
             try {
@@ -106,26 +181,26 @@ const Map = () => {
                 const scene = viewer.scene;
                 scene.globe.depthTestAgainstTerrain = true;
 
-                // //----- Marios -------
+                //----- Marios -------
 
-                // var destinationPosition: Cartesian3 | null = null
+                var destinationPosition: Cartesian3 | null = null
 
 
-                // // yellow circle
-                // const intersectionPointEntity = new Entity({
-                // position: new Cartesian3(0, 0, 0),
-                // point: {
-                //     pixelSize: 100,
-                //     color: Color.TRANSPARENT,
-                //     outlineColor: Color.YELLOW,
-                //     outlineWidth: 2,
+                // yellow circle
+                const intersectionPointEntity = new Entity({
+                position: new Cartesian3(0, 0, 0),
+                point: {
+                    pixelSize: 100,
+                    color: Color.TRANSPARENT,
+                    outlineColor: Color.YELLOW,
+                    outlineWidth: 2,
 
-                // },
-                // });
+                },
+                });
 
-                // viewer.entities.add(intersectionPointEntity);
+                viewer.entities.add(intersectionPointEntity);
 
-                // // ----- end of Marios ----- //
+                // ----- end of Marios ----- //
 
 
                 // ------
@@ -139,7 +214,7 @@ const Map = () => {
                 // ------
                 // Model settings
 
-                const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
+                // const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
                 const heading = CesiumMath.toRadians(21.5 + 90);
                 const pitch = CesiumMath.toRadians(0);
                 const roll = CesiumMath.toRadians(0);
@@ -198,7 +273,7 @@ const Map = () => {
                 scene.screenSpaceCameraController.tiltEventTypes = CameraEventType.LEFT_DRAG;
                 scene.screenSpaceCameraController.minimumZoomDistance = 0.2;
 
-                const cameraInteractionRadius = 10; // Example radius in meters
+                const cameraInteractionRadius = 15; // Example radius in meters
                 
                 viewer.scene.preUpdate.addEventListener(() => {
                     const cameraPosition = viewer.camera.positionWC;
@@ -208,14 +283,10 @@ const Map = () => {
                         if (currentCameraMode !== 'interior') {
                             console.log("Switching to interior view");
 
-                            // Disable orbiting and tilting
-                            viewer.scene.screenSpaceCameraController.enableRotate = false;
-                            viewer.scene.screenSpaceCameraController.enableTilt = false;
-                            viewer.scene.screenSpaceCameraController.enableTranslate = false;
-
-                            // Enable looking around with left drag
-                            viewer.scene.screenSpaceCameraController.enableLook = true;
-                            viewer.scene.screenSpaceCameraController.lookEventTypes = CameraEventType.LEFT_DRAG;
+                            // Change navigation mode to first person
+                            navModeDropdown.value = NAV_MODE_FLY; 
+                            firstPersonCameraController.start();
+                            firstPersonCameraController._continuousMotion = false;
 
                             currentCameraMode = 'interior';
                         }
@@ -223,38 +294,33 @@ const Map = () => {
                         if (currentCameraMode !== 'exterior') {
                             console.log("Switching to exterior view");
 
-                            // Enable orbiting, tilting, and translating
-                            viewer.scene.screenSpaceCameraController.enableRotate = true;
-                            viewer.scene.screenSpaceCameraController.enableTilt = true;
-                            viewer.scene.screenSpaceCameraController.enableTranslate = true;
-
-                            // Reset look controls to default (disable or remove explicit look event types)
-                            viewer.scene.screenSpaceCameraController.enableLook = false;
-                            viewer.scene.screenSpaceCameraController.lookEventTypes = []; // Remove explicit look event type if needed
+                            // Change navigation mode to default
+                            navModeDropdown.value = NAV_MODE_DEFAULT;
+                            firstPersonCameraController.stop();
 
                             currentCameraMode = 'exterior';
                         }
                     }
                 });
 
-                // Set up variables for camera controls
-                var moveSpeed = 1.0;
-                // Add keyboard event listener for WASD movement
-                document.addEventListener('keydown', function (e) {
-                    if (firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
-                    if (e.key === 'w' || e.key === 'W')
-                        viewer.camera.moveForward(moveSpeed);
-                    else if (e.key === 's' || e.key === 'S')
-                        viewer.camera.moveBackward(moveSpeed);
-                    else if (e.key === 'a' || e.key === 'A')
-                        viewer.camera.moveLeft(moveSpeed);
-                    else if (e.key === 'd' || e.key === 'D')
-                        viewer.camera.moveRight(moveSpeed);
-                    else if (e.key === 'q' || e.key === 'Q')
-                        viewer.camera.moveUp(moveSpeed);
-                    else if (e.key === 'e' || e.key === 'E')
-                        viewer.camera.moveDown(moveSpeed);
-                });
+                // // Set up variables for camera controls
+                // var moveSpeed = 1.0;
+                // // Add keyboard event listener for WASD movement
+                // document.addEventListener('keydown', function (e) {
+                //     if (firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
+                //     if (e.key === 'w' || e.key === 'W')
+                //         viewer.camera.moveForward(moveSpeed);
+                //     else if (e.key === 's' || e.key === 'S')
+                //         viewer.camera.moveBackward(moveSpeed);
+                //     else if (e.key === 'a' || e.key === 'A')
+                //         viewer.camera.moveLeft(moveSpeed);
+                //     else if (e.key === 'd' || e.key === 'D')
+                //         viewer.camera.moveRight(moveSpeed);
+                //     else if (e.key === 'q' || e.key === 'Q')
+                //         viewer.camera.moveUp(moveSpeed);
+                //     else if (e.key === 'e' || e.key === 'E')
+                //         viewer.camera.moveDown(moveSpeed);
+                // });
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
@@ -382,6 +448,8 @@ const Map = () => {
                     }
                 });
 
+                console.log(navModeDropdown.selectedIndex);
+
                 // ------
                 // Debug settings
 
@@ -443,7 +511,6 @@ const Map = () => {
                 const nextButton = document.createElement("button");
                 nextButton.textContent = "Story Mode(Next Location)";
                 nextButton.classList.add('cesium-button');
-                viewer.container.appendChild(nextButton);
 
                 //-----Marios-----
 
@@ -828,28 +895,21 @@ const Map = () => {
                     const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
                     toolbar.insertBefore(carouselButton, modeButton);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
-                    toolbar.insertBefore(phasesDropdown, carouselButton);
-                    toolbar.insertBefore(navModeDropdown, phasesDropdown);
-                    
+                    // toolbar.insertBefore(phasesDropdown, carouselButton);
+                    // Insert the Navigation Modes Dropdown toolbar before the Phases Dropdown
+                    toolbar.insertBefore(navModeDropdown, carouselButton);
                     // Insert the Reset Camera button before the Phases Dropdown
-                    toolbar.insertBefore(resetButton, phasesDropdown);
+                    toolbar.insertBefore(resetButton, navModeDropdown);
+
                     // Insert the Debug button before the Reset Camera
                     // toolbar.insertBefore(toggleDebug, resetButton);
+
                     // Insert the Light button before the Debug button
                     // toolbar.insertBefore(lightToggle, toggleDebug);
+
+                    // Insert the Next Location button
                     // toolbar.insertBefore(nextButton, resetButton);
                 }   
-
-                // Carlos
-                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
-                setFirstPersonCameraController(firstPersonCameraController); 
-
-                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
-                    if (event.key=='f')
-                        firstPersonCameraController.start();
-                    if (event.key=='g') 
-                        firstPersonCameraController.stop();
-                  }, false);
 
                 // Carlos
                 const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
@@ -938,6 +998,16 @@ const Map = () => {
             {/* Cesium */}
             {/* Return the Cesium Viewer */}
             <div id="cesiumContainer" />
+
+            {/* Toggle Menu Button - Always Visible */}
+            <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500 text-white px-4 py-2 rounded-t ${isMenuOpen ? 'hidden' : 'block'}`}>
+                Open Phase Selection
+            </button>
+
+            {/* Image Menu */}
+            {renderMenu()}
 
             {/* Graphic Material Modal */}
             {/* Return the Image Carousel Modal */}

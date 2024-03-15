@@ -580,7 +580,7 @@ const ResponsiveCarousel: React.FC = () => {
                     {/* Simple UI */}
                     {/* Dropdown for selecting a phase */}
                     <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black">
-                        <option value="all">Show All</option>
+                        <option value="all">All Phases</option>
                         {architecturalPhases.map((phaseId, index) => (
                             <option key={phaseId} value={phaseId} className="text-black">
                                 {architecturalPhasesDates[index]}
@@ -590,7 +590,7 @@ const ResponsiveCarousel: React.FC = () => {
 
                     {/* Dropdown for selecting a space */}
                     <select onChange={(e) => setSelectedSpace(e.target.value)} defaultValue="all" className="text-black">
-                        <option value="all">Show All</option>
+                        <option value="all">All Spaces</option>
                         {architecturalSpaces.map((spaceId, index) => (
                             <option key={spaceId} value={spaceId} className="text-black">
                                 {architecturalSpacesNames[index]}
@@ -632,14 +632,14 @@ const ResponsiveCarousel: React.FC = () => {
                         <p>
                             {currentImage ? 
                                 <><strong>Title:</strong> {titles[imageUrls.indexOf(currentImage)]}</> 
-                                : 'Select an image to see the description.'
+                                : 'Select an image to see the title.'
                             }
                         </p>
                         {/** ID */} 
                         <p>
                             {currentImage ? 
                                 <><strong>ID:</strong> {graphMatIds[imageUrls.indexOf(currentImage)]}</> 
-                                : 'Select an image to see the description.'
+                                : 'Select an image to see the ID.'
                             }
                         </p>
                         {/** Author */} 
@@ -656,11 +656,11 @@ const ResponsiveCarousel: React.FC = () => {
                                 : 'Select an image to see the date.'
                             }
                         </p>
-                        <p>
+                        {/* <p>
                             etc... 
                             <br/>
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        </p>
+                        </p> */}
                     </div>
                 </React.Fragment>
             }
