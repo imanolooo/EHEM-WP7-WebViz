@@ -198,7 +198,7 @@ class FirstPersonCameraController{
 
 
     _onMouseLButtonDoubleClicked(movement:any) {
-        this._looking = true;
+        this._looking = false; // evripidis, set to false, since we "pick" on double click, stop mouse looking
         this._mousePosition = this._startMousePosition = Cartesian3.clone(movement.position);
     };
 
@@ -345,19 +345,6 @@ class FirstPersonCameraController{
         this._enableDefaultScreenSpaceCameraController(true);
     };
 
-    /*
-    syncCameraState() {
-        // Synchronize the internal state with the current camera position and orientation
-        this._camera.position.clone(this._camera.position);
-        this._camera.direction.clone(this._camera.direction);
-        this._camera.up.clone(this._camera.up);
-        this._camera.right.clone(this._camera.right);
-    
-        // Reset any internal navigation state if necessary
-        this._direction = DIRECTION_NONE;
-        this._currentSpeed = 0;
-    }
-    */
 };
 
 

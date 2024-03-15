@@ -4,7 +4,7 @@ import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, C
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
     Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty } from "cesium";
 import { Math as CesiumMath } from 'cesium';
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
 import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
@@ -57,6 +57,8 @@ const Map = () => {
     const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
     const [selectedNavMode, setSelectedNavMode] = useState<string | null>(); 
     const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
+    const destPosRef = useRef<Cartesian3 | null>(null);
+    const [destPos, setDestPos] = useState<Cartesian3 | null>(null);
 
     // utility for getting the current time
     /* 
@@ -209,18 +211,6 @@ const Map = () => {
                 viewer.entities.add(intersectionPointEntity);
 
                 // ----- end of Marios ----- //
-
-                // test
-
-                document.addEventListener('keydown', function(event) {
-                    if (event.key === 'T' || event.key === 't') { // This checks for both lowercase and uppercase 'T'
-                        var cameraPositionWC = viewer.scene.camera.positionWC;
-                        console.log('Camera PositionWC:', cameraPositionWC);
-                    }
-                });
-
-                
-                // end of test
 
 
                 // ------
@@ -657,7 +647,7 @@ const Map = () => {
                     });
 
                     //click on 3d object and zoom camera to this position
-                    var destinationPosition: Cartesian3 | null = null
+                    var destinationPosition: Cartesian3 | null = null;
                     var positions: Cartesian3 | null = null;
                     var SelectedPositions: Cartesian3 | null = null;
                     var tempLabel: Entity;
@@ -672,8 +662,11 @@ const Map = () => {
                         var pickedObject = viewer.scene.pick(movement.position);
 
                         if (defined(pickedObject)) {
+
                             destinationPosition = viewer.scene.pickPosition(movement.position);
+                            setDestPos(destinationPosition);
                             intersectionPointEntity.show = false; // carlos; provisional
+
                             if (tempLabel) {
                                 if (tempLabel.label) {
                                     tempLabel.label.show = new ConstantProperty(false);
@@ -718,11 +711,11 @@ const Map = () => {
                                     roll: viewer.camera.roll
                                 },
                                 duration: 2.0,
+
                             });
 
                             intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
                             intersectionPointEntity.show = true;
-                            viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
                         }
 
 
@@ -929,69 +922,109 @@ const Map = () => {
         };
 
         initializeViewer();
-    }, []); 
+    }, []); // Only run this effect once, after the initial render
 
-    // Log Camera Configurations button after the viewer has been initialized
-    // ONLY in "researcher" version
+    // Whenever destPos state changes, update the ref
+    useEffect(() => {
+        destPosRef.current = destPos;
+    }, [destPos]);
+
+    // Add the Log Camera Config and Log Selected Position buttons to the Cesium toolbar
     useEffect(() => {
         if (viewer && appVersion === 'researcher') {
-            // Function to log camera configurations in JSON format
-            const logCameraConfig = () => {
-                const camera = viewer.camera;
-                const cameraConfig = {
-                    position: {
-                        x: camera.position.x,
-                        y: camera.position.y,
-                        z: camera.position.z
-                    },
-                    direction: {
-                        x: camera.direction.x,
-                        y: camera.direction.y,
-                        z: camera.direction.z
-                    },
-                    up: {
-                        x: camera.up.x,
-                        y: camera.up.y,
-                        z: camera.up.z
-                    },
-                    frustum: {
-                        fov: (camera.frustum as PerspectiveFrustum).fov,
-                        aspectRatio: (camera.frustum as PerspectiveFrustum).aspectRatio,
-                        near: camera.frustum.near,
-                        far: camera.frustum.far
-                    }
-                };
-                // Convert cameraConfig object to JSON string with pretty print
-                const cameraConfigStr = JSON.stringify(cameraConfig, null, 2);
-                console.log(cameraConfigStr);
-                // Create a Blob from the JSON string
-                const blob = new Blob([cameraConfigStr], { type: 'text/plain' });
-                // Create a URL for the Blob
-                const url = URL.createObjectURL(blob);
-                // Create a temporary link to trigger the download
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'cameraConfig.txt'; // File name for the download
-                document.body.appendChild(a); // Append the link to the document
-                a.click(); // Trigger the download
-                document.body.removeChild(a); // Clean up
-                URL.revokeObjectURL(url); // Free up resources by revoking the blob URL
-            };
-
-            // Create the button for logging camera configurations
-            const logCameraButton = document.createElement('button');
-            logCameraButton.textContent = "Log Camera Config";
-            logCameraButton.classList.add('cesium-button');
-            logCameraButton.addEventListener("click", logCameraConfig);
-
-            // Get the Cesium toolbar container element to append the button
-            const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
-            if (toolbar) {
-                // Insert the Log Camera Config button into the toolbar
-                toolbar.insertBefore(logCameraButton, toolbar.firstChild);
+            // Create and append the Log Camera Config button
+            if (!document.querySelector('.log-camera-config-button')) {
+                const logCameraButton = document.createElement('button');
+                logCameraButton.textContent = "Log Camera Config";
+                logCameraButton.classList.add('cesium-button', 'log-camera-config-button');
+                logCameraButton.addEventListener("click", logCameraConfig);
+                const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
+                toolbar?.insertBefore(logCameraButton, toolbar.firstChild);
+            }
+    
+            // Create and append the Log Selected Position button
+            if (!document.querySelector('.log-selected-position-button')) {
+                const logPositionButton = document.createElement('button');
+                logPositionButton.textContent = "Log Selected Position";
+                logPositionButton.classList.add('cesium-button', 'log-selected-position-button');
+                logPositionButton.addEventListener("click", logSelectedPosition);
+                const toolbar = viewer.container.querySelector('.cesium-viewer-toolbar');
+                toolbar?.insertBefore(logPositionButton, toolbar.firstChild);
             }
         }
-    }, [viewer]); // Viewer dependency, so it runs after viewer is initialized.
+    }, [viewer]);
+
+    // Function to log camera configurations in JSON format
+    const logCameraConfig = () => {
+        if(viewer){
+            const camera = viewer.camera;
+            const cameraConfig = {
+                position: {
+                    x: camera.position.x,
+                    y: camera.position.y,
+                    z: camera.position.z
+                },
+                direction: {
+                    x: camera.direction.x,
+                    y: camera.direction.y,
+                    z: camera.direction.z
+                },
+                up: {
+                    x: camera.up.x,
+                    y: camera.up.y,
+                    z: camera.up.z
+                },
+                frustum: {
+                    fov: (camera.frustum as PerspectiveFrustum).fov,
+                    aspectRatio: (camera.frustum as PerspectiveFrustum).aspectRatio,
+                    near: camera.frustum.near,
+                    far: camera.frustum.far
+                }
+            };
+            // Convert cameraConfig object to JSON string with pretty print
+            const cameraConfigStr = JSON.stringify(cameraConfig, null, 2);
+            console.log(cameraConfigStr);
+            // Create a Blob from the JSON string
+            const blob = new Blob([cameraConfigStr], { type: 'text/plain' });
+            // Create a URL for the Blob
+            const url = URL.createObjectURL(blob);
+            // Create a temporary link to trigger the download
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'cameraConfig.txt'; // File name for the download
+            document.body.appendChild(a); // Append the link to the document
+            a.click(); // Trigger the download
+            document.body.removeChild(a); // Clean up
+            URL.revokeObjectURL(url); // Free up resources by revoking the blob URL
+        }
+    };
+
+    // Function to log the selected position information
+    const logSelectedPosition = () => {
+        const currentDestPos = destPosRef.current;
+        if (currentDestPos) {
+            const positionInfo = {
+                position: {
+                    x: currentDestPos.x,
+                    y: currentDestPos.y,
+                    z: currentDestPos.z
+                }
+            };
+            const positionInfoStr = JSON.stringify(positionInfo, null, 2);
+            console.log(positionInfoStr);
+            const blob = new Blob([positionInfoStr], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'selectedPosition.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        } else {
+            console.log("No position selected.");
+        }
+    }
     
     
     return (
