@@ -2,7 +2,7 @@
 
 import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
-    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty } from "cesium";
+    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
@@ -186,14 +186,22 @@ const Map = () => {
                 // Create the Viewer
                 const viewer = new Viewer("cesiumContainer", {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
-                    timeline: false,    // Disable timebar at the bottom
+                    timeline: true,    // Disable timebar at the bottom
                     animation: false,    // Disable animation (clock-like) widget
                     creditContainer: document.createElement("none"), // Remove the logo and credits of Cesium Ion
-                    vrButton: true
+                    vrButton: true,
+                    shadows: true,
+                    scene3DOnly: true,
+                    msaaSamples: 1
                 });
                 setViewer(viewer);
                 const scene = viewer.scene;
                 scene.globe.depthTestAgainstTerrain = true;
+                //scene.useWebVR = true;
+                console.log(scene);
+                
+
+
 
                 //----- Marios -------
 
@@ -252,6 +260,7 @@ const Map = () => {
                 }
                 // Update the currentModelEntity reference
                 currentModelEntity = firstModelEntity;
+                currentModelEntity.model.shadows = ShadowMode.DISABLED;
 
 
                 // ------
@@ -913,6 +922,21 @@ const Map = () => {
                         firstPersonCameraController.start();
                     if (event.key=='g') 
                         firstPersonCameraController.stop();
+                    if (event.key=='c') 
+                    {
+                        if (currentModelEntity.model.shadows == ShadowMode.ENABLED)
+                            currentModelEntity.model.shadows = ShadowMode.DISABLED;
+                        else
+                        {
+                            currentModelEntity.model.shadows = ShadowMode.ENABLED;
+                            viewer.shadowMap.maximumDistance = 500;
+                        }
+                    }    
+                    if (event.key=='v') 
+                    {
+                        scene.useWebVR != scene.useWebVR;
+                    }
+
                   }, false);
 
 
