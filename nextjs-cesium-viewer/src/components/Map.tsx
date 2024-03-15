@@ -8,6 +8,7 @@ import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_t
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 import "cesium/Build/Cesium/Widgets/widgets.css"
 import {FirstPersonCameraController} from './FirstPersonNavigation';
+import { useSearchParams } from "next/navigation";
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
@@ -18,29 +19,34 @@ let boxEntities: Entity[] = []; // Global variable to store box entities
 const NAV_MODE_DEFAULT = "0";
 const NAV_MODE_FLY = "1";
 const NAV_MODE_FLY_EXPERT = "2";
-let currentCameraMode = 'exterior'; // Assume the camera starts in exterior mode
+// let currentCameraMode = 'exterior'; // Assume the camera starts in exterior mode
 
+//> Phase Model information
 type CesiumModel = {
     id: number;
     name: string;
     entity: Entity | null;
 };
 const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
+const heading = CesiumMath.toRadians(21.5 + 90);
+const pitch = CesiumMath.toRadians(0);
+const roll = CesiumMath.toRadians(0);
+const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
+const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
+
+
 
 const Map = () => {
-    const [cameraConfig, setCameraConfig] = useState({});
+    // Get the app version from the URL
+    const searchParams = useSearchParams();
+    const appVersion = searchParams.get('version');
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const imageNames = ['ix', 'x', 'xi', 'xii', 'xiii'];
-    const imageNameToModelId = {
-        'ix': 2499177,
-        'x': 2499172,
-        'xi': 2499176,
-        'xii': 2499174,
-        'xiii': 2499173,
-    };
+    const modelImageNames = ['ix', 'x', 'xi', 'xii', 'xiii'];
 
-    const models: CesiumModel[] = [];
+    // const models: CesiumModel[] = [];
+    const [models, setModels] = useState<CesiumModel[]>([]);
     let currentModelEntity: Entity | null = null;
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Handle the modal state
@@ -51,57 +57,58 @@ const Map = () => {
     const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
 
     // utility for getting the current time
-    // useEffect(() => {
-    //     const handleKeyDown = (event: { key: any; }) => {
-    //     switch (event.key) {
-    //     case 'G':
-    //         // Start animating forward
-    //         if (viewer) {
-    //             viewer.clock.multiplier = 4000; // Adjust speed as needed
-    //             viewer.clock.shouldAnimate = true;
-    //         }
-    //         break;
-    //     case 'F':
-    //         // Start animating backward
-    //         if (viewer) {
-    //             viewer.clock.multiplier = -4000; // Adjust speed as needed
-    //             viewer.clock.shouldAnimate = true;
-    //         }
-    //         break;
-    //     case 'T':
-    //         // Log the current date and time
-    //         if (viewer) {
-    //             const currentTime = viewer.clock.currentTime;
-    //             const date = JulianDate.toDate(currentTime);
-    //             console.log(date.toString());
-    //         }
-    //         break;
-    //     }
-    //     };
+    /* 
+    useEffect(() => {
+        const handleKeyDown = (event: { key: any; }) => {
+        switch (event.key) {
+        case 'G':
+            // Start animating forward
+            if (viewer) {
+                viewer.clock.multiplier = 4000; // Adjust speed as needed
+                viewer.clock.shouldAnimate = true;
+            }
+            break;
+        case 'F':
+            // Start animating backward
+            if (viewer) {
+                viewer.clock.multiplier = -4000; // Adjust speed as needed
+                viewer.clock.shouldAnimate = true;
+            }
+            break;
+        case 'T':
+            // Log the current date and time
+            if (viewer) {
+                const currentTime = viewer.clock.currentTime;
+                const date = JulianDate.toDate(currentTime);
+                console.log(date.toString());
+            }
+            break;
+        }
+        };
     
-    // const handleKeyUp = (event: { key: string; }) => {
-    //     if (event.key === 'G' || event.key === 'F') {
-    //         // Stop animating
-    //         if (viewer) {
-    //             viewer.clock.shouldAnimate = false;
-    //         }
-    //     }
-    // };
+    const handleKeyUp = (event: { key: string; }) => {
+        if (event.key === 'G' || event.key === 'F') {
+            // Stop animating
+            if (viewer) {
+                viewer.clock.shouldAnimate = false;
+            }
+        }
+    };
 
-    // document.addEventListener('keydown', handleKeyDown);
-    //     document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
     
-    //     return () => {
-    //     document.removeEventListener('keydown', handleKeyDown);
-    //     document.removeEventListener('keyup', handleKeyUp);
-    //     };
-    // }, [viewer]);
-
-    // Initialize the Cesium Viewer
+        return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [viewer]);
+    */
     
+    // Phases Selection menu
     const renderMenu = () => (
         <div className={`fixed inset-x-0 bottom-0 z-20 bg-opacity-75 bg-black p-4 flex justify-center items-center space-x-4 overflow-x-auto ${isMenuOpen ? 'block' : 'hidden'}`}>
-            {imageNames.map((name) => (
+            {modelImageNames.map((name) => (
                 <img 
                     key={name} 
                     src={`/${name}.jpg`} 
@@ -118,21 +125,22 @@ const Map = () => {
         </div>
     );
     
+    // Image selector from the Phase Selection menu
     const selectImage = (imageName: string) => {
-        const index = imageNames.indexOf(imageName);
+        const index = modelImageNames.indexOf(imageName);
         if (index !== -1) {
             const modelId = phasesInfo[index].id; // Assuming the orders match
             setSelectedImage(String(modelId)); // Now storing the model ID instead
         }
     };
     
-
+    // Load the selected phase .glB model
     const loadModel = async (modelId: number) => {
         models.forEach((model) => {
             // Hide any previously shown model
             if (model.entity) model.entity.show = false;
         });
-    
+        
         let selectedModel = models.find(model => model.id === modelId);
         if (selectedModel) {
             if (!selectedModel.entity) {
@@ -157,12 +165,14 @@ const Map = () => {
         }
     };
     
+    // Load the model corresponding to the selected image
     useEffect(() => {
         if (selectedImage !== null) {
             loadModel(Number(selectedImage));
         }
-    }, [selectedImage]); // Dependency array includes selectedImage
+    }, [selectedImage]);
 
+    // Cesium Viewer and everything
     useEffect(() => {
         const initializeViewer = async () => {
             try {
@@ -184,20 +194,17 @@ const Map = () => {
                 //----- Marios -------
 
                 var destinationPosition: Cartesian3 | null = null
-
-
                 // yellow circle
                 const intersectionPointEntity = new Entity({
-                position: new Cartesian3(0, 0, 0),
-                point: {
-                    pixelSize: 100,
-                    color: Color.TRANSPARENT,
-                    outlineColor: Color.YELLOW,
-                    outlineWidth: 2,
+                    position: new Cartesian3(0, 0, 0),
+                    point: {
+                        pixelSize: 100,
+                        color: Color.TRANSPARENT,
+                        outlineColor: Color.YELLOW,
+                        outlineWidth: 2,
 
-                },
+                    },
                 });
-
                 viewer.entities.add(intersectionPointEntity);
 
                 // ----- end of Marios ----- //
@@ -215,11 +222,11 @@ const Map = () => {
                 // Model settings
 
                 // const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
-                const heading = CesiumMath.toRadians(21.5 + 90);
-                const pitch = CesiumMath.toRadians(0);
-                const roll = CesiumMath.toRadians(0);
-                const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
-                const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
+                // const heading = CesiumMath.toRadians(21.5 + 90);
+                // const pitch = CesiumMath.toRadians(0);
+                // const roll = CesiumMath.toRadians(0);
+                // const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
+                // const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
 
                 // only store the models' metadata for now
                 phasesInfo.forEach(phase => {
@@ -357,8 +364,10 @@ const Map = () => {
                 });  
 
 
+
                 // ------
                 // Phases Dropdown Menu settings
+                /*
                 // Load the 3D models on demand
 
                 const phasesDropdown = document.createElement('select');
@@ -406,6 +415,7 @@ const Map = () => {
                         console.log('Current model position: ', currentModelEntity.position);
                     }
                 });
+                */
 
                 // ------
                 // Navigation Modes Dropdown Menu settings
@@ -448,7 +458,6 @@ const Map = () => {
                     }
                 });
 
-                console.log(navModeDropdown.selectedIndex);
 
                 // ------
                 // Debug settings
@@ -870,11 +879,7 @@ const Map = () => {
                             }
                         }
                         }
-        
-        
-                        
 
-        
                     })
                     .catch(error => {
                         console.error('Error fetching JSON:', error);
@@ -924,17 +929,6 @@ const Map = () => {
                         firstPersonCameraController.stop();
                   }, false);
 
-                // Carlos
-                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
-                setFirstPersonCameraController(firstPersonCameraController); 
-
-                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
-                    if (event.key=='f')
-                        firstPersonCameraController.start();
-                    if (event.key=='g') 
-                        firstPersonCameraController.stop();
-                  }, false);
-
 
             } catch (error) {
                 console.log(error);
@@ -944,9 +938,10 @@ const Map = () => {
         initializeViewer();
     }, []); 
 
-    // Add the button after the viewer has been initialized
+    // Log Camera Configurations button after the viewer has been initialized
+    // ONLY in "researcher" version
     useEffect(() => {
-        if (viewer) {
+        if (viewer && appVersion === 'researcher') {
             // Function to log camera configurations in JSON format
             const logCameraConfig = () => {
                 const camera = viewer.camera;

@@ -215,7 +215,7 @@ _onClockTick(clock:any) {
 
         this._direction = DIRECTION_NONE;
 
-        console.log(keyCode);
+        // console.log(keyCode);
         switch (keyCode) {
             case "W".charCodeAt(0):
             case 38: // up

@@ -92,7 +92,6 @@ const ResponsiveCarousel: React.FC = () => {
     let   [currentImage, setCurrentImage] = useState<string | null>(null);
     const [isCurrentImageSet, setIsCurrentImageSet] = useState(false);
 
-    // test
     const [graphicMaterialToSpace, setGraphicMaterialToSpace] = useState<Map<string, string>>(new Map());
     const [graphicMaterialToPhase, setGraphicMaterialToPhase] = useState<Map<string, string>>(new Map());
     const [selectedPhase, setSelectedPhase] = useState<string | null>(null);
@@ -100,8 +99,6 @@ const ResponsiveCarousel: React.FC = () => {
     const [filteredThumbnailUrls, setFilteredThumbnailUrls] = useState<string[]>([]);
     const [filteredImageUrls, setFilteredImageUrls] = useState<string[]>([]);
 
-
-    // end of test
 
     // Boolean states to check if the XMLs are parsed
     const [isGraphicMaterialsXmlParsed, setIsGraphicMaterialsXmlParsed] = useState(false);
@@ -316,8 +313,7 @@ const ResponsiveCarousel: React.FC = () => {
         setIsArchitecturalSpacesXmlParsed(true);
     };
 
-    // test
-
+    // Parse and store the links (Maps) between Graphic Materials and Architectural Phases
     const handleGraphicMaterialSpaceLinks = (data: any) => {
         const tempMap = new Map<string, string>();
     
@@ -341,6 +337,7 @@ const ResponsiveCarousel: React.FC = () => {
         setIsLink_GraphicMaterialsArchitecturalSpacesXmlParsed(true);
     };
     
+    // Parse and store the links (Maps) between Graphic Materials and Architectural Phases
     const handleGraphicMaterialPhaseLinks = (data: any) => {
         const tempMap = new Map<string, string>();
     
@@ -363,8 +360,6 @@ const ResponsiveCarousel: React.FC = () => {
         setGraphicMaterialToPhase(tempMap);
         setIsLink_GraphicMaterialsArchitecturalPhasesXmlParsed(true);
     };
-    
-    // end of test
 
     // Set the first image after filtering as the current image
     // and initialize the selected phase and space
@@ -377,17 +372,7 @@ const ResponsiveCarousel: React.FC = () => {
         if(!selectedSpace) { setSelectedSpace("all"); }
     });
 
-    
-    // test
-
-    // useEffect(() => {
-    //     console.log("graphicMaterialToPhase Map:", Array.from(graphicMaterialToPhase));
-    //     console.log("graphicMaterialToSpace Map:", Array.from(graphicMaterialToSpace));
-    //     console.log("Selected phaseId for filtering:", selectedPhase);
-    //     console.log("Selected spaceId for filtering:", selectedSpace);
-    // }, [selectedPhase, selectedSpace]);
-
-
+    // Filter the images and thumbnails based on the selected phase and space
     useEffect(() => {
         let filteredIds: string[] = [];
         let newFilteredThumbnailUrls: string[] = [];
@@ -422,8 +407,6 @@ const ResponsiveCarousel: React.FC = () => {
         setCurrentImage(newFilteredImageUrls.length > 0 ? newFilteredImageUrls[0] : null);
     
     }, [selectedPhase, selectedSpace, graphicMaterialToPhase, graphicMaterialToSpace, graphMatIds, imageUrls, thumbnailUrls]);
-    
-    // end of test
 
 
     // Declare the OpenSeadragon viewer reference
@@ -516,47 +499,6 @@ const ResponsiveCarousel: React.FC = () => {
         ));
     };
 
-    // useEffect(() => {
-    //     let filteredUrls = [...imageUrls]; // Start with all images
-    
-    //     if (selectedPhase !== "all" || selectedSpace !== "all") {
-    //         let filteredIds: string[] = [];
-    
-    //         if (selectedPhase !== "all") {
-    //             // Filter graphic material IDs by the selected phase
-    //             filteredIds.push(...Array.from(graphicMaterialToPhase)
-    //                 .filter(([_, phaseId]) => phaseId === selectedPhase)
-    //                 .map(([graphicMatId, _]) => graphicMatId));
-    //         }
-    
-    //         if (selectedSpace !== "all") {
-    //             // Filter graphic material IDs by the selected space, 
-    //             // or intersect with previously filtered IDs if phase was also selected
-    //             const spaceFilteredIds = Array.from(graphicMaterialToSpace)
-    //                 .filter(([_, spaceId]) => spaceId === selectedSpace)
-    //                 .map(([graphicMatId, _]) => graphicMatId);
-    
-    //             if (filteredIds.length > 0) {
-    //                 // Intersect phase and space filters if both are selected
-    //                 filteredIds = filteredIds.filter(id => spaceFilteredIds.includes(id));
-    //             } else {
-    //                 // If only space was selected
-    //                 filteredIds.push(...spaceFilteredIds);
-    //             }
-    //         }
-    
-    //         // Filter URLs by the resulting set of graphic material IDs
-    //         filteredUrls = imageUrls.filter((_, index) => filteredIds.includes(graphMatIds[index]));
-    //     }
-    
-    //     // Update the current image to the first in the filtered list or reset if empty
-    //     setCurrentImage(filteredUrls.length > 0 ? filteredUrls[0] : null);
-    
-    // }, [selectedPhase, selectedSpace, graphicMaterialToPhase, graphicMaterialToSpace, graphMatIds, imageUrls]);
-    
-    
-    // end of test
-
     return (
         <div>
             {/* Parse the .xmls only once, so it doesn't try to parse it infinitely */}
@@ -579,7 +521,7 @@ const ResponsiveCarousel: React.FC = () => {
                 <React.Fragment>
                     {/* Simple UI */}
                     {/* Dropdown for selecting a phase */}
-                    <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black">
+                    <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black mr-2">
                         <option value="all">All Phases</option>
                         {architecturalPhases.map((phaseId, index) => (
                             <option key={phaseId} value={phaseId} className="text-black">
