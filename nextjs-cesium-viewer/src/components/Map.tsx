@@ -260,7 +260,8 @@ const Map = () => {
                 }
                 // Update the currentModelEntity reference
                 currentModelEntity = firstModelEntity;
-                currentModelEntity.model.shadows = ShadowMode.DISABLED;
+                if (currentModelEntity?.model)
+                    currentModelEntity.model.shadows = new ConstantProperty(ShadowMode.DISABLED);
 
 
                 // ------
@@ -924,14 +925,15 @@ const Map = () => {
                         firstPersonCameraController.stop();
                     if (event.key=='c') 
                     {
-                        if (currentModelEntity.model.shadows == ShadowMode.ENABLED)
-                            currentModelEntity.model.shadows = ShadowMode.DISABLED;
-                        else
-                        {
-                            currentModelEntity.model.shadows = ShadowMode.ENABLED;
-                            viewer.shadowMap.maximumDistance = 500;
-                        }
-                    }    
+                        if (currentModelEntity?.model)
+                            currentModelEntity.model.shadows = new ConstantProperty(ShadowMode.ENABLED);
+                    }
+                    if (event.key=='C') 
+                    {
+                        if (currentModelEntity?.model)
+                            currentModelEntity.model.shadows = new ConstantProperty(ShadowMode.DISABLED);
+                    }
+
                     if (event.key=='v') 
                     {
                         scene.useWebVR != scene.useWebVR;
