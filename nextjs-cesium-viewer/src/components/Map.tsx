@@ -199,7 +199,7 @@ const Map = () => {
                 scene.screenSpaceCameraController.minimumZoomDistance = 0.2;
 
                 const cameraInteractionRadius = 10; // Example radius in meters
-                
+                /*
                 viewer.scene.preUpdate.addEventListener(() => {
                     const cameraPosition = viewer.camera.positionWC;
                     const distanceToModel = Cartesian3.distance(cameraPosition, modelPosition);
@@ -236,7 +236,7 @@ const Map = () => {
                         }
                     }
                 });
-
+                */
                 // Set up variables for camera controls
                 var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
@@ -562,7 +562,7 @@ const Map = () => {
                     if (event.key === 'Escape') {
                         // isRKeyPressed = false;
                         viewer.scene.camera.lookAtTransform(originalPosition);
-                        intersectionPointEntity.show = false;
+                        //intersectionPointEntity.show = false; // carlos; provisional
                         if (tempLabel) {
                         if (tempLabel.label) {
                             tempLabel.label.show = new ConstantProperty(false);
@@ -598,7 +598,7 @@ const Map = () => {
                         } else {
                         destinationPosition = viewer.scene.pickPosition(movement.position);
                         }
-                        intersectionPointEntity.show = false;
+                        //intersectionPointEntity.show = false; // carlos; provisional
                         if (tempLabel) {
                         if (tempLabel.label) {
                             tempLabel.label.show = new ConstantProperty(false);
@@ -646,9 +646,9 @@ const Map = () => {
 
                             });
 
-
-                            intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
-                            intersectionPointEntity.show = true;
+                            // carlos; provisional
+                            //intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
+                            //intersectionPointEntity.show = true;
                             viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
                         }
 
@@ -723,7 +723,7 @@ const Map = () => {
                     //Story Mode Button to increase the index
                     function onNextButtonClick() {
                     viewer.scene.camera.lookAtTransform(originalPosition);
-                    intersectionPointEntity.show = false;
+                    //intersectionPointEntity.show = false; // carlos; provisional
                     if (tempLabel) {
                         if (tempLabel.label) {
                         tempLabel.label.show = new ConstantProperty(false);
@@ -749,6 +749,8 @@ const Map = () => {
 
                     // Initial setup
                     setCameraToLocation(currentIndex);
+                    resetCamera(); // carlos
+
                 })
                 .catch(error => {
                     console.error('Error fetching JSON:', error);
@@ -850,18 +852,6 @@ const Map = () => {
                     if (event.key=='g') 
                         firstPersonCameraController.stop();
                   }, false);
-
-                // Carlos
-                const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
-                setFirstPersonCameraController(firstPersonCameraController); 
-
-                document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
-                    if (event.key=='f')
-                        firstPersonCameraController.start();
-                    if (event.key=='g') 
-                        firstPersonCameraController.stop();
-                  }, false);
-
 
             } catch (error) {
                 console.log(error);
