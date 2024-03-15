@@ -1,6 +1,8 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cesium3DTileset, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource, JulianDate, ClockRange, ClockStep, LabelStyle, VerticalOrigin, Cartesian2, defined, ConstantPositionProperty, ScreenSpaceEventType, CameraEventType } from "cesium";
+import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
+    ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
+    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import { useEffect, useState } from "react";
 import Modal from './Modal';
@@ -33,7 +35,7 @@ const pitch = CesiumMath.toRadians(0);
 const roll = CesiumMath.toRadians(0);
 const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
 const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
-
+//< Phase Model information
 
 
 const Map = () => {
@@ -193,7 +195,6 @@ const Map = () => {
 
                 //----- Marios -------
 
-                var destinationPosition: Cartesian3 | null = null
                 // yellow circle
                 const intersectionPointEntity = new Entity({
                     position: new Cartesian3(0, 0, 0),
@@ -209,6 +210,18 @@ const Map = () => {
 
                 // ----- end of Marios ----- //
 
+                // test
+
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'T' || event.key === 't') { // This checks for both lowercase and uppercase 'T'
+                        var cameraPositionWC = viewer.scene.camera.positionWC;
+                        console.log('Camera PositionWC:', cameraPositionWC);
+                    }
+                });
+
+                
+                // end of test
+
 
                 // ------
                 // Light settings
@@ -220,13 +233,6 @@ const Map = () => {
 
                 // ------
                 // Model settings
-
-                // const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
-                // const heading = CesiumMath.toRadians(21.5 + 90);
-                // const pitch = CesiumMath.toRadians(0);
-                // const roll = CesiumMath.toRadians(0);
-                // const modelHPR = new HeadingPitchRoll(heading, pitch, roll);
-                // const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHPR);
 
                 // only store the models' metadata for now
                 phasesInfo.forEach(phase => {
@@ -261,8 +267,6 @@ const Map = () => {
                 // ------
                 // Camera settings
 
-                // await viewer.zoomTo(tileset_Phase_IX);
-                // await viewer.zoomTo(entity);
                 viewer.camera.position = new Cartesian3(4736954.40901528, 155726.14313851847, 4254884.18938475);
                 viewer.camera.direction = new Cartesian3(-0.42410389201848225, 0.8530220500056251, 0.30412048760150384);
                 viewer.camera.up = new Cartesian3(0.7062752621207551, 0.10134975317909911, 0.7006450468295589);
@@ -417,6 +421,7 @@ const Map = () => {
                 });
                 */
 
+
                 // ------
                 // Navigation Modes Dropdown Menu settings
                 
@@ -461,7 +466,7 @@ const Map = () => {
 
                 // ------
                 // Debug settings
-
+                
                 // Create the Debug button
                 const toggleDebug = document.createElement('button');
                 toggleDebug.classList.add('cesium-button');
@@ -553,106 +558,102 @@ const Map = () => {
                     addAnnotations(currentPhase);
                     // Function to set the camera to the current location and update description
                     function setCameraToLocation(index: number) {
-                    const location = phases[currentPhase]?.locations[index];
-                    if (!location) return;
+                        const location = phases[currentPhase]?.locations[index];
+                        if (!location) return;
 
-                    const destination = Cartesian3.fromDegrees(
-                        location.lon,
-                        location.lat,
-                        location.height
-                    );
+                        const destination = Cartesian3.fromDegrees(
+                            location.lon,
+                            location.lat,
+                            location.height
+                        );
 
-                    // Calculate vector from camera to destination
-                    const cameraPosition = viewer.camera.positionWC.clone();
-                    const direction = new Cartesian3();
-                    Cartesian3.subtract(destination, cameraPosition, direction);
+                        // Calculate vector from camera to destination
+                        const cameraPosition = viewer.camera.positionWC.clone();
+                        const direction = new Cartesian3();
+                        Cartesian3.subtract(destination, cameraPosition, direction);
 
-                    // Set a desired distance (e.g., 1000 meters) from the destination
-                    const distance = -1.0;
-                    Cartesian3.normalize(direction, direction);
-                    Cartesian3.multiplyByScalar(direction, distance, direction);
+                        // Set a desired distance (e.g., 1000 meters) from the destination
+                        const distance = -1.0;
+                        Cartesian3.normalize(direction, direction);
+                        Cartesian3.multiplyByScalar(direction, distance, direction);
 
-                    const finalDestination = Cartesian3.add(
-                        destination,
-                        direction,
-                        new Cartesian3()
-                    );
+                        const finalDestination = Cartesian3.add(
+                            destination,
+                            direction,
+                            new Cartesian3()
+                        );
 
-                    // Remove the current label entity
-                    if (currentLabelEntity) {
-                        viewer.entities.remove(currentLabelEntity);
-                        currentLabelEntity = null;
+                        // Remove the current label entity
+                        if (currentLabelEntity) {
+                            viewer.entities.remove(currentLabelEntity);
+                            currentLabelEntity = null;
+                        }
+
+                        // Create a label for the current location
+                        if (location.descriptions || location.image) {
+                            currentLabelEntity = viewer.entities.add({
+                                position: destination,
+                                label: {
+                                    text: location.descriptions,
+                                    show: false,
+                                    font: location.font,
+                                    fillColor: Color.WHITE,
+                                    outlineColor: Color.BLACK,
+                                    outlineWidth: 2,
+                                    style: LabelStyle.FILL_AND_OUTLINE,
+                                    verticalOrigin: VerticalOrigin.BOTTOM,
+                                    pixelOffset: new Cartesian2(0, 40),
+                                    backgroundColor: Color.fromCssColorString(
+                                    'rgba(0,0,0,0.7)'
+                                    ),
+                                    showBackground: true,
+                                    backgroundPadding: new Cartesian2(8, 4),
+                                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                                },
+                                billboard: {
+                                    image: location.image,
+                                    show: false,
+                                    verticalOrigin: VerticalOrigin.BOTTOM,
+                                    width: location.image_width,
+                                    height: location.image_height,
+                                    pixelOffset: new Cartesian2(0, location.pixelOffset),
+                                },
+                            });
+
+                        }
+
+                        if (phases[currentPhase].locations[index].move == 1) {
+                            viewer.scene.camera.flyTo({
+                            destination: finalDestination,
+                            orientation: {
+                                heading: CesiumMath.toRadians(location.heading),
+                                pitch: CesiumMath.toRadians(location.pitch),
+                                roll: viewer.camera.roll,
+                            },
+                            duration: 3.0,
+                            complete: function () { },
+                            });
+                        } else if (phases[currentPhase].locations[index].move == 0) {
+                            resetCamera();
+                        }
                     }
 
-                    // Create a label for the current location
-                    if (location.descriptions || location.image) {
-                        currentLabelEntity = viewer.entities.add({
-                        position: destination,
-                        label: {
-                            text: location.descriptions,
-                            show: false,
-                            font: location.font,
-                            fillColor: Color.WHITE,
-                            outlineColor: Color.BLACK,
-                            outlineWidth: 2,
-                            style: LabelStyle.FILL_AND_OUTLINE,
-                            verticalOrigin: VerticalOrigin.BOTTOM,
-                            pixelOffset: new Cartesian2(0, 40),
-                            backgroundColor: Color.fromCssColorString(
-                            'rgba(0,0,0,0.7)'
-                            ),
-                            showBackground: true,
-                            backgroundPadding: new Cartesian2(8, 4),
-                            disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                        },
-                        billboard: {
-                            image: location.image,
-                            show: false,
-                            verticalOrigin: VerticalOrigin.BOTTOM,
-                            width: location.image_width,
-                            height: location.image_height,
-                            pixelOffset: new Cartesian2(0, location.pixelOffset),
-                        },
-                        });
-
-                    }
-
-                    if (phases[currentPhase].locations[index].move == 1) {
-                        viewer.scene.camera.flyTo({
-                        destination: finalDestination,
-                        orientation: {
-                            heading: CesiumMath.toRadians(location.heading),
-                            pitch: CesiumMath.toRadians(location.pitch),
-                            roll: viewer.camera.roll,
-                        },
-                        duration: 3.0,
-                        complete: function () { },
-                        });
-                    } else if (phases[currentPhase].locations[index].move == 0) {
-                        resetCamera();
-                    }
-                    }
--
                     //escape -> camera move normally
                     document.addEventListener('keyup', function (event) {
-                    if (event.key === 'Escape') {
-                        // isRKeyPressed = false;
-                        viewer.scene.camera.lookAtTransform(originalPosition);
-                        //intersectionPointEntity.show = false; // carlos; provisional
-                        if (tempLabel) {
-                        if (tempLabel.label) {
-                            tempLabel.label.show = new ConstantProperty(false);
+                        if (event.key === 'Escape') {
+                            viewer.scene.camera.lookAtTransform(originalPosition);
+                            intersectionPointEntity.show = false; // carlos; provisional
+                            if (tempLabel) {
+                                if (tempLabel.label) {
+                                    tempLabel.label.show = new ConstantProperty(false);
+                                }
+                            }
+                            if (currentLabelEntity) {
+                                if (currentLabelEntity.label) {
+                                    currentLabelEntity.label.show = new ConstantProperty(false);
+                                }
+                            }
                         }
-                        }
-                        if (currentLabelEntity) {
-                        if (currentLabelEntity.label) {
-                            currentLabelEntity.label.show = new ConstantProperty(false);
-                        }
-                        }
-
-
-
-                    }
                     });
 
                     //click on 3d object and zoom camera to this position
@@ -664,67 +665,63 @@ const Map = () => {
 
                     const originalPosition = viewer.scene.camera.transform.clone();
 
+                    // left double click to zoom to the selected position
                     viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
+                        
+                        viewer.scene.camera.lookAtTransform(originalPosition);
+                        var pickedObject = viewer.scene.pick(movement.position);
 
-                    viewer.scene.camera.lookAtTransform(originalPosition);
-                    var pickedObject = viewer.scene.pick(movement.position);
-                    if (defined(pickedObject)) {
-                        if (defined(pickedObject.id)) {
-                        destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
-                        } else {
-                        destinationPosition = viewer.scene.pickPosition(movement.position);
-                        }
-                        //intersectionPointEntity.show = false; // carlos; provisional
-                        if (tempLabel) {
-                        if (tempLabel.label) {
-                            tempLabel.label.show = new ConstantProperty(false);
-                        }
-                        }
-                        if (currentLabelEntity) {
-                        if (currentLabelEntity.label) {
-                            currentLabelEntity.label.show = new ConstantProperty(false);
-                        }
-                        }
-                        // destinationPosition = pickedObject.id.position?.getValue(JulianDate.now());
+                        if (defined(pickedObject)) {
+                            destinationPosition = viewer.scene.pickPosition(movement.position);
+                            intersectionPointEntity.show = false; // carlos; provisional
+                            if (tempLabel) {
+                                if (tempLabel.label) {
+                                    tempLabel.label.show = new ConstantProperty(false);
+                                }
+                            }
+                            if (currentLabelEntity) {
+                                if (currentLabelEntity.label) {
+                                    currentLabelEntity.label.show = new ConstantProperty(false);
+                                }
+                            }
 
-                        // Get the current camera distance
-                        var currentDistance = Cartesian3.distance(viewer.camera.position, destinationPosition as Cartesian3);
+                            // Get the current camera distance
+                            var currentDistance = Cartesian3.distance(viewer.camera.position, destinationPosition as Cartesian3);
 
-                        // Adjust the destination position based on a factor (e.g., 2 times the current distance)
-                        var adjustedDistance = 0.85 * currentDistance;
-                        var adjustedDestination = Cartesian3.multiplyByScalar(
-                        Cartesian3.normalize(
-                            Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
-                            new Cartesian3()
-                        ),
-                        adjustedDistance,
-                        new Cartesian3()
-                        );
-                        var adjustedPointDistance = 0.995 * currentDistance;
-                        var adjustedPointDestination = Cartesian3.multiplyByScalar(
-                        Cartesian3.normalize(
-                            Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
-                            new Cartesian3()
-                        ),
-                        adjustedPointDistance,
-                        new Cartesian3()
-                        );
+                            // Adjust the destination position based on a factor (e.g., 2 times the current distance)
+                            var adjustedDistance = 0.70 * currentDistance;
+                            var adjustedDestination = Cartesian3.multiplyByScalar(
+                                Cartesian3.normalize(
+                                    Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
+                                    new Cartesian3()
+                                ),
+                                adjustedDistance,
+                                new Cartesian3()
+                            );
 
-                        viewer.camera.flyTo({
-                        destination: Cartesian3.add(viewer.camera.position, adjustedDestination, new Cartesian3()),
-                        orientation: {
-                            heading: viewer.camera.heading,
-                            pitch: viewer.camera.pitch,
-                            roll: viewer.camera.roll
-                        },
-                            duration: 2.0,
+                            // Adjust the selected point to be slightly in front of the actual model position, to avoid occlusion
+                            var adjustedPointDistance = 0.995 * currentDistance;
+                            var adjustedPointDestination = Cartesian3.multiplyByScalar(
+                                Cartesian3.normalize(
+                                    Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
+                                    new Cartesian3()
+                                ),
+                                adjustedPointDistance,
+                                new Cartesian3()
+                            );
 
-
+                            viewer.camera.flyTo({
+                                destination: Cartesian3.add(viewer.camera.position, adjustedDestination, new Cartesian3()),
+                                orientation: {
+                                    heading: viewer.camera.heading,
+                                    pitch: viewer.camera.pitch,
+                                    roll: viewer.camera.roll
+                                },
+                                duration: 2.0,
                             });
 
-                            // carlos; provisional
-                            //intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
-                            //intersectionPointEntity.show = true;
+                            intersectionPointEntity.position = new ConstantPositionProperty(Cartesian3.add(viewer.camera.position, adjustedPointDestination, new Cartesian3()));
+                            intersectionPointEntity.show = true;
                             viewer.scene.camera.lookAt(destinationPosition as Cartesian3, new HeadingPitchRange(0, -Math.PI / 8, 1000000));
                         }
 
@@ -734,8 +731,8 @@ const Map = () => {
 
                             positions = Cartesian3.fromDegrees(phases[currentPhase].locations[i].lon, phases[currentPhase].locations[i].lat, phases[currentPhase].locations[i].height);
                             if (firstframe) {
-                            SelectedPositions = positions;
-                            firstframe = false;
+                                SelectedPositions = positions;
+                                firstframe = false;
                             }
                             // console.log("pos" + positions);
                             // console.log("dest" + destinationPosition);
@@ -743,90 +740,86 @@ const Map = () => {
 
 
                             labelDescriptionEntity = viewer.entities.add({
-                            position: positions,
-                            label: {
-                                text: phases[currentPhase].locations[i].labeldesciption,
-                                show: false,
-                                font: phases[currentPhase].locations[i].font,  // You can customize font for the second label as needed
-                                fillColor: Color.WHITE,
-                                outlineColor: Color.BLACK,
-                                outlineWidth: 2,
-                                style: LabelStyle.FILL_AND_OUTLINE,
-                                verticalOrigin: VerticalOrigin.BOTTOM,
-                                pixelOffset: new Cartesian2(0, 80),  // Adjust pixelOffset for the second label
-                                backgroundColor: Color.fromCssColorString('rgba(0,0,0,0.7)'),
-                                showBackground: true,
-                                backgroundPadding: new Cartesian2(8, 4),
-                                disableDepthTestDistance: Number.POSITIVE_INFINITY,
-                            },
+                                position: positions,
+                                label: {
+                                    text: phases[currentPhase].locations[i].labeldesciption,
+                                    show: false,
+                                    font: phases[currentPhase].locations[i].font,  // You can customize font for the second label as needed
+                                    fillColor: Color.WHITE,
+                                    outlineColor: Color.BLACK,
+                                    outlineWidth: 2,
+                                    style: LabelStyle.FILL_AND_OUTLINE,
+                                    verticalOrigin: VerticalOrigin.BOTTOM,
+                                    pixelOffset: new Cartesian2(0, 80),  // Adjust pixelOffset for the second label
+                                    backgroundColor: Color.fromCssColorString('rgba(0,0,0,0.7)'),
+                                    showBackground: true,
+                                    backgroundPadding: new Cartesian2(8, 4),
+                                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                                },
                             });
                             //check if the clicked position is the same position with the data.json file -> to show the labeldescriptions
-                            if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3)) {
-                            console.log(phases[currentPhase].locations[i].labeldesciption);
+                            if (destinationPosition && destinationPosition.equals(positions) && positions.equals(SelectedPositions as Cartesian3))
+                            {
+                                console.log(phases[currentPhase].locations[i].labeldesciption);
 
-
-                            if (labelDescriptionEntity) {
-                                if (labelDescriptionEntity.label) {
-                                labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                if (labelDescriptionEntity) {
+                                    if (labelDescriptionEntity.label) {
+                                        labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                    }
                                 }
-                            }
-                            tempLabel = labelDescriptionEntity;
+                                tempLabel = labelDescriptionEntity;
 
-                            } else if (destinationPosition && destinationPosition.equals(positions) && !positions.equals(SelectedPositions as Cartesian3)) {
+                            }
+                            else if (destinationPosition && destinationPosition.equals(positions) && !positions.equals(SelectedPositions as Cartesian3))
+                            {
 
-                            if (tempLabel) {
-                                if (tempLabel.label) {
-                                tempLabel.label.show = new ConstantProperty(false);
+                                if (tempLabel) {
+                                    if (tempLabel.label) {
+                                        tempLabel.label.show = new ConstantProperty(false);
+                                    }
                                 }
-                            }
-                            if (labelDescriptionEntity) {
-                                if (labelDescriptionEntity.label) {
-                                labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                if (labelDescriptionEntity) {
+                                    if (labelDescriptionEntity.label) {
+                                        labelDescriptionEntity.label.show = new ConstantProperty(true);
+                                    }
                                 }
-                            }
-                            tempLabel = labelDescriptionEntity;
+                                tempLabel = labelDescriptionEntity;
 
                             }
                         }
 
-                        }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); // changed to double click for not interfering with navigation
+                    }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); // changed to double click for not interfering with navigation
 
-
-                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {
-                            }, ScreenSpaceEventType.LEFT_CLICK); // left click does nothing (disable default behaviour on gltf models)
+                    // left click does nothing (disable default behaviour on gltf models)
+                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {}, ScreenSpaceEventType.LEFT_CLICK);
     
-
                     //Story Mode Button to increase the index
                     function onNextButtonClick() {
-                    viewer.scene.camera.lookAtTransform(originalPosition);
-                    //intersectionPointEntity.show = false; // carlos; provisional
-                    if (tempLabel) {
-                        if (tempLabel.label) {
-                        tempLabel.label.show = new ConstantProperty(false);
+                        viewer.scene.camera.lookAtTransform(originalPosition);
+                        intersectionPointEntity.show = false; // carlos; provisional
+                        if (tempLabel) {
+                            if (tempLabel.label) {
+                                tempLabel.label.show = new ConstantProperty(false);
+                            }
                         }
-                    }
-                    currentIndex = (currentIndex) % phases[currentPhase]?.locations.length;
-                    setCameraToLocation(currentIndex);
-                    if (currentLabelEntity) {
-                        if (currentLabelEntity.label) {
-                        currentLabelEntity.label.show = new ConstantProperty(true);
+                        currentIndex = (currentIndex) % phases[currentPhase]?.locations.length;
+                        setCameraToLocation(currentIndex);
+                        if (currentLabelEntity) {
+                            if (currentLabelEntity.label) {
+                                currentLabelEntity.label.show = new ConstantProperty(true);
+                            }
+                            if (currentLabelEntity.billboard) {
+                                currentLabelEntity.billboard.show = new ConstantProperty(true);
+                            }
                         }
-                        if (currentLabelEntity.billboard) {
-                        currentLabelEntity.billboard.show = new ConstantProperty(true);
-                        }
+                        currentIndex += 1;
                     }
-                    currentIndex += 1;
-                    }
-
-
 
                     nextButton?.addEventListener('click', onNextButtonClick);
-
 
                     // Initial setup
                     setCameraToLocation(currentIndex);
                     resetCamera(); // carlos
-
                 })
                 .catch(error => {
                     console.error('Error fetching JSON:', error);

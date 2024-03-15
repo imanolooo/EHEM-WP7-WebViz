@@ -64,94 +64,94 @@ class FirstPersonCameraController{
 
     }
 
-_onClockTick(clock:any) {
-    if(!this._enabled)
-        return;
+    _onClockTick(clock:any) {
+        if(!this._enabled)
+            return;
 
-    let dt = clock._clockStep;
+        let dt = clock._clockStep;
 
-    if(this._looking)
-        this._changeHeadingPitch(dt);
+        if(this._looking)
+            this._changeHeadingPitch(dt);
 
-    if(this._direction === DIRECTION_NONE)
-        return;
+        if(this._direction === DIRECTION_NONE)
+            return;
 
 
-    let distance = this._currentSpeed * dt;
-    if (this._continuousMotion) 
-    {
-        if (this._currentSpeed < 0.0) // brake only when the speed is negative
-            this._currentSpeed /= this._forwardInertia;
-    }
-    else
-    {
-        this._currentSpeed /= this._forwardInertia;  // friction
-    }
-    //console.log(this._currentSpeed);
+        let distance = this._currentSpeed * dt;
+        if (this._continuousMotion) 
+        {
+            if (this._currentSpeed < 0.0) // brake only when the speed is negative
+                this._currentSpeed /= this._forwardInertia;
+        }
+        else
+        {
+            this._currentSpeed /= this._forwardInertia;  // friction
+        }
+        //console.log(this._currentSpeed);
 
-    
-    if(this._direction === DIRECTION_WHEEL_FORWARD)
-        Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_WHEEL_BACKWARD)
-        Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
-    else
-        distance = this._defaultSpeed * dt; // for WASD motion
+        
+        if(this._direction === DIRECTION_WHEEL_FORWARD)
+            Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_WHEEL_BACKWARD)
+            Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
+        else
+            distance = this._defaultSpeed * dt; // for WASD motion
 
-    if(this._direction === DIRECTION_FORWARD)
-        Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_BACKWARD)
-        Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_LEFT)
-        Cartesian3.multiplyByScalar(this._camera.right, -1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_RIGHT)
-        Cartesian3.multiplyByScalar(this._camera.right, 1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_DOWN)
-        Cartesian3.multiplyByScalar(this._camera.up, -1, this.scratchCurrentDirection);
-    else if(this._direction === DIRECTION_UP)
-        Cartesian3.multiplyByScalar(this._camera.up, 1, this.scratchCurrentDirection);
-    
-    Cartesian3.multiplyByScalar(this.scratchCurrentDirection, distance, this.scratchDeltaPosition);
+        if(this._direction === DIRECTION_FORWARD)
+            Cartesian3.multiplyByScalar(this._camera.direction, 1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_BACKWARD)
+            Cartesian3.multiplyByScalar(this._camera.direction, -1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_LEFT)
+            Cartesian3.multiplyByScalar(this._camera.right, -1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_RIGHT)
+            Cartesian3.multiplyByScalar(this._camera.right, 1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_DOWN)
+            Cartesian3.multiplyByScalar(this._camera.up, -1, this.scratchCurrentDirection);
+        else if(this._direction === DIRECTION_UP)
+            Cartesian3.multiplyByScalar(this._camera.up, 1, this.scratchCurrentDirection);
+        
+        Cartesian3.multiplyByScalar(this.scratchCurrentDirection, distance, this.scratchDeltaPosition);
 
-    let currentCameraPosition = this._camera.position;
+        let currentCameraPosition = this._camera.position;
 
-    Cartesian3.add(currentCameraPosition, this.scratchDeltaPosition, this.scratchNextPosition);
+        Cartesian3.add(currentCameraPosition, this.scratchDeltaPosition, this.scratchNextPosition);
 
-    // consider terrain height
+        // consider terrain height
 
-    let globe = this._cesiumViewer.scene.globe;
-    let ellipsoid = globe.ellipsoid;
+        let globe = this._cesiumViewer.scene.globe;
+        let ellipsoid = globe.ellipsoid;
 
-    // get height for next update position
-    ellipsoid.cartesianToCartographic(this.scratchNextPosition, this.scratchNextCartographic);
+        // get height for next update position
+        ellipsoid.cartesianToCartographic(this.scratchNextPosition, this.scratchNextCartographic);
 
-    let height = globe.getHeight(this.scratchNextCartographic);
+        let height = globe.getHeight(this.scratchNextCartographic);
 
-    if(height === undefined) {
-        console.warn('height is undefined!');
-        return;
-    }
+        if(height === undefined) {
+            console.warn('height is undefined!');
+            return;
+        }
 
-    if(height < 0) {
-        console.warn(`height is negative!`);
-    }
+        if(height < 0) {
+            console.warn(`height is negative!`);
+        }
 
-    //this.scratchNextCartographic.height = height + HUMAN_EYE_HEIGHT;
+        //this.scratchNextCartographic.height = height + HUMAN_EYE_HEIGHT;
 
-    ellipsoid.cartographicToCartesian(this.scratchNextCartographic, this.scratchTerrainConsideredNextPosition);
+        ellipsoid.cartographicToCartesian(this.scratchNextCartographic, this.scratchTerrainConsideredNextPosition);
 
-    this._camera.setView({
-        destination: this.scratchTerrainConsideredNextPosition,
-        orientation: new HeadingPitchRoll(this._camera.heading, this._camera.pitch, this._camera.roll),
-        endTransform : Matrix4.IDENTITY
-    });
+        this._camera.setView({
+            destination: this.scratchTerrainConsideredNextPosition,
+            orientation: new HeadingPitchRoll(this._camera.heading, this._camera.pitch, this._camera.roll),
+            endTransform : Matrix4.IDENTITY
+        });
 
-    if (Math.abs(this._currentSpeed) < 0.001) 
-    {
-        //this._direction = DIRECTION_NONE;
-        this._currentSpeed = 0;
-    }
-    
-};
+        if (Math.abs(this._currentSpeed) < 0.001) 
+        {
+            //this._direction = DIRECTION_NONE;
+            this._currentSpeed = 0;
+        }
+        
+    };
 
 
     _connectEventHandlers()
@@ -345,7 +345,19 @@ _onClockTick(clock:any) {
         this._enableDefaultScreenSpaceCameraController(true);
     };
 
-
+    /*
+    syncCameraState() {
+        // Synchronize the internal state with the current camera position and orientation
+        this._camera.position.clone(this._camera.position);
+        this._camera.direction.clone(this._camera.direction);
+        this._camera.up.clone(this._camera.up);
+        this._camera.right.clone(this._camera.right);
+    
+        // Reset any internal navigation state if necessary
+        this._direction = DIRECTION_NONE;
+        this._currentSpeed = 0;
+    }
+    */
 };
 
 
