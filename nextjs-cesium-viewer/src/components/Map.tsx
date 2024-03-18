@@ -703,7 +703,7 @@ const Map = () => {
                             );
 
                             // Adjust the selected point to be slightly in front of the actual model position, to avoid occlusion
-                            var adjustedPointDistance = 0.995 * currentDistance;
+                            var adjustedPointDistance = 0.98 * currentDistance;
                             var adjustedPointDestination = Cartesian3.multiplyByScalar(
                                 Cartesian3.normalize(
                                     Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
