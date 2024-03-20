@@ -1,0 +1,42 @@
+{
+    "stories": [
+      {
+        "title": "B.1. The salvation",
+        "parades": [
+            {
+              "title": "Some parade title",
+              "actions": [
+                { "goto": "cam-salvation.txt" },
+                { "enable-pois": ["poiId1", "poiId2"] },
+                { "show-side-text": "The iconography within the northern and southern apsidioles..." },
+                { "play-audio": "file.mp3" },
+                { "show-image-interval": ["GM00032.jpg", "00:00", "00:20"]},
+                { "show-image-interval": ["GM00037.jpg", "00:40", "00:55"]},
+                { "next-parade": "" }
+              ]
+            },
+            {
+              "title": "Another parade title",
+              "actions": [
+                { "goto": "cam-salvation2.txt" },
+                { "change-model": "XIII"},
+                { "show-html-modal": "file.html" }
+              ]
+            }
+          ]
+      },
+      {
+        "title": "Story 2",
+        "parades": []
+      },
+      {
+        "title": "Story 3",
+        "parades": []
+      },
+      {
+        "title": "Story 4",
+        "parades": []
+      }
+    ]
+  }
+  

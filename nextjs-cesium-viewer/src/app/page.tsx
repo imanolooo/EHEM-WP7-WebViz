@@ -2,7 +2,7 @@
 
 import "cesium/Build/Cesium/Widgets/widgets.css"
 import dynamic from "next/dynamic"
-import FilterToolbar from "../components/FilterToolbar";
+import StoriesDisplay from "@/components/StoriesDisplay";
 
 const Map = dynamic(() => import("../components/Map"), {  // dynamic import
   ssr:false // Disable server-side rendering for this component
@@ -11,9 +11,9 @@ const Map = dynamic(() => import("../components/Map"), {  // dynamic import
 export default function Home() {
 
   return (
-    <div>
-      {/* <FilterToolbar /> */}
+    <div className="relative w-full h-full">
       <Map />
+      <StoriesDisplay />
     </div>
   );
 }
