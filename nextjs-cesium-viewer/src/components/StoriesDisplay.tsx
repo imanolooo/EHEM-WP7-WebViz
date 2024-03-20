@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 
 // Actions based on our discussion, could be extended
@@ -31,6 +31,8 @@ const StoriesDisplay: React.FC = () => {
   const [currentParadeIndex, setCurrentParadeIndex] = useState(0);
   const [displayContent, setDisplayContent] = useState<string[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
+
 
   // Toggle collapse state
   const toggleCollapse = () => {
@@ -51,10 +53,19 @@ const StoriesDisplay: React.FC = () => {
 
   // Call executeParadeActions when currentParadeIndex changes
   useEffect(() => {
+    // Clear any existing timeouts when the selected story or parade index changes
+    timeoutIds.current.forEach(clearTimeout);
+    timeoutIds.current = []; // Reset the array after clearing timeouts
+
     if (selectedStory && selectedStory.parades.length > 0) {
       executeParadeActions(selectedStory.parades[currentParadeIndex]);
+    } else {
+      // If the new selected story has no parades or is null, clear displayed content and image
+      setDisplayContent([]);
+      setCurrentImageUrl(null);
     }
   }, [selectedStory, currentParadeIndex]);
+
 
   // Handle story selection
   const handleStorySelection = (story: Story) => {
@@ -94,33 +105,23 @@ const StoriesDisplay: React.FC = () => {
   
     // Immediate content (non-images)
     const immediateContent = parade.actions
-      .filter(action => !action['show-image-interval'] && action['show-side-text'])
-      .map(action => action['show-side-text'] || '')
+      .filter(action => !action['show-image-interval'] && action['show-side-text']) // currently retrieving only text and image content
+      .map(action => action['show-side-text'] || '') // get the text content as immediate content
       .filter(text => text);
     setDisplayContent(immediateContent);
   
     // Start scheduling image displays based on their actual start times
-    let lastEndTime = 0;
     parade.actions.filter(action => action['show-image-interval']).forEach(action => {
       const [imageUrl, start, end] = action['show-image-interval'] as string[];
-      const startTime = parseTime(start) * 1000; // Convert start time to milliseconds
-      const endTime = parseTime(end) * 1000; // Convert end time to milliseconds
+      const startTime = parseTime(start) * 1000;
+      const endTime = parseTime(end) * 1000;
       const displayDuration = endTime - startTime;
 
-      // Ensure there's no overlap in image display times
-      const delayTime = Math.max(lastEndTime, startTime);
+      const showImageTimeout = setTimeout(() => setCurrentImageUrl(imageUrl), startTime);
+      const clearImageTimeout = setTimeout(() => setCurrentImageUrl(null), startTime + displayDuration);
 
-      // Schedule image to display
-      setTimeout(() => {
-        setCurrentImageUrl(imageUrl);
-      }, delayTime);
-  
-      // Schedule image to be cleared
-      setTimeout(() => {
-        setCurrentImageUrl(null);
-      }, delayTime + displayDuration);
-  
-      lastEndTime = delayTime + displayDuration; // Update lastEndTime for the next iteration
+      // Store timeouts so they can be cleared if the story changes
+      timeoutIds.current.push(showImageTimeout, clearImageTimeout);
     });
   };
 
