@@ -8,7 +8,7 @@
               "actions": [
                 { "goto": "cam-salvation.txt" },
                 { "enable-pois": ["poiId1", "poiId2"] },
-                { "show-side-text": "The iconography within the northern and southern apsidioles..." },
+                { "show-side-text": "The iconography within the northern and southern apsidioles X..." },
                 { "play-audio": "file.mp3" },
                 { "show-image-interval": ["https://ehem.virvig.eu/imgs/GM000032-Paintings%20central%20apse-north%20wall-the%20multitude%20of%20the%20chosen%20ones.jpg",
                 "00:00:00", "00:00:40"]},
@@ -27,8 +27,8 @@
           ]
       },
       {
-        "title": "Story 2",
-        "parades": []
+        "title": "The technique of the paintings of Pedret",
+        "parades": [{"title": "Techniques used", "actions": [{"goto": "cam-salvation.txt"}, {"show-side-text": "Pedret's Romanesque paintings show a great technical mastery and a very good knowledge of the nature of the materials. The techniques used were the usual ones in Romanesque mural painting: fresco and lime painting."}, {"enable-pois": ["Christ", "Crownedlady", "Wise", "Foolish"]}, {"play-audio": "tecniques.mp3"}]}, {"title": "Fresco painting", "actions": [{"show-side-text": "The wall to be painted was levelled to apply, first, a mortar of lime and coarse sand (arriccio), and then another layer of thinner mortar (intonaco). This, while still damp, was painted with the pigments diluted with water. The carbonation of the lime amalgamates the pigments with the wall, without the need for a binder. This is the process known as fresco painting."}, {"enable-pois": []}]}, {"title": "Lime painting", "actions": [{"show-side-text": "As the mortar takes a short time to dry, fresco was only used for the first layers of paint and the backgrounds. For the final details, such as parts of the faces, folds of clothing, and decorative elements, the \"lime painting\" process was used. This consists of wetting the wall when it is dry and applying the pigments bound with lime water."}, {"enable-pois": []}]}, {"title": "Pigments used", "actions": [{"show-side-text": "The pigments used were those characteristics of fresco painting. For the reds and yellows, earths and oxides. For the whites, the same lime, and for the blacks, carbon black. It is worth noting the use of the blue pigment, aerinite, to make some mixtures of greens, a mineral of nearby origin that is frequently found in Romanesque Pyrenean paintings."}, {"enable-pois": []}]}]
       },
       {
         "title": "Story 3",
