@@ -198,7 +198,6 @@ const Map = () => {
                 const scene = viewer.scene;
                 scene.globe.depthTestAgainstTerrain = true;
                 //scene.useWebVR = true;
-                console.log(scene);
                 
 
 

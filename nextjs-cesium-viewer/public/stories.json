@@ -10,8 +10,9 @@
                 { "enable-pois": ["poiId1", "poiId2"] },
                 { "show-side-text": "The iconography within the northern and southern apsidioles..." },
                 { "play-audio": "file.mp3" },
-                { "show-image-interval": ["GM00032.jpg", "00:00", "00:20"]},
-                { "show-image-interval": ["GM00037.jpg", "00:40", "00:55"]},
+                { "show-image-interval": ["https://ehem.virvig.eu/imgs/GM000032-Paintings%20central%20apse-north%20wall-the%20multitude%20of%20the%20chosen%20ones.jpg",
+                "00:00:00", "00:00:40"]},
+                { "show-image-interval": ["https://ehem.virvig.eu/imgs/GM000037-Paintings%20central%20apse-vault-Maiestas%20Domini.jpg", "00:00:41", "00:00:55"]},
                 { "next-parade": "" }
               ]
             },
