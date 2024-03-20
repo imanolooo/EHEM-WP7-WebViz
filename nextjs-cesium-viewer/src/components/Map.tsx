@@ -4,7 +4,7 @@ import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, C
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
     Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode } from "cesium";
 import { Math as CesiumMath } from 'cesium';
-import { useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import Modal from './Modal';
 import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
@@ -12,6 +12,8 @@ import "cesium/Build/Cesium/Widgets/widgets.css"
 import {FirstPersonCameraController} from './FirstPersonNavigation';
 import {Experimental} from './Experimental';
 import { useSearchParams } from "next/navigation";
+import CesiumContext from '@/contexts/CesiumContext';
+
 
 // This is the default access token
 Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI2YTEzMWI1ZS05NmIxLTQ4NDEtYWUzZC04OTU4NmE1YTc2ZDUiLCJpZCI6MTg1MzUwLCJpYXQiOjE3MDI5OTc0MDR9.LtVjMcGUML_mgWbk5GwdseCcF_nYM-xTc3j5q0TrDBw';
@@ -40,6 +42,11 @@ const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHP
 
 
 const Map = () => {
+
+    const { setCameraView } = useContext(CesiumContext);
+
+    console.log(setCameraView);
+
     // Get the app version from the URL
     const searchParams = useSearchParams();
     const appVersion = searchParams.get('version');
@@ -200,10 +207,7 @@ const Map = () => {
                 const scene = viewer.scene;
                 scene.globe.depthTestAgainstTerrain = true;
                 //scene.useWebVR = true;
-                console.log(scene);
                 
-
-
 
                 //----- Marios -------
 
@@ -626,14 +630,14 @@ const Map = () => {
 
                         if (phases[currentPhase].locations[index].move == 1) {
                             viewer.scene.camera.flyTo({
-                            destination: finalDestination,
-                            orientation: {
-                                heading: CesiumMath.toRadians(location.heading),
-                                pitch: CesiumMath.toRadians(location.pitch),
-                                roll: viewer.camera.roll,
-                            },
-                            duration: 3.0,
-                            complete: function () { },
+                                destination: finalDestination,
+                                orientation: {
+                                    heading: CesiumMath.toRadians(location.heading),
+                                    pitch: CesiumMath.toRadians(location.pitch),
+                                    roll: viewer.camera.roll,
+                                },
+                                duration: 3.0,
+                                complete: function () { },
                             });
                         } else if (phases[currentPhase].locations[index].move == 0) {
                             resetCamera();
@@ -960,6 +964,29 @@ const Map = () => {
 
         initializeViewer();
     }, []); // Only run this effect once, after the initial render
+
+
+    // test
+
+    useEffect(() => {
+        const newSetCameraView = (viewConfig: { position: { x: number; y: number; z: number; }; }) => {
+            if (viewer) {
+                const { position } = viewConfig; // Using only the position for flyTo
+        
+                // Convert to Cesium's Cartesian3 for the destination
+                const cesiumPosition = new Cartesian3(position.x, position.y, position.z);
+                
+                viewer.camera.flyTo({
+                    destination: cesiumPosition
+                    // duration: 3.0
+                });
+            }
+        };
+        setCameraView(newSetCameraView);
+    }, [viewer]);
+
+    // end of test
+
 
     // Whenever destPos state changes, update the ref
     useEffect(() => {
