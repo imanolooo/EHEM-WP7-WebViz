@@ -10,6 +10,7 @@ import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_t
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 import "cesium/Build/Cesium/Widgets/widgets.css"
 import {FirstPersonCameraController} from './FirstPersonNavigation';
+import {Experimental} from './Experimental';
 import { useSearchParams } from "next/navigation";
 
 // This is the default access token
@@ -57,6 +58,7 @@ const Map = () => {
     const [selectedPhase, setSelectedPhase] = useState<string | null>(); // Initialize it to Phase IX
     const [selectedNavMode, setSelectedNavMode] = useState<string | null>(); 
     const [firstPersonCameraController, setFirstPersonCameraController] = useState<FirstPersonCameraController | null>();
+    const [experimental, setExperimental] = useState<Experimental | null>();
     const destPosRef = useRef<Cartesian3 | null>(null);
     const [destPos, setDestPos] = useState<Cartesian3 | null>(null);
 
@@ -794,7 +796,7 @@ const Map = () => {
                     }, ScreenSpaceEventType.LEFT_DOUBLE_CLICK); // changed to double click for not interfering with navigation
 
                     // left click does nothing (disable default behaviour on gltf models)
-                    viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {}, ScreenSpaceEventType.LEFT_CLICK);
+                    //viewer.screenSpaceEventHandler.setInputAction(function (movement: any) {}, ScreenSpaceEventType.LEFT_CLICK);
     
                     //Story Mode Button to increase the index
                     function onNextButtonClick() {
@@ -918,6 +920,10 @@ const Map = () => {
                 const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
                 setFirstPersonCameraController(firstPersonCameraController); 
 
+                const experimental = new Experimental(viewer, scene);
+                setExperimental(experimental); 
+
+
                 document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
                     if (event.key=='f')
                         firstPersonCameraController.start();
@@ -937,6 +943,11 @@ const Map = () => {
                     if (event.key=='v') 
                     {
                         scene.useWebVR != scene.useWebVR;
+                    }
+
+                    if (event.key=='t') 
+                    {
+                        experimental.start();
                     }
 
                   }, false);
