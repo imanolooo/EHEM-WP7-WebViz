@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import CesiumContext from '@/contexts/CesiumContext';
 
 // Actions based on our discussion, could be extended
 // ... other actions
@@ -33,6 +33,7 @@ const StoriesDisplay: React.FC = () => {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
 
+  const { setCameraView } = useContext(CesiumContext);
 
   // Toggle collapse state
   const toggleCollapse = () => {
@@ -90,6 +91,15 @@ const StoriesDisplay: React.FC = () => {
     );
   };
 
+  // Handle goto action
+  const handleGotoAction = (filename: any) => {
+    fetch(`./${filename}`)
+      .then(response => response.json())
+      .then(viewConfig => {
+        setCameraView(viewConfig);
+      })
+      .catch(error => console.error("Failed to load camera view config:", error));
+  };
 
   // Helper function to parse time strings "HH:MM:SS" into total seconds
   const parseTime = (timeString: string) => {
@@ -102,26 +112,42 @@ const StoriesDisplay: React.FC = () => {
     // Reset content for new parade
     setDisplayContent([]);
     setCurrentImageUrl(null);
+    
+    parade.actions.forEach((action, index) => {
+      // Immediate non-image text content
+      if (action['show-side-text']) {
+        const textContent = action['show-side-text'];
+        setDisplayContent(prevContent => [...prevContent, textContent]);
+      }
+      
+      // Image interval actions
+      else if (action['show-image-interval']) {
+        const [imageUrl, start, end] = action['show-image-interval'];
+        // Convert start and end times to milliseconds for scheduling
+        const startTime = parseTime(start) * 1000;
+        const endTime = parseTime(end) * 1000;
   
-    // Immediate content (non-images)
-    const immediateContent = parade.actions
-      .filter(action => !action['show-image-interval'] && action['show-side-text']) // currently retrieving only text and image content
-      .map(action => action['show-side-text'] || '') // get the text content as immediate content
-      .filter(text => text);
-    setDisplayContent(immediateContent);
+        // Schedule showing the image
+        const showImageTimeout = setTimeout(() => setCurrentImageUrl(imageUrl), startTime);
+        timeoutIds.current.push(showImageTimeout);
   
-    // Start scheduling image displays based on their actual start times
-    parade.actions.filter(action => action['show-image-interval']).forEach(action => {
-      const [imageUrl, start, end] = action['show-image-interval'] as string[];
-      const startTime = parseTime(start) * 1000;
-      const endTime = parseTime(end) * 1000;
-      const displayDuration = endTime - startTime;
-
-      const showImageTimeout = setTimeout(() => setCurrentImageUrl(imageUrl), startTime);
-      const clearImageTimeout = setTimeout(() => setCurrentImageUrl(null), startTime + displayDuration);
-
-      // Store timeouts so they can be cleared if the story changes
-      timeoutIds.current.push(showImageTimeout, clearImageTimeout);
+        // Schedule clearing the image after its display duration
+        const clearImageTimeout = setTimeout(() => setCurrentImageUrl(null), endTime);
+        timeoutIds.current.push(clearImageTimeout);
+      }
+      
+      // Handle 'goto' camera movement actions
+      else if (action.goto) {
+        fetch(`./${action.goto}`)
+          .then(response => response.json())
+          .then(cameraConfig => {
+            // Delay applying camera view to align with narrative, if necessary
+            const gotoTimeout = setTimeout(() => {
+              setCameraView(cameraConfig);
+            }, index * 1000); // Example: Adjust delay as needed
+            timeoutIds.current.push(gotoTimeout);
+          });
+      }
     });
   };
 
