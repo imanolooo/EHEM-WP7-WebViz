@@ -40,7 +40,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
 
   // Fetch stories.json and update state
   useEffect(() => {
-    fetch('/stories copy.json')
+    fetch('/stories.json')
       .then(response => response.json())
       .then(data => setStories(data.stories));
   }, []);
