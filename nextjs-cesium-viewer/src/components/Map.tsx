@@ -4,15 +4,15 @@ import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, C
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
     Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode } from "cesium";
 import { Math as CesiumMath } from 'cesium';
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
 import { phasesInfo, phaseIXPoints_main, phaseIXPoints_secondary, phaseXPoints_top, phaseXPoints_bottom, phaseXIPoints, phaseXIIIPoints } from './Phases';
 import { PhaseBoxDataType, PhaseBoxProps, Dimensions, LocalPosition, Orientation, Point } from './DebugBoxTypes';
 import "cesium/Build/Cesium/Widgets/widgets.css"
 import {FirstPersonCameraController} from './FirstPersonNavigation';
 import {Experimental} from './Experimental';
+import StoriesDisplay from "./StoriesDisplay";
 import { useSearchParams } from "next/navigation";
-import CesiumContext from '@/contexts/CesiumContext';
 
 
 // This is the default access token
@@ -42,10 +42,7 @@ const orientation = Transforms.headingPitchRollQuaternion(modelPosition, modelHP
 
 
 const Map = () => {
-
-    const { setCameraView } = useContext(CesiumContext);
-
-    console.log(setCameraView);
+    const viewerRef = useRef<Viewer>();
 
     // Get the app version from the URL
     const searchParams = useSearchParams();
@@ -204,6 +201,7 @@ const Map = () => {
                     msaaSamples: 1
                 });
                 setViewer(viewer);
+                viewerRef.current = viewer;
                 const scene = viewer.scene;
                 scene.globe.depthTestAgainstTerrain = true;
                 //scene.useWebVR = true;
@@ -965,30 +963,6 @@ const Map = () => {
         initializeViewer();
     }, []); // Only run this effect once, after the initial render
 
-
-    // test
-
-    useEffect(() => {
-        const newSetCameraView = (viewConfig: { position: { x: number; y: number; z: number; }; }) => {
-            console.log('Setting camera view...');
-            if (viewer) {
-                const { position } = viewConfig; // Using only the position for flyTo
-        
-                // Convert to Cesium's Cartesian3 for the destination
-                const cesiumPosition = new Cartesian3(position.x, position.y, position.z);
-                
-                viewer.camera.flyTo({
-                    destination: cesiumPosition
-                    // duration: 3.0
-                });
-            }
-        };
-        setCameraView(newSetCameraView);
-    }, [viewer]);
-
-    // end of test
-
-
     // Whenever destPos state changes, update the ref
     useEffect(() => {
         destPosRef.current = destPos;
@@ -1091,7 +1065,33 @@ const Map = () => {
         }
     }
     
+    // Function to set the destination position
+    const setCameraView = (cameraConfig: { position: any; direction: any; up: any; frustum: any; }) => {
+        if (viewerRef.current) {
+          const { position, direction, up, frustum } = cameraConfig;
     
+          viewerRef.current.camera.flyTo({
+            destination: new Cartesian3(position.x, position.y, position.z),
+            orientation: {
+              direction: new Cartesian3(direction.x, direction.y, direction.z),
+              up: new Cartesian3(up.x, up.y, up.z),
+            },
+            duration: 2.0,
+            complete: function () { },
+          });
+    
+          // Adjusting the frustum
+          // not really needed? Let's leave it for now since we have the data
+          const currentFrustum = viewerRef.current.camera.frustum;
+          if (currentFrustum instanceof PerspectiveFrustum) {
+            currentFrustum.fov = frustum.fov;
+            currentFrustum.aspectRatio = frustum.aspectRatio;
+            currentFrustum.near = frustum.near;
+            currentFrustum.far = frustum.far;
+          }
+        }
+      };
+      
     return (
         <div>
             {/* Cesium */}
@@ -1113,6 +1113,9 @@ const Map = () => {
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
                 openModal={() => setIsModalOpen(true)} >
             </Modal>
+
+            {/* Stories */}
+            <StoriesDisplay setCameraView={ setCameraView }/>
 
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}

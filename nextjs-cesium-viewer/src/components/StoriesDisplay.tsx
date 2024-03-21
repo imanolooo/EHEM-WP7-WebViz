@@ -1,5 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
-import CesiumContext from '@/contexts/CesiumContext';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Actions based on our discussion, could be extended
 // ... other actions
@@ -24,7 +23,8 @@ interface Story {
   parades: Parade[];
 }
 
-const StoriesDisplay: React.FC = () => {
+const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
+
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [stories, setStories] = useState<Story[]>([]);
   const [selectedStory, setSelectedStory] = useState<Story | null>(null);
@@ -33,8 +33,6 @@ const StoriesDisplay: React.FC = () => {
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
 
-  const { setCameraView } = useContext(CesiumContext);
-
   // Toggle collapse state
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -42,7 +40,7 @@ const StoriesDisplay: React.FC = () => {
 
   // Fetch stories.json and update state
   useEffect(() => {
-    fetch('/stories.json')
+    fetch('/stories copy.json')
       .then(response => response.json())
       .then(data => setStories(data.stories));
   }, []);
@@ -91,16 +89,6 @@ const StoriesDisplay: React.FC = () => {
     );
   };
 
-  // Handle goto action
-  const handleGotoAction = (filename: any) => {
-    fetch(`./${filename}`)
-      .then(response => response.json())
-      .then(viewConfig => {
-        setCameraView(viewConfig);
-      })
-      .catch(error => console.error("Failed to load camera view config:", error));
-  };
-
   // Helper function to parse time strings "HH:MM:SS" into total seconds
   const parseTime = (timeString: string) => {
     const [hours, minutes, seconds] = timeString.split(':').map(parseFloat);
@@ -144,7 +132,6 @@ const StoriesDisplay: React.FC = () => {
             // Delay applying camera view to align with narrative, if necessary
             const gotoTimeout = setTimeout(() => {
               setCameraView(cameraConfig);
-            //}, index * 1); // Example: Adjust delay as needed
             }, 500); 
             timeoutIds.current.push(gotoTimeout);
           });
