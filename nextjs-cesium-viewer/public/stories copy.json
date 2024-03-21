@@ -21,7 +21,7 @@
               "actions": [
                 { "goto": "cam-salvation2.txt" },
                 { "change-model": "XIII"},
-                { "show-html-modal": "file.html" }
+                { "show-html-modal": "Sant Quirze de Pedret is a small mediaeval church in central Catalonia's Berguedà area, near the Pyrenees foothills and close to an important old route. The Llobregat River, one of the territory's key waterways, flows nearby. <br> <br> <img src='https://www.cs.upc.edu/~virtual/img/IMG_5615.jpg' width='400' class='rounded'> </img> <embed src='https://www.cs.upc.edu/~virtual/mp3/A1a.mp3' loop='true' autostart='true' height='0'>" }
               ]
             }
           ]

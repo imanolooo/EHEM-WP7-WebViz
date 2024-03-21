@@ -1114,9 +1114,13 @@ const Map = () => {
 
             {/* Graphic Material Modal */}
             {/* Return the Image Carousel Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}
-                openModal={() => setIsModalOpen(true)} >
-            </Modal>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                showCarousel={true}
+                backgroundStyle="bg-black bg-opacity-75" // it's the default, can be omitted, but I leave it for readability
+                allowInteraction={false} // it's the default, can be omitted, but I leave it for readability
+            />
 
             {/* Stories */}
             <StoriesDisplay setCameraView={ setCameraView }/>
