@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Modal from './Modal';
 
 // Actions based on our discussion, could be extended
 // ... other actions
@@ -32,6 +33,9 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
   const [displayContent, setDisplayContent] = useState<string[]>([]);
   const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
   const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalHtmlContent, setModalHtmlContent] = useState('');
+
 
   // Toggle collapse state
   const toggleCollapse = () => {
@@ -40,7 +44,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
 
   // Fetch stories.json and update state
   useEffect(() => {
-    fetch('/stories.json')
+    fetch('/stories copy.json')
       .then(response => response.json())
       .then(data => setStories(data.stories));
   }, []);
@@ -136,6 +140,12 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
             timeoutIds.current.push(gotoTimeout);
           });
       }
+
+      // Handle 'show-html-modal' action
+      else if (action['show-html-modal']) {
+        setModalHtmlContent(action['show-html-modal']);
+        setIsModalOpen(true);
+      }
     });
   };
 
@@ -184,6 +194,17 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
                   <img src={currentImageUrl} alt="current-image" className="w-full h-auto" />
                 )}
               </div>
+
+              {/* Modal for displaying HTML content */}
+              <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                backgroundStyle=''
+                allowInteraction={true}
+              >
+                <div className='text-black' dangerouslySetInnerHTML={{ __html: modalHtmlContent }} />
+              </Modal>
+
               {/* Navigation buttons for parades */}
               {/*&lt; = left arrow "<"*/}
               {/*&gt; = right arrow ">"*/}
