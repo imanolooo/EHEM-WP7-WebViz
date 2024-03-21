@@ -44,7 +44,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
 
   // Fetch stories.json and update state
   useEffect(() => {
-    fetch('/stories copy.json')
+    fetch('/stories.json')
       .then(response => response.json())
       .then(data => setStories(data.stories));
   }, []);
@@ -153,7 +153,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
   return (
     <div className="absolute top-12 left-2 w-2/5 max-w-md bg-gray-800 bg-opacity-95 border border-gray-700 rounded-lg shadow-lg shadow-black transition-opacity duration-200 ease-out transform opacity-100">
       <button 
-        className="w-full bg-gray-700 text-center rounded-t-lg overflow-hidden whitespace-nowrap p-1.5 focus:outline-none"
+        className="w-full bg-gray-700 text-white text-center rounded-t-lg overflow-hidden whitespace-nowrap p-1.5 focus:outline-none"
         onClick={toggleCollapse}
       >
         Stories

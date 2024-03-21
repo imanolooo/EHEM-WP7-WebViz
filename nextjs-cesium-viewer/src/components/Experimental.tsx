@@ -3,20 +3,22 @@
 import { Viewer, Scene, LabelCollection, Cartesian3, Color, DistanceDisplayCondition, Cartographic, PerspectiveFrustum, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource, JulianDate, ClockRange, ClockStep, CameraEventType, ScreenSpaceEventHandler, ScreenSpaceEventType, Property } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 
-const POI_RADIUS = 0.10; // meters
-const LABEL_OFFSET = -0.4; // meters
-const LABEL_FAR_DISTANCE = 5; // meters
+const POI_RADIUS = 0.08; // meters
+const LABEL_OFFSET = -0.2; // meters
+const LABEL_FAR_DISTANCE = 7; // meters
 
 class Experimental{
     viewer: Viewer; 
     scene: Scene; 
     storyDropdown: HTMLSelectElement;
+    labels: LabelCollection;
 
     constructor(viewer: Viewer, scene: Scene)
     {
         this.viewer = viewer;
         this.scene = scene;
         this.storyDropdown = document.createElement('select');
+        this.labels = this.scene.primitives.add(new LabelCollection());
     }
 
     addOption(value:string, text:string, select:HTMLSelectElement) {
@@ -190,155 +192,144 @@ class Experimental{
     start() {
 
         console.log("Experimental start");
-        this.createStoryDropdown();
+        //this.createStoryDropdown();
         
         //const entity = this.viewer.entities.getById("46ff28c7-d685-4ed2-a2d3-7a7070b159cc");
         //if (entity) entity.description = new ConstantProperty("Hola");
 
-        const labels = this.scene.primitives.add(new LabelCollection());
-
         this.viewer.infoBox.viewModel.enableCamera = false;
         this.viewer.infoBox.viewModel.isCameraTracking = false;
         this.viewer.infoBox.viewModel.maxHeight = 1900;
-        
-        /*
-        var poi_orant = this.viewer.entities.add({
-            position: new Cartesian3(4736926.905790371, 155793.86066556993, 4254899.979210657),
-            name : "Sant Quirze de Pedret, XII century",
-            description:"<H1> L'Orant </H1> <embed src='https://samplelib.com/lib/preview/mp3/sample-12s.mp3' loop='true' autostart='true' width='2' height='0'>When the Romanesque paintings were removed, remains of an earlier, pre-Romanesque mural decoration appeared. One of the two fragments is known as the 'Orant', where a male figure is depicted with arms outstretched in a posture of prayer, within a double circle and decorated in zigzag. <br>  <div style='text-align: center;'> <img src='https://visitmuseum.gencat.cat/media/cache/1140x684_portrait/uploads/objects/photos/54ba9fbfef972_orant-de-sant-quirze-de-pedret.jpeg' width='100'> </img> </div> <p> Above this circle, there is a bird with outstretched wings. <video controls width='250'><source src='https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4' type='video/mp4' /></video>",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(0.5)
-            }
-        });
+    }
 
-        labels.add({
-            position : new Cartesian3(4736926.905790371, 155793.86066556993, 4254899.979210657),
-          text : 'Orant',
-          eyeOffset : new Cartesian3(-0.5, 0.0, LABEL_OFFSET), 
-          distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE)
-          });
-          */
+    addPOIs(id: string) 
+    {
+        this.labels.removeAll();
+        // declare abc as an array of strings
+        var ids = new Array();
+        this.viewer.entities.values.forEach(entity => { if (entity.ellipsoid) ids.push(entity.id); });
+        ids.forEach(id => { var entity = this.viewer.entities.getById(id); if (entity) this.viewer.entities.remove(entity); });
+        if (id==="centralApse") 
+        {
+            var poiOrant = this.viewer.entities.add({
+                position: new Cartesian3(4736926.962825191, 155793.86441249054, 4254900.037438289),
+                name : 'Orant',
+                description:"<H1> Orant </H1> When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Orant', a bearded male figure with open arms in a prayerful attitude. <br><br><img src='https://visitmuseum.gencat.cat/media/cache/1140x684_portrait/uploads/objects/photos/54ba9fbfef972_orant-de-sant-quirze-de-pedret.jpeg' width='400'> ",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
+            this.labels.add({
+            position : new Cartesian3(4736926.962825191, 155793.86441249054, 4254900.037438289),
+            text : 'Orant',
+            eyeOffset : new Cartesian3(-0.05, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
 
-          var poiOrant = this.viewer.entities.add({
-            position: new Cartesian3(4736926.962825191, 155793.86441249054, 4254900.037438289),
-            name : 'Orant',
-            description:"<H1> Orant </H1> When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Orant', a bearded male figure with open arms in a prayerful attitude. <br><br><img src='https://visitmuseum.gencat.cat/media/cache/1140x684_portrait/uploads/objects/photos/54ba9fbfef972_orant-de-sant-quirze-de-pedret.jpeg' width='400'> ",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
+            
 
-        labels.add({
-        position : new Cartesian3(4736926.962825191, 155793.86441249054, 4254900.037438289),
-        text : 'Orant',
-        eyeOffset : new Cartesian3(-0.05, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
+            var poiCavaller = this.viewer.entities.add({
+                position: new Cartesian3(4736925.556599217, 155794.5915427292, 4254901.407861949),
+                name : 'Cavaller',
+                description:"<H1> Cavaller </H1> When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Cavaller',  a warrior on horseback. <br><br><img src='https://www.cs.upc.edu/~virtual/img/cavaller.jpg' width='400'>",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
-        
+            this.labels.add({
+            position : new Cartesian3(4736925.556599217, 155794.5915427292, 4254901.407861949),
+            text : 'Cavaller',
+            eyeOffset : new Cartesian3(-0.08, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
+        }
+        if (id==="southApse")
+        {
 
-        var poiCavaller = this.viewer.entities.add({
-            position: new Cartesian3(4736925.556599217, 155794.5915427292, 4254901.407861949),
-            name : 'Cavaller',
-            description:"<H1> Cavaller </H1> When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Cavaller',  a warrior on horseback. <br><br><img src='https://www.cs.upc.edu/~virtual/img/cavaller.jpg' width='400'>",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
+            var poiChrist = this.viewer.entities.add({
+                position: new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
+                name : 'Divine Incarnation',
+                description:"<H1> Divine Incarnation </H1> At the apex, there is a portrayal of the infant Jesus Christ, clutching a scroll, seated on the Virgin Mary's lap, surrounded by an aureole or mandorla. This imagery symbolizes Christ's incarnation and his role as the founder of the Christian Church.",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
-        labels.add({
-        position : new Cartesian3(4736925.556599217, 155794.5915427292, 4254901.407861949),
-        text : 'Cavaller',
-        eyeOffset : new Cartesian3(-0.08, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
+            this.labels.add({
+            position : new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
+            text : 'Divine Incarnation',
+            eyeOffset : new Cartesian3(-0.18, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
 
-        
+            
 
-        var poiChrist = this.viewer.entities.add({
-            position: new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
-            name : 'Divine Incarnation',
-            description:"<H1> Divine Incarnation </H1> At the apex, there is a portrayal of the infant Jesus Christ, clutching a scroll, seated on the Virgin Mary's lap, surrounded by an aureole or mandorla. This imagery symbolizes Christ's incarnation and his role as the founder of the Christian Church.",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
+            var poiCrownedlady = this.viewer.entities.add({
+                position: new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
+                name : 'Church on Earth',
+                description:"<H1> Church on Earth </H1> The Church's terrestrial phase is depicted by means of a double visual metaphor. Next to the entrance, at the visitor’s right-hand side, there is the church personified as a crowned lady seated on a church-like edifice, reflecting the ethos of the Gregorian Reform. However, this iconography, with few parallels, notably in southern Italy, raises questions about its cultural transmission to Catalonia.",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
-        labels.add({
-        position : new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
-        text : 'Divine Incarnation',
-        eyeOffset : new Cartesian3(-0.18, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
+            this.labels.add({
+            position : new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
+            text : 'Church on Earth',
+            eyeOffset : new Cartesian3(-0.15, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
 
-        
+            
 
-        var poiCrownedlady = this.viewer.entities.add({
-            position: new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
-            name : 'Church on Earth',
-            description:"<H1> Church on Earth </H1> The Church's terrestrial phase is depicted by means of a double visual metaphor. Next to the entrance, at the visitor’s right-hand side, there is the church personified as a crowned lady seated on a church-like edifice, reflecting the ethos of the Gregorian Reform. However, this iconography, with few parallels, notably in southern Italy, raises questions about its cultural transmission to Catalonia.",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
+            var poiWise = this.viewer.entities.add({
+                position: new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
+                name : 'The Parable of the Virgins',
+                description:"<H1> The Parable of the Virgins </H1> The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
-        labels.add({
-        position : new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
-        text : 'Church on Earth',
-        eyeOffset : new Cartesian3(-0.15, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
+            this.labels.add({
+            position : new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
+            text : 'The Parable of the Virgins',
+            eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
 
-        
+            
 
-        var poiWise = this.viewer.entities.add({
-            position: new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
-            name : 'The Parable of the Virgins',
-            description:"<H1> The Parable of the Virgins </H1> The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
+            var poiFoolish = this.viewer.entities.add({
+                position: new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
+                name : 'The Parable of the Virgins',
+                description:"<H1> The Parable of the Virgins </H1> The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.",
+                ellipsoid : {
+                    radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
+                    material : Color.RED.withAlpha(1.0)
+                }
+            });
 
-        labels.add({
-        position : new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
-        text : 'The Parable of the Virgins',
-        eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
-
-        
-
-        var poiFoolish = this.viewer.entities.add({
-            position: new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
-            name : 'The Parable of the Virgins',
-            description:"<H1> The Parable of the Virgins </H1> The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.",
-            ellipsoid : {
-                radii : new Cartesian3(POI_RADIUS, POI_RADIUS, POI_RADIUS),
-                material : Color.RED.withAlpha(1.0)
-            }
-        });
-
-        labels.add({
-        position : new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
-        text : 'The Parable of the Virgins',
-        eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
-        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
-        disableDepthTestDistance: LABEL_FAR_DISTANCE
-        });
-
+            this.labels.add({
+            position : new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
+            text : 'The Parable of the Virgins',
+            eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
+            distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+            disableDepthTestDistance: LABEL_FAR_DISTANCE
+            });
+        }
 
 
 

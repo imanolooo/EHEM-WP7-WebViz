@@ -124,7 +124,7 @@ const Map = () => {
                     src={`/${name}.jpg`} 
                     alt={`Select ${name}`} 
                     className="h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200" 
-                    onClick={() => selectImage(name)}
+                    onClick={() => { selectImage(name); setIsMenuOpen(!isMenuOpen)}}
                 />
             ))}
             <button 
@@ -954,6 +954,18 @@ const Map = () => {
                     if (event.key=='t') 
                     {
                         experimental.start();
+                    }
+                    if (event.key=='0') 
+                    {
+                        experimental.addPOIs("");  // just remove all
+                    }
+                    if (event.key=='1') 
+                    {
+                        experimental.addPOIs("centralApse"); 
+                    }
+                    if (event.key=='2') 
+                    {
+                        experimental.addPOIs("southApse"); 
                     }
 
                   }, false);
