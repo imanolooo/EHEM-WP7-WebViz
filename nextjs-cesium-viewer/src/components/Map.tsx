@@ -196,7 +196,7 @@ const Map = () => {
                     animation: false,    // Disable animation (clock-like) widget
                     creditContainer: document.createElement("none"), // Remove the logo and credits of Cesium Ion
                     vrButton: true,
-                    shadows: true,
+                    shadows: false,
                     scene3DOnly: true,
                     msaaSamples: 1
                 });
