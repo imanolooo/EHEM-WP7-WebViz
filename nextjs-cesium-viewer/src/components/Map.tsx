@@ -970,6 +970,7 @@ const Map = () => {
 
     useEffect(() => {
         const newSetCameraView = (viewConfig: { position: { x: number; y: number; z: number; }; }) => {
+            console.log('Setting camera view...');
             if (viewer) {
                 const { position } = viewConfig; // Using only the position for flyTo
         

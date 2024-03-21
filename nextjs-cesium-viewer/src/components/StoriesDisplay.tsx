@@ -144,7 +144,8 @@ const StoriesDisplay: React.FC = () => {
             // Delay applying camera view to align with narrative, if necessary
             const gotoTimeout = setTimeout(() => {
               setCameraView(cameraConfig);
-            }, index * 1000); // Example: Adjust delay as needed
+            //}, index * 1); // Example: Adjust delay as needed
+            }, 500); 
             timeoutIds.current.push(gotoTimeout);
           });
       }
@@ -168,12 +169,12 @@ const StoriesDisplay: React.FC = () => {
             {stories.map((story, index) => (
               <button
                 key={index}
-                className={`mb-2 p-2 rounded block w-full text-left ${
+                className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left ${
                   selectedStory === story ? 'bg-gray-700 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'
                 }`}
                 onClick={() => handleStorySelection(story)}
               >
-                {story.title}
+                 {story.title} 
               </button>
             ))}
           </div>
