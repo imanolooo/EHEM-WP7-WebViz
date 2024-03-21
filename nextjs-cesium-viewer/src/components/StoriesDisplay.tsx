@@ -182,11 +182,13 @@ const StoriesDisplay: React.FC = () => {
           {selectedStory && (
             <div className="mt-4 p-4 bg-gray-700 text-white rounded-b-lg">
               <h2 className="text-lg font-bold">{selectedStory.title}</h2>
-              <p>{selectedStory.parades[currentParadeIndex]?.title || 'No parade info available'}</p>
+              <h3 className="font-bold">{selectedStory.parades[currentParadeIndex]?.title || 'No parade info available'}</h3>
               <div>
                 {/* Display text content */}
                 {displayContent.map((content, index) => (
-                  <p key={index}>{content}</p> // For simplicity, displaying as text
+                  //<p key={index}>{content}</p> // For simplicity, displaying as text
+                  <p key={index}> <span dangerouslySetInnerHTML={{__html: content }} /> </p> // Displaying as HTML
+
                 ))}
 
                 {/* Display image content */}

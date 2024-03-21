@@ -242,11 +242,12 @@ class Experimental{
         });
 
         labels.add({
-          position : new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
-          text : 'Divine Incarnation',
-          eyeOffset : new Cartesian3(-0.18, 0.0, LABEL_OFFSET),
-          distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE)
-          });
+        position : new Cartesian3(4736929.057067022, 155790.07447817564, 4254899.004732476),
+        text : 'Divine Incarnation',
+        eyeOffset : new Cartesian3(-0.18, 0.0, LABEL_OFFSET),
+        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+        disableDepthTestDistance: LABEL_FAR_DISTANCE
+        });
 
         
 
@@ -261,11 +262,12 @@ class Experimental{
         });
 
         labels.add({
-          position : new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
-          text : 'Church on Earth',
-          eyeOffset : new Cartesian3(-0.15, 0.0, LABEL_OFFSET),
-          distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE)
-          });
+        position : new Cartesian3(4736928.800539953, 155789.13254590853, 4254897.888945552),
+        text : 'Church on Earth',
+        eyeOffset : new Cartesian3(-0.15, 0.0, LABEL_OFFSET),
+        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+        disableDepthTestDistance: LABEL_FAR_DISTANCE
+        });
 
         
 
@@ -280,11 +282,12 @@ class Experimental{
         });
 
         labels.add({
-          position : new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
-          text : 'The Parable of \nthe Virgins',
-          eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
-          distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE)
-          });
+        position : new Cartesian3(4736927.884777924, 155790.40944153548, 4254899.321675795),
+        text : 'The Parable of the Virgins',
+        eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
+        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+        disableDepthTestDistance: LABEL_FAR_DISTANCE
+        });
 
         
 
@@ -299,11 +302,14 @@ class Experimental{
         });
 
         labels.add({
-          position : new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
-          text : 'The Parable of the Virgins',
-          eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
-          distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE)
-          });
+        position : new Cartesian3(4736929.009021637, 155790.2253358087, 4254897.839051721),
+        text : 'The Parable of the Virgins',
+        eyeOffset : new Cartesian3(-0.26, 0.0, LABEL_OFFSET),
+        distanceDisplayCondition: new DistanceDisplayCondition(0.01, LABEL_FAR_DISTANCE),
+        disableDepthTestDistance: LABEL_FAR_DISTANCE
+        });
+
+
 
 
 
