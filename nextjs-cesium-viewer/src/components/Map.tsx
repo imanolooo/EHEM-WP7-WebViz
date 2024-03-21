@@ -450,7 +450,7 @@ const Map = () => {
 
                 const option3 = document.createElement('option');
                 option3.value = NAV_MODE_FLY_EXPERT;
-                option3.textContent = "Navigation: Fly (expert)";
+                option3.textContent = "Nav: Fly expert";
                 navModeDropdown.appendChild(option3);
 
 
@@ -711,7 +711,7 @@ const Map = () => {
                             );
 
                             // Adjust the selected point to be slightly in front of the actual model position, to avoid occlusion
-                            var adjustedPointDistance = 0.98 * currentDistance;
+                            var adjustedPointDistance = 0.90 * currentDistance;  // 0.98
                             var adjustedPointDestination = Cartesian3.multiplyByScalar(
                                 Cartesian3.normalize(
                                     Cartesian3.subtract(destinationPosition as Cartesian3, viewer.camera.position, new Cartesian3()),
