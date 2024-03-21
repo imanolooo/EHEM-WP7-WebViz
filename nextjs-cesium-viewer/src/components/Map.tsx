@@ -1,8 +1,8 @@
 'use client'    // Client component
 
-import { Ion, createWorldTerrainAsync, Viewer, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
+import { Ion, createWorldTerrainAsync, Viewer, Camera, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
-    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode } from "cesium";
+    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import React, { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
@@ -189,6 +189,10 @@ const Map = () => {
                 // ------
                 // Viewer settings
 
+                var extent = Rectangle.fromDegrees(1.88000, 42.10300, 1.88700, 42.11200);
+                Camera.DEFAULT_VIEW_RECTANGLE = extent;
+                Camera.DEFAULT_VIEW_FACTOR = 0;
+
                 // Create the Viewer
                 const viewer = new Viewer("cesiumContainer", {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
@@ -364,7 +368,7 @@ const Map = () => {
                 // Create a custom button in the Cesium's existing toolbar
                 const carouselButton = document.createElement('button');
                 carouselButton.classList.add('cesium-button');
-                carouselButton.innerHTML = 'GraphMat';    // Open Modal button name
+                carouselButton.innerHTML = 'Graphic Materials';    // Open Modal button name
 
                 // Add a click event handler to open the Modal
                 carouselButton.addEventListener('click', () => {
@@ -436,17 +440,17 @@ const Map = () => {
 
                 const option1 = document.createElement('option');
                 option1.value = NAV_MODE_DEFAULT;
-                option1.textContent = "Navigation: default (globe)"
+                option1.textContent = "Navigation: Orbit"
                 navModeDropdown.appendChild(option1);
 
                 const option2 = document.createElement('option');
                 option2.value = NAV_MODE_FLY;
-                option2.textContent = "Navigation: Fly-through";
+                option2.textContent = "Navigation: Fly";
                 navModeDropdown.appendChild(option2);
 
                 const option3 = document.createElement('option');
                 option3.value = NAV_MODE_FLY_EXPERT;
-                option3.textContent = "Navigation: Fly-through (expert)";
+                option3.textContent = "Navigation: Fly (expert)";
                 navModeDropdown.appendChild(option3);
 
 
