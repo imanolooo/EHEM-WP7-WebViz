@@ -60,8 +60,9 @@ const Modal: React.FC<ModalProps> = ({
     <div className={`fixed inset-0 flex items-center justify-center ${overlayStyle}`}>
       <div ref={modalContentRef} className="bg-white rounded-lg shadow-lg w-11/12 md:w-3/4 lg:w-2/3 h-5/6 p-4 overflow-y-auto max-w-5xl max-h-[90vh]">
         <button onClick={onClose} className="absolute top-14 right-2 text-white bg-[#303336]
-                                              hover:bg-[#48b] hover:border-[#aef] hover:shadow-[0_0_8px_#fff]  font-bold py-2 px-4 rounded">
-            Close
+          hover:bg-[#48b] hover:border-[#aef] hover:shadow-[0_0_8px_#fff] font-bold py-2 px-4 rounded"
+        >
+          Close
         </button>
         <div className="flex flex-col w-full h-full">
             {showCarousel ? <ResponsiveCarousel /> : children}

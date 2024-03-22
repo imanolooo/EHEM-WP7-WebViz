@@ -117,22 +117,29 @@ const Map = () => {
     
     // Phases Selection menu
     const renderMenu = () => (
-        <div className={`fixed inset-x-0 bottom-0 z-20 bg-opacity-75 bg-black p-4 flex justify-center items-center space-x-4 overflow-x-auto ${isMenuOpen ? 'block' : 'hidden'}`}>
-            {modelImageNames.map((name) => (
-                <img 
-                    key={name} 
-                    src={`/${name}.jpg`} 
-                    alt={`Select ${name}`} 
-                    className="h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200" 
-                    onClick={() => { selectImage(name); setIsMenuOpen(!isMenuOpen)}}
-                />
-            ))}
+        <>
+            {/* Menu Content */}
+            <div className={`fixed inset-x-0 bottom-0 z-20 bg-opacity-75 bg-black flex items-center overflow-x-auto ${isMenuOpen ? 'py-4' : 'py-0'} ${isMenuOpen ? 'block' : 'hidden'}`}>
+                <div className="flex flex-grow justify-center space-x-4 px-4">
+                    {modelImageNames.map((name) => (
+                        <img 
+                            key={name} 
+                            src={`/${name}.jpg`} 
+                            alt={`Select ${name}`}
+                            className="min-w-[100px] max-w-[200px] w-auto h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200"
+                            onClick={() => { selectImage(name); setIsMenuOpen(!isMenuOpen)}}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Toggle Button */}
             <button 
                 onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="absolute top-0 right-0 mt-4 mr-4 bg-blue-500 text-white p-2 rounded">
+                className="fixed bottom-36 right-2 text-white bg-[#303336] hover:bg-[#48b] hover:border-[#aef] hover:shadow-[0_0_8px_#fff] font-bold py-2 px-4 rounded">
                 {isMenuOpen ? 'Close' : 'Open'} Phase Selection
             </button>
-        </div>
+        </>
     );
     
     // Image selector from the Phase Selection menu
@@ -1114,14 +1121,7 @@ const Map = () => {
             {/* Return the Cesium Viewer */}
             <div id="cesiumContainer" />
 
-            {/* Toggle Menu Button - Always Visible */}
-            <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className={`fixed bottom-0 left-1/2 transform -translate-x-1/2 z-30 bg-blue-500 text-white px-4 py-2 rounded-t ${isMenuOpen ? 'hidden' : 'block'}`}>
-                Open Phase Selection
-            </button>
-
-            {/* Image Menu */}
+            {/* Phases Image Menu */}
             {renderMenu()}
 
             {/* Graphic Material Modal */}
