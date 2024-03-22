@@ -35,7 +35,12 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
   const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalHtmlContent, setModalHtmlContent] = useState('');
+  const [isHoveringTitles, setIsHoveringTitles] = useState(false);
 
+
+  // Handle mouse enter and leave for story titles area
+  const handleMouseEnter = () => setIsHoveringTitles(true);
+  const handleMouseLeave = () => setIsHoveringTitles(false);
 
   // Toggle collapse state
   const toggleCollapse = () => {
@@ -159,17 +164,19 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
         Stories
       </button>
       {!isCollapsed && (
-        <div className="overflow-auto max-h-screen transition-max-height duration-700 ease-in-out" style={{ maxHeight: '752px' }}>
-
+        <div className="overflow-auto max-h-screen transition-max-height duration-700 ease-in-out" style={{ maxHeight: '752px' }} >
           {/* Select story */}
-          <div className="p-4">
-            {stories.map((story, index) => (
+          <div className="p-4" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
+            {((!selectedStory || isHoveringTitles) ? stories : [selectedStory]).map((story, index) => (
               <button
                 key={index}
                 className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left ${
                   selectedStory === story ? 'bg-gray-700 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'
                 }`}
-                onClick={() => handleStorySelection(story)}
+                onClick={() => {
+                  handleStorySelection(story);
+                  setIsHoveringTitles(false);
+                }}
               >
                  {story.title} 
               </button>
@@ -200,7 +207,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 backgroundStyle=''
-                allowInteraction={true}
+                allowInteraction={false}
               >
                 <div className='text-black' dangerouslySetInnerHTML={{ __html: modalHtmlContent }} />
               </Modal>

@@ -52,6 +52,8 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen, onClose]);
 
   // Conditional overlay style
+  // right now it's not useful after all, both Stories and Map
+  // use the default allowInteraction=false value 
   const overlayStyle = allowInteraction ? 'pointer-events-none' : backgroundStyle;
 
   return isOpen ? ReactDOM.createPortal(
