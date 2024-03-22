@@ -50,7 +50,7 @@ const Map = () => {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const modelImageNames = ['ix', 'x', 'xi', 'xii', 'xiii'];
+    const modelImageNames = ['ix', 'x', 'xi', 'xii', 'xiii', 'xxi'];
 
     // const models: CesiumModel[] = [];
     const [models, setModels] = useState<CesiumModel[]>([]);
