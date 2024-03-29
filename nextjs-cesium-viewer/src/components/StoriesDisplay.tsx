@@ -9,9 +9,9 @@ interface Action {
   "show-side-text"?: string;
   "play-audio"?: string;
   "show-image-interval"?: string[];
-  "next-parade"?: string;
   "change-model"?: string;
   "show-html-modal"?: string;
+  "next-parade"?: string;
 }
 
 interface Parade {
@@ -24,7 +24,12 @@ interface Story {
   parades: Parade[];
 }
 
-const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
+interface StoriesDisplayProps {
+  setCameraView: any;
+  onPoisEnabled: (pois: string[]) => void;
+}
+
+const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) => {
 
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [stories, setStories] = useState<Story[]>([]);
@@ -36,7 +41,6 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalHtmlContent, setModalHtmlContent] = useState('');
   const [isHoveringTitles, setIsHoveringTitles] = useState(false);
-
 
   // Handle mouse enter and leave for story titles area
   const handleMouseEnter = () => setIsHoveringTitles(true);
@@ -80,6 +84,7 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
     // Toggle off if the same story is reselected
     if (selectedStory === story) {
       setSelectedStory(null);
+      onPoisEnabled([]);
     } else {
       setSelectedStory(story);
     }
@@ -146,11 +151,33 @@ const StoriesDisplay = ({ setCameraView }: { setCameraView: any }) => {
           });
       }
 
+      // Handle 'enable-pois' action
+      else if (action['enable-pois']) {
+        onPoisEnabled(action['enable-pois']);
+      }
+
       // Handle 'show-html-modal' action
       else if (action['show-html-modal']) {
         setModalHtmlContent(action['show-html-modal']);
         setIsModalOpen(true);
       }
+
+      // Handle 'next-parade' action
+      // it's working, but there needs to be some extra condition,
+      // else it will keep on going to the next parade infinitely
+      // example for 2s delay. Add this to any parade action: {"next-parade": "true"} 
+      else if (action['next-parade'] && action['next-parade'] === 'true') {
+        setTimeout(() => {
+          handleNextParade();
+        }, 2000); 
+      }
+
+      //> core code
+
+      // else if (action['next-parade'] && action['next-parade'] === 'true') {
+      //   handleNextParade();
+      // }
+
     });
   };
 

@@ -65,6 +65,7 @@ const Map = () => {
     const [experimental, setExperimental] = useState<Experimental | null>();
     const destPosRef = useRef<Cartesian3 | null>(null);
     const [destPos, setDestPos] = useState<Cartesian3 | null>(null);
+    const [enabledPois, setEnabledPois] = useState<string[]>([]);
 
     // utility for getting the current time
     /* 
@@ -333,7 +334,7 @@ const Map = () => {
                 var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
                 document.addEventListener('keydown', function (e) {
-                    if (firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
+                    if (firstPersonCameraController && firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
                     if (e.key === 'w' || e.key === 'W')
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
@@ -465,16 +466,18 @@ const Map = () => {
                 navModeDropdown.addEventListener('change', async (event) => {
                     const id = (event.target as HTMLSelectElement).value;                    
                     //console.log('Selected Nav Mode: ', id);
-                    if (id === NAV_MODE_FLY) {
-                        firstPersonCameraController.start();
-                        firstPersonCameraController._continuousMotion = false;
-                    }
-                    else if (id === NAV_MODE_FLY_EXPERT) {
-                        firstPersonCameraController.start();
-                        firstPersonCameraController._continuousMotion = true;
-                    }
-                    else if (id === NAV_MODE_DEFAULT) {
-                        firstPersonCameraController.stop();
+                    if(firstPersonCameraController){
+                        if (id === NAV_MODE_FLY) {
+                            firstPersonCameraController.start();
+                            firstPersonCameraController._continuousMotion = false;
+                        }
+                        else if (id === NAV_MODE_FLY_EXPERT) {
+                            firstPersonCameraController.start();
+                            firstPersonCameraController._continuousMotion = true;
+                        }
+                        else if (id === NAV_MODE_DEFAULT) {
+                            firstPersonCameraController.stop();
+                        }
                     }
                 });
 
@@ -929,14 +932,13 @@ const Map = () => {
                     // toolbar.insertBefore(nextButton, resetButton);
                 }   
 
-                // Carlos
                 const firstPersonCameraController = new FirstPersonCameraController({ cesiumViewer : viewer });
                 setFirstPersonCameraController(firstPersonCameraController); 
 
-                const experimental = new Experimental(viewer, scene);
-                setExperimental(experimental); 
+                const experimental = new Experimental(viewer, viewer.scene);
+                setExperimental(experimental);
 
-
+                // Carlos
                 document.addEventListener('keypress', (event) => {    // TODO: set navigation mode through GUI
                     if (event.key=='f')
                         firstPersonCameraController.start();
@@ -952,29 +954,22 @@ const Map = () => {
                         if (currentModelEntity?.model)
                             currentModelEntity.model.shadows = new ConstantProperty(ShadowMode.DISABLED);
                     }
-
                     if (event.key=='v') 
                     {
                         scene.useWebVR != scene.useWebVR;
                     }
-
                     if (event.key=='t') 
                     {
-                        experimental.start();
+                        experimental?.start();
                     }
-                    if (event.key=='0') 
-                    {
-                        experimental.addPOIs("");  // just remove all
-                    }
-                    if (event.key=='1') 
-                    {
-                        experimental.addPOIs("centralApse"); 
-                    }
-                    if (event.key=='2') 
-                    {
-                        experimental.addPOIs("southApse"); 
-                    }
-
+                    // if (event.key=='1') 
+                    // {
+                    //     experimental.addPOIs("centralApse"); 
+                    // }
+                    // if (event.key=='2') 
+                    // {
+                    //     experimental.addPOIs("southApse"); 
+                    // }
                   }, false);
 
 
@@ -985,6 +980,26 @@ const Map = () => {
 
         initializeViewer();
     }, []); // Only run this effect once, after the initial render
+
+
+    // test
+
+    useEffect(() => {
+        
+        if (!viewer || !experimental) { return; }
+
+        const updatePOIs = (poiIds: string[]) => {
+            experimental.addPOIs([]);
+            experimental.addPOIs(enabledPois);
+        }
+
+        // Call updatePOIs whenever enabledPois changes
+        updatePOIs(enabledPois);
+
+    }, [enabledPois, experimental]);
+
+    // end of test
+
 
     // Whenever destPos state changes, update the ref
     useEffect(() => {
@@ -1102,16 +1117,6 @@ const Map = () => {
             duration: 2.0,
             complete: function () { },
           });
-    
-          // Adjusting the frustum
-          // not really needed? Let's leave it for now since we have the data
-          const currentFrustum = viewerRef.current.camera.frustum;
-          if (currentFrustum instanceof PerspectiveFrustum) {
-            currentFrustum.fov = frustum.fov;
-            currentFrustum.aspectRatio = frustum.aspectRatio;
-            currentFrustum.near = frustum.near;
-            currentFrustum.far = frustum.far;
-          }
         }
       };
       
@@ -1135,7 +1140,7 @@ const Map = () => {
             />
 
             {/* Stories */}
-            <StoriesDisplay setCameraView={ setCameraView }/>
+            <StoriesDisplay setCameraView={ setCameraView } onPoisEnabled={setEnabledPois} />
 
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}
