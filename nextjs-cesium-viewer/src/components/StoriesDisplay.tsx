@@ -41,6 +41,9 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalHtmlContent, setModalHtmlContent] = useState('');
   const [isHoveringTitles, setIsHoveringTitles] = useState(false);
+  const audioRef = useRef(new Audio());
+  const playPauseButtonRef = useRef(null);
+  const muteButtonRef = useRef(null);
 
   // Handle mouse enter and leave for story titles area
   const handleMouseEnter = () => setIsHoveringTitles(true);
@@ -109,6 +112,59 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
     return hours * 3600 + minutes * 60 + seconds;
   };
 
+  // Helper function to stop audio and clean up when component unmounts
+  useEffect(() => {
+    return () => {
+      audioRef.current.pause();
+      audioRef.current.src = ''; // Clear the source
+    };
+  }, []);
+
+  // Audio play/pause and mute/unmute text changing
+  useEffect(() => {
+    const playHandler = () => {
+      if (playPauseButtonRef.current) (playPauseButtonRef.current as HTMLButtonElement).textContent = 'Pause Audio';
+    };
+    
+    const pauseHandler = () => {
+      if (playPauseButtonRef.current) (playPauseButtonRef.current as HTMLButtonElement).textContent = 'Play Audio';
+    };
+
+    const volumeChangeHandler = () => {
+      if (muteButtonRef.current) (muteButtonRef.current as HTMLButtonElement).textContent = audioRef.current.muted ? 'Unmute' : 'Mute';
+    };
+    
+    const audioCurrent = audioRef.current;
+  
+    // Event Listeners
+    audioCurrent.addEventListener('play', playHandler);
+    audioCurrent.addEventListener('pause', pauseHandler);
+    audioCurrent.addEventListener('volumechange', volumeChangeHandler);
+
+    // Cleanup
+    return () => {
+      audioCurrent.removeEventListener('play', playHandler);
+      audioCurrent.removeEventListener('pause', pauseHandler);
+      audioCurrent.removeEventListener('volumechange', volumeChangeHandler);
+    };
+  }, []);
+
+  // Audio play/pause functionality
+  const togglePlayPause = () => {
+    if (audioRef.current.src) {
+      if (!audioRef.current.paused) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(error => console.error("Audio play failed:", error));
+      }
+    }
+  };
+
+  // Audio mute/unmute functionality
+  const toggleMute = () => {
+    audioRef.current.muted = !audioRef.current.muted;
+  };
+
   // Function to execute parade actions
   const executeParadeActions = (parade: Parade) => {
     // Reset content for new parade
@@ -166,18 +222,26 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
       // it's working, but there needs to be some extra condition,
       // else it will keep on going to the next parade infinitely
       // example for 2s delay. Add this to any parade action: {"next-parade": "true"} 
+
+      //> core 'next-parade' code
+      // else if (action['next-parade'] && action['next-parade'] === 'true') {
+      //   handleNextParade();
+      // }
+
       else if (action['next-parade'] && action['next-parade'] === 'true') {
         setTimeout(() => {
           handleNextParade();
         }, 2000); 
       }
 
-      //> core code
-
-      // else if (action['next-parade'] && action['next-parade'] === 'true') {
-      //   handleNextParade();
-      // }
-
+      // Handle 'play-audio' action
+      else if (action['play-audio']) {
+        const audioFile = action['play-audio'];
+        const audioSource = `/${audioFile}`; // /public/file-name.mp3
+        audioRef.current.src = audioSource;
+        audioRef.current.loop = true;
+        audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
+      }
     });
   };
 
@@ -222,6 +286,14 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
                   <p key={index}> <span dangerouslySetInnerHTML={{__html: content }} /> </p> // Displaying as HTML
 
                 ))}
+
+                {/* Audio player */}
+                <button ref={playPauseButtonRef} onClick={togglePlayPause} className='bg-gray-800 hover:bg-gray-900 mt-6 mr-2 p-1 rounded-lg'>
+                  Play Audio
+                </button>
+                <button ref={muteButtonRef} onClick={toggleMute} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>
+                  Mute
+                </button>
 
                 {/* Display image content */}
                 {currentImageUrl && (
