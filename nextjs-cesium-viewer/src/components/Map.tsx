@@ -2,7 +2,7 @@
 
 import { Ion, createWorldTerrainAsync, Viewer, Camera, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
     ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
-    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle } from "cesium";
+    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle, Cesium3DTileset } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import React, { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
@@ -30,7 +30,9 @@ const NAV_MODE_FLY_EXPERT = "2";
 type CesiumModel = {
     id: number;
     name: string;
-    entity: Entity | null;
+    entityType: 'GLTF' | 'Tileset';
+    model?: Entity; // For GLTF models
+    tileset?: Cesium3DTileset; // For 3D Tilesets
 };
 const modelPosition = Cartesian3.fromDegrees(1.883635, 42.107455, 644.8);
 const heading = CesiumMath.toRadians(21.5 + 90);
@@ -154,34 +156,43 @@ const Map = () => {
     
     // Load the selected phase .glB model
     const loadModel = async (modelId: number) => {
+        // Hide any previously shown models or tilesets
         models.forEach((model) => {
-            // Hide any previously shown model
-            if (model.entity) model.entity.show = false;
+            if (model.model) model.model.show = false; // For GLTF models
+            if (model.tileset) model.tileset.show = false; // For 3D Tilesets
         });
-        
+    
         let selectedModel = models.find(model => model.id === modelId);
         if (selectedModel) {
-            if (!selectedModel.entity) {
-                // Model not yet loaded; load it now
+            if (selectedModel.entityType === 'GLTF' && !selectedModel.model) {
+                // Load GLTF model
                 const modelUri = await IonResource.fromAssetId(selectedModel.id);
                 if (viewer) {
-                    selectedModel.entity = viewer.entities.add({
+                    selectedModel.model = viewer.entities.add({
                         position: modelPosition,
                         orientation: new ConstantProperty(orientation),
                         model: {
                             uri: modelUri,
-                            show: true, // Show immediately after loading
+                            show: true,
                         },
                     });
                 }
+            } else if (selectedModel.entityType === 'Tileset' && !selectedModel.tileset) {
+                // Load 3D Tileset
+                const tileset = await Cesium3DTileset.fromIonAssetId(selectedModel.id);
+                if (viewer) {
+                    viewer.scene.primitives.add(tileset);
+                    tileset.show = true;
+                    selectedModel.tileset = tileset; // Assign the tileset
+                }
             } else {
-                // Model already loaded; just show it
-                selectedModel.entity.show = true;
+                // Entity already loaded; just show it
+                if (selectedModel.model) selectedModel.model.show = true;
+                if (selectedModel.tileset) selectedModel.tileset.show = true;
             }
-            // Update the currentModelEntity reference
-            currentModelEntity = selectedModel.entity;
         }
     };
+    
     
     // Load the model corresponding to the selected image
     useEffect(() => {
@@ -249,11 +260,18 @@ const Map = () => {
                 // Model settings
 
                 // only store the models' metadata for now
-                phasesInfo.forEach(phase => {
+                phasesInfo.forEach((phase) => {
+                    // Check if phase.text matches "Phase XXI" or any other
+                    // specific phases you want to treat as Tilesets
+                    const isTileset = phase.text === "Phase XXI"
+                                      || phase.text === "Another Tileset Phase"; // Example for adding more conditions
+                
                     const model = {
                         id: phase.id,
                         name: phase.text,
-                        entity: null, // Initially, there's no entity loaded
+                        entityType: isTileset ? 'Tileset' as 'Tileset' : 'GLTF' as 'GLTF',
+                        model: undefined, // Placeholder for GLTF
+                        tileset: undefined, // Placeholder for 3DTilesets
                     };
                     models.push(model);
                 });
@@ -269,10 +287,11 @@ const Map = () => {
                     },
                 });
 
+                // Assuming the first model is a GLTF model
                 // Update the corresponding model in the `models` array to include the entity reference
                 const firstModelIndex = models.findIndex(model => model.id === phasesInfo[0].id);
                 if (firstModelIndex !== -1) {
-                    models[firstModelIndex].entity = firstModelEntity;
+                    models[firstModelIndex].model = firstModelEntity;
                 }
                 // Update the currentModelEntity reference
                 currentModelEntity = firstModelEntity;
@@ -982,8 +1001,7 @@ const Map = () => {
     }, []); // Only run this effect once, after the initial render
 
 
-    // test
-
+    // Whenever enabledPois state changes, update the POIs
     useEffect(() => {
         
         if (!viewer || !experimental) { return; }
@@ -997,9 +1015,6 @@ const Map = () => {
         updatePOIs(enabledPois);
 
     }, [enabledPois, experimental]);
-
-    // end of test
-
 
     // Whenever destPos state changes, update the ref
     useEffect(() => {
