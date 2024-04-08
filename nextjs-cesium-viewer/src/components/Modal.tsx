@@ -6,6 +6,8 @@ import ResponsiveCarousel from './ResponsiveCarousel';
 
 interface ModalProps {
   isOpen: boolean;
+  currentImage: any,
+  setCurrentImage: any;
   onClose: () => void;
   showCarousel?: boolean;
   children?: React.ReactNode;
@@ -15,6 +17,8 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
+  currentImage,
+  setCurrentImage,
   onClose,
   showCarousel = false,
   children,
@@ -65,7 +69,7 @@ const Modal: React.FC<ModalProps> = ({
           Close
         </button>
         <div className="flex flex-col w-full h-full">
-            {showCarousel ? <ResponsiveCarousel /> : children}
+            {showCarousel ? <ResponsiveCarousel currentImage={currentImage} setCurrentImage={setCurrentImage}/> : children}
         </div>
       </div>
     </div>,

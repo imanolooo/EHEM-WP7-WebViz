@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from './Modal';
+import { phasesInfo} from './Phases';
 
 // Actions based on our discussion, could be extended
 // ... other actions
@@ -7,6 +8,7 @@ interface Action {
   goto?: string;
   "enable-pois"?: string[];
   "show-side-text"?: string;
+  "show-graphic-material"?: string;
   "play-audio"?: string;
   "show-image-interval"?: string[];
   "change-model"?: string;
@@ -26,10 +28,14 @@ interface Story {
 
 interface StoriesDisplayProps {
   setCameraView: any;
+  loadModel: any;
+  setGMmodal: any;
+  setGMimage: any;
+  setCurrentImage: any;
   onPoisEnabled: (pois: string[]) => void;
 }
 
-const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) => {
+const StoriesDisplay = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentImage, onPoisEnabled }: StoriesDisplayProps) => {
 
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [stories, setStories] = useState<Story[]>([]);
@@ -170,15 +176,27 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
     // Reset content for new parade
     setDisplayContent([]);
     setCurrentImageUrl(null);
-    
+    console.log('Executing parade actions:', parade);
+    if (!parade) 
+    { 
+        console.log('ERROR: No parade to execute actions for.');      
+        return;
+    }
     parade.actions.forEach((action, index) => {
       // Immediate non-image text content
       if (action['show-side-text']) {
         const textContent = action['show-side-text'];
         setDisplayContent(prevContent => [...prevContent, textContent]);
       }
+
+      if (action['show-graphic-material']) {
+        const textContent = action['show-graphic-material'];
+        setGMmodal(true);
+        console.log('show-graphic-material:', action['show-graphic-material']);
+        setGMimage(textContent);
+      }
       
-      // Image interval actions
+      // Image interval actions 
       else if (action['show-image-interval']) {
         const [imageUrl, start, end] = action['show-image-interval'];
         // Convert start and end times to milliseconds for scheduling
@@ -212,6 +230,17 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
         onPoisEnabled(action['enable-pois']);
       }
 
+      else if (action['change-model']) {
+        var century = action['change-model'];
+        if (century == 'IX') loadModel(phasesInfo[0].id);
+        else if (century == 'X') loadModel(phasesInfo[1].id);
+        else if (century == 'XI') loadModel(phasesInfo[2].id);
+        else if (century == 'XII') loadModel(phasesInfo[3].id);
+        else if (century == 'XIII') loadModel(phasesInfo[4].id);
+        else if (century == 'XXI') loadModel(phasesInfo[5].id);
+      }
+
+
       // Handle 'show-html-modal' action
       else if (action['show-html-modal']) {
         setModalHtmlContent(action['show-html-modal']);
@@ -226,20 +255,20 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
       //> core 'next-parade' code
       // else if (action['next-parade'] && action['next-parade'] === 'true') {
       //   handleNextParade();
-      // }
+      // } 
 
       else if (action['next-parade'] && action['next-parade'] === 'true') {
         setTimeout(() => {
           handleNextParade();
         }, 2000); 
       }
-
+ 
       // Handle 'play-audio' action
       else if (action['play-audio']) {
         const audioFile = action['play-audio'];
         const audioSource = `/${audioFile}`; // /public/file-name.mp3
         audioRef.current.src = audioSource;
-        audioRef.current.loop = true;
+        audioRef.current.loop = false;
         audioRef.current.play().catch(error => console.error('Failed to play audio:', error));
       }
     });
@@ -259,18 +288,30 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
           {/* Select story */}
           <div className="p-4" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
             {((!selectedStory || isHoveringTitles) ? stories : [selectedStory]).map((story, index) => (
-              <button
-                key={index}
-                className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left ${
-                  selectedStory === story ? 'bg-gray-700 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'
-                }`}
-                onClick={() => {
-                  handleStorySelection(story);
-                  setIsHoveringTitles(false);
-                }}
-              >
-                 {story.title} 
-              </button>
+              story.title[1]!="."?  
+                <button
+                  key={index}
+                  className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left ${
+                    selectedStory === story ? 'bg-gray-700 text-white' : 'bg-gray-800 text-white hover:bg-gray-700'
+                  }`}
+                  onClick={() => {
+                    handleStorySelection(story);
+                    setIsHoveringTitles(false);
+                  }}
+                >
+                  {story.title} 
+                </button>
+              : 
+              <button  // Disabled button for top-level stories
+                  key={index}
+                  className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left disabled bg-gray-800 text-white hover:bg-gray-800`}
+                  disabled={true}
+                  onClick={() => {
+                    // setIsHoveringTitles(false);
+                  }}
+                >
+                  {story.title} 
+                </button>
             ))}
           </div>
             
@@ -278,46 +319,65 @@ const StoriesDisplay = ({ setCameraView, onPoisEnabled }: StoriesDisplayProps) =
           {selectedStory && (
             <div className="mt-4 p-4 bg-gray-700 text-white rounded-b-lg">
               <h2 className="text-lg font-bold">{selectedStory.title}</h2>
+
+               {/* Navigation buttons for parades */}
+              {/*&lt; = left arrow "<"*/}
+              {/*&gt; = right arrow ">"*/}
+              <div className='flex justify-between'>
+                {currentParadeIndex == 0? 
+                <button className='bg-gray-800 text-gray-500 mt-6 p-1 rounded-lg' disabled={true}> prev parade</button>
+                : <button onClick={handlePrevParade} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>prev parade</button>
+                }
+                <button className='bg-gray-800 mt-6 p-1 rounded-lg' disabled={true}>
+                Parade {currentParadeIndex + 1} of {selectedStory.parades.length}
+                </button>
+                {currentParadeIndex < selectedStory.parades.length - 1 ?
+                <button onClick={handleNextParade} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>next parade</button>
+                :
+                <button onClick={handleNextParade} className='bg-gray-800 text-gray-500 mt-6 p-1 rounded-lg' disabled={true}>next parade</button>
+                }
+              </div>
+              <br></br>
+
               <h3 className="font-bold">{selectedStory.parades[currentParadeIndex]?.title || 'No parade info available'}</h3>
               <div>
                 {/* Display text content */}
                 {displayContent.map((content, index) => (
-                  //<p key={index}>{content}</p> // For simplicity, displaying as text
+                  //<p key={index}>{content}</p> // display as text
                   <p key={index}> <span dangerouslySetInnerHTML={{__html: content }} /> </p> // Displaying as HTML
 
                 ))}
 
-                {/* Audio player */}
-                <button ref={playPauseButtonRef} onClick={togglePlayPause} className='bg-gray-800 hover:bg-gray-900 mt-6 mr-2 p-1 rounded-lg'>
+               
+
+                {/* Display image content */}
+                {currentImageUrl && (
+                  <img src={currentImageUrl} alt="current-image" className="w-full h-auto" />
+                )}
+
+                 {/* Audio player */}
+                 <button ref={playPauseButtonRef} onClick={togglePlayPause} className='bg-gray-800 hover:bg-gray-900 mt-6 mr-2 p-1 rounded-lg'>
                   Play Audio
                 </button>
                 <button ref={muteButtonRef} onClick={toggleMute} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>
                   Mute
                 </button>
 
-                {/* Display image content */}
-                {currentImageUrl && (
-                  <img src={currentImageUrl} alt="current-image" className="w-full h-auto" />
-                )}
               </div>
 
               {/* Modal for displaying HTML content */}
               <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                backgroundStyle=''
+                backgroundStyle='bg-opacity-50 bg-black'
                 allowInteraction={false}
+                currentImage={null}
+                setCurrentImage={null}
               >
                 <div className='text-black' dangerouslySetInnerHTML={{ __html: modalHtmlContent }} />
               </Modal>
 
-              {/* Navigation buttons for parades */}
-              {/*&lt; = left arrow "<"*/}
-              {/*&gt; = right arrow ">"*/}
-              <div className='flex justify-between'>
-                <button onClick={handlePrevParade} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>prev parade</button>
-                <button onClick={handleNextParade} className='bg-gray-800 hover:bg-gray-900 mt-6 p-1 rounded-lg'>next parade</button>
-              </div>
+             
             </div>
           )}
         </div>

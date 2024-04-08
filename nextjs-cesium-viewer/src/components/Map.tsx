@@ -51,7 +51,8 @@ const Map = () => {
     const appVersion = searchParams.get('version');
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [currentImage, setCurrentImage] = useState<string | null>(null); // Graphic material
+    const [selectedImage, setSelectedImage] = useState<string | null>(null); // Phase
     const modelImageNames = ['ix', 'x', 'xi', 'xii', 'xiii', 'xxi'];
 
     // const models: CesiumModel[] = [];
@@ -68,6 +69,22 @@ const Map = () => {
     const destPosRef = useRef<Cartesian3 | null>(null);
     const [destPos, setDestPos] = useState<Cartesian3 | null>(null);
     const [enabledPois, setEnabledPois] = useState<string[]>([]);
+
+    function setGMimage(image:string)
+    {
+        console.log("setGMimage: " + image);
+        // execute after one second
+        setTimeout(() => {
+            setCurrentImage(image);
+        }, 1000);
+        setTimeout(() => {
+            setCurrentImage(image);
+        }, 2000);
+        setTimeout(() => {
+            setCurrentImage(image);
+        }, 3000);
+        
+    }
 
     // utility for getting the current time
     /* 
@@ -156,6 +173,7 @@ const Map = () => {
     
     // Load the selected phase .glB model
     const loadModel = async (modelId: number) => {
+        console.log('Selected model ID: ', modelId);
         // Hide any previously shown models or tilesets
         models.forEach((model) => {
             if (model.model) model.model.show = false; // For GLTF models
@@ -217,8 +235,14 @@ const Map = () => {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
                     timeline: true,    // Disable timebar at the bottom
                     animation: false,    // Disable animation (clock-like) widget
+                    baseLayerPicker: false,
+                    fullscreenButton: false,
+                    geocoder: false,
+                    sceneModePicker: false,
+                    selectionIndicator: false,
+                    navigationHelpButton: false,
                     creditContainer: document.createElement("none"), // Remove the logo and credits of Cesium Ion
-                    vrButton: true,
+                    vrButton: false,
                     shadows: false,
                     scene3DOnly: true,
                     msaaSamples: 1
@@ -366,7 +390,9 @@ const Map = () => {
                         viewer.camera.moveUp(moveSpeed);
                     else if (e.key === 'e' || e.key === 'E')
                         viewer.camera.moveDown(moveSpeed);
-                });
+                    else if (e.key === 'z' || e.key === 'Z')
+                        setIsModalOpen(true);
+                }); 
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
@@ -395,7 +421,7 @@ const Map = () => {
                 // Create a custom button in the Cesium's existing toolbar
                 const carouselButton = document.createElement('button');
                 carouselButton.classList.add('cesium-button');
-                carouselButton.innerHTML = 'Graphic Materials';    // Open Modal button name
+                carouselButton.innerHTML = 'Show graphic materials';    // Open Modal button name
 
                 // Add a click event handler to open the Modal
                 carouselButton.addEventListener('click', () => {
@@ -1148,14 +1174,16 @@ const Map = () => {
             {/* Return the Image Carousel Modal */}
             <Modal
                 isOpen={isModalOpen}
+                currentImage = {currentImage}
+                setCurrentImage = {setCurrentImage}
                 onClose={() => setIsModalOpen(false)}
                 showCarousel={true}
-                backgroundStyle="bg-black bg-opacity-75" // it's the default, can be omitted, but I leave it for readability
+                backgroundStyle="bg-black bg-opacity-75" 
                 allowInteraction={false} // it's the default, can be omitted, but I leave it for readability
             />
 
             {/* Stories */}
-            <StoriesDisplay setCameraView={ setCameraView } onPoisEnabled={setEnabledPois} />
+            <StoriesDisplay setCameraView={ setCameraView } loadModel={loadModel} setGMmodal={setIsModalOpen} setGMimage={setGMimage} setCurrentImage={setCurrentImage} onPoisEnabled={setEnabledPois} />
 
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}

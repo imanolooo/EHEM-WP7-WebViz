@@ -73,7 +73,12 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
 }
 
 
-const ResponsiveCarousel: React.FC = () => {
+interface Props {
+    currentImage: any,
+    setCurrentImage: any;
+}
+
+const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) => {
     // Get the app version from the URL
     const searchParams = useSearchParams();
     const appVersion = searchParams.get('version');
@@ -89,7 +94,7 @@ const ResponsiveCarousel: React.FC = () => {
     const [architecturalSpaces, setArchitecturalSpaces] = useState<any[]>([]);
     const [architecturalSpacesNames, setArchitecturalSpacesNames] = useState<any[]>([]);
     const [annotations, setAnnotations] = useState<Annotation[]>([]);
-    let   [currentImage, setCurrentImage] = useState<string | null>(null);
+    //let   [currentImage, setCurrentImage] = useState<string | null>(null);
     const [isCurrentImageSet, setIsCurrentImageSet] = useState(false);
 
     const [graphicMaterialToSpace, setGraphicMaterialToSpace] = useState<Map<string, string>>(new Map());
@@ -468,11 +473,28 @@ const ResponsiveCarousel: React.FC = () => {
 
     // Handle thumbnail click
     const handleThumbnailClick = (thumbnailUrl: string) => {
+        console.log('Thumbnail clicked:', thumbnailUrl);
         const index = filteredThumbnailUrls.indexOf(thumbnailUrl);
         if (index !== -1) {
             setCurrentImage(filteredImageUrls[index]);
+            console.log(filteredImageUrls[index]);
         }
     };
+
+    
+    const openGM = (name: string) => {
+        console.log('Opening GM:', name);
+        const url = getImageUrlByGraphicMaterialId(name);
+        // filteredImageUrls.forEach((url, index) => { if (url.includes(name)) { setCurrentImage(filteredImageUrls[index]); } });
+        if (url) 
+        {
+                const index = filteredImageUrls.indexOf(url);
+                if (index !== -1) {
+                    setCurrentImage(filteredImageUrls[index]);
+                }
+        }
+    }
+    
 
     // Render custom thumbnails
     const renderCustomThumbnails = () => {
@@ -494,7 +516,7 @@ const ResponsiveCarousel: React.FC = () => {
     // Render carousel items without OpenSeadragon viewer
     const renderCarouselItems = () => {
         return filteredThumbnailUrls.map((thumbnailUrl, index) => (
-            <div key={index} className="display-flex overflow-x-auto whitespace-nowrap"
+            <div key={index} className="display-flex overflow-x-auto whitespace-nowrap h-24" 
                 onClick={() => handleThumbnailClick(thumbnailUrl)} />
         ));
     };
@@ -556,7 +578,7 @@ const ResponsiveCarousel: React.FC = () => {
                             showArrows={false}
                             showStatus={true}
                             showIndicators={false}
-                            infiniteLoop={true}
+                            infiniteLoop={false}  // changed 
                             dynamicHeight={false}
                             selectedItem={currentImage ? imageUrls.indexOf(currentImage) : 0}
                             onChange={(newIndex) => setCurrentImage(imageUrls[newIndex])}
@@ -613,3 +635,4 @@ const ResponsiveCarousel: React.FC = () => {
 }
 
 export default ResponsiveCarousel;
+
