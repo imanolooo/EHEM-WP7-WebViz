@@ -1,0 +1,43 @@
+{
+    "stories": [
+      {
+        "title": "B.1. The salvation",
+        "parades": [
+            {
+              "title": "Some parade title",
+              "actions": [
+                { "goto": "cam-salvation.txt" },
+                { "enable-pois": ["poiId1", "poiId2"] },
+                { "show-side-text": "The iconography within the northern and southern apsidioles X..." },
+                { "play-audio": "file.mp3" },
+                { "show-image-interval": ["https://ehem.virvig.eu/imgs/GM000032-Paintings%20central%20apse-north%20wall-the%20multitude%20of%20the%20chosen%20ones.jpg",
+                "00:00:00", "00:00:40"]},
+                { "show-image-interval": ["https://ehem.virvig.eu/imgs/GM000037-Paintings%20central%20apse-vault-Maiestas%20Domini.jpg", "00:00:41", "00:00:55"]},
+                { "next-parade": "" }
+              ]
+            },
+            {
+              "title": "Another parade title",
+              "actions": [
+                { "goto": "cam-salvation2.txt" },
+                { "change-model": "XIII"},
+                { "show-html-modal": "Sant Quirze de Pedret is a small mediaeval church in central Catalonia's Berguedà area, near the Pyrenees foothills and close to an important old route. The Llobregat River, one of the territory's key waterways, flows nearby. <br> <br> <img src='https://www.cs.upc.edu/~virtual/img/IMG_5615.jpg' width='400' class='rounded'> </img> <embed src='https://www.cs.upc.edu/~virtual/mp3/A1a.mp3' loop='true' autostart='true' height='0'>" }
+              ]
+            }
+          ]
+      },
+      {
+        "title": "Story 2",
+        "parades": []
+      },
+      {
+        "title": "Story 3",
+        "parades": []
+      },
+      {
+        "title": "Story 4",
+        "parades": []
+      }
+    ]
+  }
+  

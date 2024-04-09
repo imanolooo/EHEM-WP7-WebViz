@@ -1,0 +1,19 @@
+{
+    "globalPosition": {
+        "longitude": 1.883635,
+        "latitude": 42.107455,
+        "height": 644.8
+    },
+    "globalOrientation": {
+        "heading": 111.5,
+        "pitch": 0,
+        "roll": 0
+    },
+    "models": [
+        {"id": 2499177, "text": "Phase IX"},
+        {"id": 2499172, "text": "Phase X"},
+        {"id": 2499176, "text": "Phase XI"},
+        {"id": 2499174, "text": "Phase XII"},
+        {"id": 2499173, "text": "Phase XIII"}
+    ]
+}

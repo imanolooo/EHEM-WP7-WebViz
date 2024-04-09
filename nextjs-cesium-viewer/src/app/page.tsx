@@ -1,3 +1,5 @@
+'use client'    // Client component
+
 import "cesium/Build/Cesium/Widgets/widgets.css"
 import dynamic from "next/dynamic"
 
@@ -8,8 +10,8 @@ const Map = dynamic(() => import("../components/Map"), {  // dynamic import
 export default function Home() {
 
   return (
-    <div>
-      <Map />
-    </div>
+      <div className="relative w-full h-full">
+        <Map />
+      </div>
   );
 }
