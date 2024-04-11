@@ -21,8 +21,8 @@ export const phasesInfo = [
     { id: 2504192, text: "Phase XI" },
     { id: 2504191, text: "Phase XII" },
     { id: 2504190, text: "Phase XIII" },
-    // 3D Tilset
-    { id: 2513585, text: "Phase XXI" }
+    // 3D Tilset -> NO TILESET
+    { id: 2533920, text: "Phase XXI" }
 ];
 
 

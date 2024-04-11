@@ -287,8 +287,8 @@ const Map = () => {
                 phasesInfo.forEach((phase) => {
                     // Check if phase.text matches "Phase XXI" or any other
                     // specific phases you want to treat as Tilesets
-                    const isTileset = phase.text === "Phase XXI"
-                                      || phase.text === "Another Tileset Phase"; // Example for adding more conditions
+                    const isTileset = false;// phase.text === "Phase XXII"
+                    //                  || phase.text === "Another Tileset Phase"; // Example for adding more conditions
                 
                     const model = {
                         id: phase.id,
@@ -555,7 +555,7 @@ const Map = () => {
                     });
                 });
 
-                // Define your phase box data array (replace this with actual data)
+                // Define your phase box data array (replace this with actual data) 
                 const phaseBoxData: PhaseBoxDataType[] = [
                     // Example:
                     // { points: /* ... */, color: /* ... */, orientation: /* ... */, ... }
