@@ -3,9 +3,9 @@
 import { Viewer, Scene, LabelCollection, Cartesian3, Color, DistanceDisplayCondition, Cartographic, PerspectiveFrustum, Transforms, HeadingPitchRoll, ConstantProperty, Matrix4, Entity, HeadingPitchRange, DirectionalLight, Light, Sun, PostProcessStage, Cesium3DTileStyle, Cesium3DTileColorBlendMode, PointPrimitive, IonResource, JulianDate, ClockRange, ClockStep, CameraEventType, ScreenSpaceEventHandler, ScreenSpaceEventType, Property } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 
-const POI_RADIUS = 0.08; // meters
+const POI_RADIUS = 0.06; // meters
 const LABEL_OFFSET = -0.2; // meters
-const LABEL_FAR_DISTANCE = 7; // meters
+const LABEL_FAR_DISTANCE = 9; // meters
 
 class POI {
     id: string;
@@ -360,21 +360,25 @@ class Experimental{
     */
 
     addAllPois() {
-		this.pois.push(new POI("Orant", "Orant", `When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Orant', 
-a bearded male figure with open arms in a prayerful attitude. 
-<br><br><img src='https://visitmuseum.gencat.cat/media/cache/1140x684_portrait/uploads/objects/photos/54ba9fbfef972_orant-de-sant-quirze-de-pedret.jpeg' width='400'>
+		this.pois.push(new POI("Orant", "Orant", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Orant', 
+a bearded male figure with open arms in a prayerful attitude.
+<br><br><img src='orant.jpg' height='480'>
 
 `, 4736926.962825191, 155793.86441249054, 4254900.037438289));
-		this.pois.push(new POI("Cavaller", "Cavaller", `When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Cavaller', 
+		this.pois.push(new POI("Cavaller", "Cavaller", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Cavaller', 
 a warrior on horseback. 
-<br><br><img src='https://www.cs.upc.edu/~virtual/img/cavaller.jpg' width='400'>
+<br><br><img src='cavaller.jpg' height='600'>
 
 `, 4736925.556599217, 155794.5915427292, 4254901.407861949));
-		this.pois.push(new POI("Christ", "Divine Incarnation", `At the apex, there is a portrayal of the infant Jesus Christ, clutching a scroll, seated on the Virgin Mary's lap, surrounded by an aureole or mandorla. This imagery symbolizes Christ's incarnation and his role as the founder of the Christian Church.`, 4736929.057067022, 155790.07447817564, 4254899.004732476));
-		this.pois.push(new POI("Crownedlady", "Church on Earth", `The Church's terrestrial phase is depicted by means of a double visual metaphor. Next to the entrance, at the visitor’s right-hand side, there is the church personified as a crowned lady seated on a church-like edifice, reflecting the ethos of the Gregorian Reform. However, this iconography, with few parallels, notably in southern Italy, raises questions about its cultural transmission to Catalonia.`, 4736928.800539953, 155789.13254590853, 4254897.888945552));
-		this.pois.push(new POI("Wise", "The Parable of the Virgins", `The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.`, 4736927.884777924, 155790.40944153548, 4254899.321675795));
-		this.pois.push(new POI("Foolish", "The Parable of the Virgins", `The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.`, 4736929.009021637, 155790.2253358087, 4254897.839051721));
+		this.pois.push(new POI("Christ", "Divine Incarnation", `<p style="font-size:14px; font-family:Verdana, sans-serif">At the apex, there is a portrayal of the infant Jesus Christ, clutching a scroll, seated on the Virgin Mary's lap, surrounded by an aureole or mandorla. This imagery symbolizes Christ's incarnation and his role as the founder of the Christian Church.`, 4736929.057067022, 155790.07447817564, 4254899.004732476));
+		this.pois.push(new POI("Crownedlady", "Church on Earth", `<p style="font-size:14px; font-family:Verdana, sans-serif">The Church's terrestrial phase is depicted by means of a double visual metaphor. Next to the entrance, at the visitor’s right-hand side, there is the church personified as a crowned lady seated on a church-like edifice, reflecting the ethos of the Gregorian Reform. However, this iconography, with few parallels, notably in southern Italy, raises questions about its cultural transmission to Catalonia.`, 4736928.800539953, 155789.13254590853, 4254897.888945552));
+		this.pois.push(new POI("Wise", "The Parable of the Virgins", `<p style="font-size:14px; font-family:Verdana, sans-serif">The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.`, 4736927.884777924, 155790.40944153548, 4254899.321675795));
+		this.pois.push(new POI("Foolish", "The Parable of the Virgins", `<p style="font-size:14px; font-family:Verdana, sans-serif">The rest of the medium zone of the wall illustrates the parable of the wise and foolish virgins (Matthew 25,1-4), with the wise seated at a table with Christ. The juxtaposition of natural and metaphorical light, through burning and extinguished torches, underscores the theme of spiritual preparedness for salvation.`, 4736929.009021637, 155790.2253358087, 4254897.839051721));
+		this.pois.push(new POI("SaintWriting", "Seated saint writing", `<p style="font-size:14px; font-family:Verdana, sans-serif">Unidentified Saint seated and writing. `, 4736928.6574164545, 155788.77521022837, 4254898.795277267));
+		this.pois.push(new POI("scaMaria", "Inscription ", `<p style="font-size:14px; font-family:Verdana, sans-serif">SCA MARIA, inscription that identifies the Virgin`, 4736928.676959032, 155789.87453088397, 4254899.403179705));
 	}
+
+
 
     addPOIs(ids: string[]) {
         // remove all previous POIs

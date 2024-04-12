@@ -260,10 +260,10 @@ const Map = () => {
                 const intersectionPointEntity = new Entity({
                     position: new Cartesian3(0, 0, 0),
                     point: {
-                        pixelSize: 100,
+                        pixelSize: 0, // invisible
                         color: Color.TRANSPARENT,
                         outlineColor: Color.YELLOW,
-                        outlineWidth: 2,
+                        outlineWidth: 0, // invisible
 
                     },
                 });

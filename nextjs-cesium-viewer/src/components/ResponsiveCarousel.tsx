@@ -434,7 +434,7 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
                 type: 'image',
                 url: currentImage,
             },
-            maxZoomLevel: 4,
+            maxZoomLevel: 3, // Limit zoom level to 3x
             gestureSettingsMouse: {
                 clickToZoom: false, // Disable zoom on click
             },
