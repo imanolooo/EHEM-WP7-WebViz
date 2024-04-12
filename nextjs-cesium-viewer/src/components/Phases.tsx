@@ -16,13 +16,19 @@
 
 export const phasesInfo = [
     // GLB models (new - translated origin - no Draco)
-    { id: 2504193, text: "Phase IX" },
+    /*{ id: 2504193, text: "Phase IX" },
     { id: 2504189, text: "Phase X" },
     { id: 2504192, text: "Phase XI" },
     { id: 2504191, text: "Phase XII" },
     { id: 2504190, text: "Phase XIII" },
     // 3D Tilset -> NO TILESET
-    { id: 2533920, text: "Phase XXI" }
+    { id: 2533920, text: "Phase XXI" }*/
+    { id: 2536536, text: "Phase IX" },
+    { id: 2536537, text: "Phase X" },
+    { id: 2536538, text: "Phase XI" },
+    { id: 2536539, text: "Phase XII" },
+    { id: 2536540, text: "Phase XIII" },
+    { id: 2536602, text: "Phase XXI" }
 ];
 
 
