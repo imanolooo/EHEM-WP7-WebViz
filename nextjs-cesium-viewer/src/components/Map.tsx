@@ -396,10 +396,11 @@ const Map = () => {
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
+                        console.log("Entra");
                         viewer.flyTo(currentModelEntity, {
                             offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
-                                CesiumMath.toRadians(0),
+                                CesiumMath.toRadians(-15),
                                 35
                             ),
                         });
