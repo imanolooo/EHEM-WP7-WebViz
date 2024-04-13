@@ -382,16 +382,16 @@ const Map = () => {
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
                         viewer.camera.moveBackward(moveSpeed);
-                    else if (e.key === 'a' || e.key === 'A')
+                    else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')
                         viewer.camera.moveLeft(moveSpeed);
-                    else if (e.key === 'd' || e.key === 'D')
+                    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight')
                         viewer.camera.moveRight(moveSpeed);
-                    else if (e.key === 'q' || e.key === 'Q')
+                    else if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowUp')
                         viewer.camera.moveUp(moveSpeed);
-                    else if (e.key === 'e' || e.key === 'E')
+                    else if (e.key === 'e' || e.key === 'E' || e.key === 'ArrowDown')
                         viewer.camera.moveDown(moveSpeed);
-                    else if (e.key === 'z' || e.key === 'Z')
-                        setIsModalOpen(true);
+                    //else if (e.key === 'z' || e.key === 'Z')
+                        //setIsModalOpen(true);
                 }); 
 
                 const resetCamera = () => {
