@@ -218,11 +218,9 @@ class FirstPersonCameraController{
         // console.log(keyCode);
         switch (keyCode) {
             case "W".charCodeAt(0):
-            case 38: // up
                 this._direction = DIRECTION_FORWARD;
                 return;
             case "S".charCodeAt(0):
-            case 40: // down
                 this._direction = DIRECTION_BACKWARD;
                 return;
             case "D".charCodeAt(0):
@@ -235,9 +233,11 @@ class FirstPersonCameraController{
                 return;
 
             case "Q".charCodeAt(0):
+            case 40: // down
                     this._direction = DIRECTION_DOWN;
                     return;
             case "E".charCodeAt(0):
+            case 38: // up
                         this._direction = DIRECTION_UP;
                         return;
     
