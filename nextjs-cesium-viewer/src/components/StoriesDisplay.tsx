@@ -288,7 +288,7 @@ const StoriesDisplay = ({ setCameraView, loadModel, setGMmodal, setGMimage, setC
           {/* Select story */}
           <div className="p-4" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
             {((!selectedStory || isHoveringTitles) ? stories : [selectedStory]).map((story, index) => (
-              story.title[1]!="."?  
+              story.title[1]!="." || story.title[0]=="C"?  
                 <button
                   key={index}
                   className={`mb-1 pt-0 pb-0 btn-sm rounded block w-full text-left ${
