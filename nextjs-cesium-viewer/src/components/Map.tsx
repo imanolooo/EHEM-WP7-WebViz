@@ -591,9 +591,10 @@ const Map = () => {
                 nextButton.classList.add('cesium-button');
 
                 //-----Marios-----
+               
 
                 // Path to your JSON file
-                const jsonFilePath = 'data.json';
+                const jsonFilePath = 'data2.json';
 
                 // Variable to store the phases and their locations
                 var phases: Record<string, { locations: Array<any> }> = {};
