@@ -359,14 +359,14 @@ class Experimental{
     };
     */
 
-    addAllPois() {
-		this.pois.push(new POI("Orant", "Orant", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Orant', 
-a bearded male figure with open arms in a prayerful attitude.
+	addAllPois() {
+		this.pois.push(new POI("Orant", "Orant", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. This fragment is the 'Orant', 
+a bearded male figure, probably a saint, with open arms in a prayerful attitude.
 <br><br><img src='orant.jpg' height='480'>
 
 `, 4736926.962825191, 155793.86441249054, 4254900.037438289));
-		this.pois.push(new POI("Cavaller", "Cavaller", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. One of the fragments is the 'Cavaller', 
-a warrior on horseback. 
+		this.pois.push(new POI("Cavaller", "Cavaller", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. This fragment is the 'Cavaller' or the Knight, 
+a warrior on horseback who probably represents a saint. 
 <br><br><img src='cavaller.jpg' height='600'>
 
 `, 4736925.556599217, 155794.5915427292, 4254901.407861949));
@@ -389,6 +389,8 @@ a warrior on horseback.
 The inscription [AGNVS DEI QVI T]OL[L]ITP[E] / [CCAT]A MON / DI alludes to the presence of the Lamb, which would be accompanying it. The text has liturgical significance, as it evokes the Roman Mass prayer of the Agnus dei: "Lamb of God, who takes away the sin of the world, have mercy on us"). At the same time, it recalls the words of John the Baptist when he saw Jesus: "Behold the Lamb of God, who takes away the sin of the world.(Jo. 1,29)`, 4736928.086128469, 155793.70484611992, 4254902.240684626));
 		this.pois.push(new POI("scales", "The scales of the Apocalyptic knight", `<p style="font-size:14px; font-family:Verdana, sans-serif">Accoding to Rev. 6,5, this horseman symbolizes scarcity on earth.`, 4736927.789278445, 155792.03589676268, 4254900.393080054));
 		this.pois.push(new POI("hell", "The gates of hell", `<p style="font-size:14px; font-family:Verdana, sans-serif">Just around the corner is an elongated black spot, which could be identified as the gate of Hell.`, 4736928.289110475, 155793.55130542885, 4254900.138990375));
+		this.pois.push(new POI("Death", "The horseman of Death", `<p style="font-size:14px; font-family:Verdana, sans-serif">Next to the gates of hell there is a saddened figure holding reins in his hand: he is the horseman of Death.`, 4736928.062460028, 155793.12627936073, 4254900.128780006));
+		this.pois.push(new POI("martyrs", "The souls of the martyrs", `<p style="font-size:14px; font-family:Verdana, sans-serif">Six busts, dressed in white robes, that represent the souls of the martyrs mentioned at the opening of the fifth seal.`, 4736926.012778861, 155794.3124003423, 4254903.060940844));
 	}
 
 
