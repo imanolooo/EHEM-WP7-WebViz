@@ -359,7 +359,7 @@ class Experimental{
     };
     */
 
-	addAllPois() {
+    addAllPois() {
 		this.pois.push(new POI("Orant", "Orant", `<p style="font-size:14px; font-family:Verdana, sans-serif">When the Romanesque paintings were removed, fragments of an earlier, pre-Romanesque mural decoration appeared. This fragment is the 'Orant', 
 a bearded male figure, probably a saint, with open arms in a prayerful attitude.
 <br><br><img src='orant.jpg' height='480'>
@@ -391,6 +391,9 @@ The inscription [AGNVS DEI QVI T]OL[L]ITP[E] / [CCAT]A MON / DI alludes to the p
 		this.pois.push(new POI("hell", "The gates of hell", `<p style="font-size:14px; font-family:Verdana, sans-serif">Just around the corner is an elongated black spot, which could be identified as the gate of Hell.`, 4736928.289110475, 155793.55130542885, 4254900.138990375));
 		this.pois.push(new POI("Death", "The horseman of Death", `<p style="font-size:14px; font-family:Verdana, sans-serif">Next to the gates of hell there is a saddened figure holding reins in his hand: he is the horseman of Death.`, 4736928.062460028, 155793.12627936073, 4254900.128780006));
 		this.pois.push(new POI("martyrs", "The souls of the martyrs", `<p style="font-size:14px; font-family:Verdana, sans-serif">Six busts, dressed in white robes, that represent the souls of the martyrs mentioned at the opening of the fifth seal.`, 4736926.012778861, 155794.3124003423, 4254903.060940844));
+		this.pois.push(new POI("altar", "The altar", `<p style="font-size:14px; font-family:Verdana, sans-serif">The altar, which has been placed above the souls of the martyrs as the biblical text says, is a very prominent feature.`, 4736926.508230306, 155794.40806272783, 4254903.18560753));
+		this.pois.push(new POI("ciborium", "Canopy or ciborium ", `<p style="font-size:14px; font-family:Verdana, sans-serif">The purpose of the canopy or ciborium is to protect and embellish the altar<br><br><img src='ciborium.jpg' width='60%'>`, 4736926.642469661, 155794.20561968195, 4254903.283976408));
+		this.pois.push(new POI("sky", "The rolling sky", `<p style="font-size:14px; font-family:Verdana, sans-serif">The sky is represented by a white parchment resembling a tablecloth. The inscription (C)OELO is the key to identifying this fragment. <br><br><img src='coelo.jpg' width='60%'>`, 4736925.866166571, 155794.30033455332, 4254902.978532835));
 	}
 
 
