@@ -397,13 +397,25 @@ const Map = () => {
                 const resetCamera = () => {
                     if (currentModelEntity) {
                         console.log("Entra");
-                        viewer.flyTo(currentModelEntity, {
+                        /*viewer.flyTo(currentModelEntity, {
                             offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
                                 CesiumMath.toRadians(-15),
                                 35
                             ),
                         });
+                        */
+                        viewer.camera.flyTo({
+                            destination: new Cartesian3(4736929.155177345, 155752.35991777678, 4254912.231938995),
+                            orientation: {
+                              direction: new Cartesian3(-0.11077147452686226, 0.9481225389143196, -0.2979820995190974),
+                              up: new Cartesian3(0.7, 0.1, 0.68)
+                            },
+                            duration: 2.0,
+                            complete: function () { },
+                          });
+                        
+                           
                     }
                 };
 
