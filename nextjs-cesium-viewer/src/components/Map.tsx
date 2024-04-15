@@ -395,27 +395,40 @@ const Map = () => {
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
                         viewer.camera.moveBackward(moveSpeed);
-                    else if (e.key === 'a' || e.key === 'A')
+                    else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')
                         viewer.camera.moveLeft(moveSpeed);
-                    else if (e.key === 'd' || e.key === 'D')
+                    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight')
                         viewer.camera.moveRight(moveSpeed);
-                    else if (e.key === 'q' || e.key === 'Q')
+                    else if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowUp')
                         viewer.camera.moveUp(moveSpeed);
-                    else if (e.key === 'e' || e.key === 'E')
+                    else if (e.key === 'e' || e.key === 'E' || e.key === 'ArrowDown')
                         viewer.camera.moveDown(moveSpeed);
-                    else if (e.key === 'z' || e.key === 'Z')
-                        setIsModalOpen(true);
+                    //else if (e.key === 'z' || e.key === 'Z')
+                        //setIsModalOpen(true);
                 }); 
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
-                        viewer.flyTo(currentModelEntity, {
+                        console.log("Entra");
+                        /*viewer.flyTo(currentModelEntity, {
                             offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
-                                CesiumMath.toRadians(0),
+                                CesiumMath.toRadians(-15),
                                 35
                             ),
                         });
+                        */
+                        viewer.camera.flyTo({
+                            destination: new Cartesian3(4736929.155177345, 155752.35991777678, 4254912.231938995),
+                            orientation: {
+                              direction: new Cartesian3(-0.11077147452686226, 0.9481225389143196, -0.2979820995190974),
+                              up: new Cartesian3(0.7, 0.1, 0.68)
+                            },
+                            duration: 2.0,
+                            complete: function () { },
+                          });
+                        
+                           
                     }
                 };
 
@@ -603,9 +616,10 @@ const Map = () => {
                 nextButton.classList.add('cesium-button');
 
                 //-----Marios-----
+               
 
                 // Path to your JSON file
-                const jsonFilePath = 'data.json';
+                const jsonFilePath = 'data2.json';
 
                 // Variable to store the phases and their locations
                 var phases: Record<string, { locations: Array<any> }> = {};
