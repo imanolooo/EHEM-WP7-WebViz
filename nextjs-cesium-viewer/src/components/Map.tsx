@@ -70,6 +70,8 @@ const Map = () => {
     const [destPos, setDestPos] = useState<Cartesian3 | null>(null);
     const [enabledPois, setEnabledPois] = useState<string[]>([]);
 
+    const [buttonText, setButtonText] = useState('Phase IXth cent.');
+
     function setGMimage(image:string)
     {
         console.log("setGMimage: " + image);
@@ -138,27 +140,36 @@ const Map = () => {
     // Phases Selection menu
     const renderMenu = () => (
         <>
+
+           
+
             {/* Menu Content */}
-            <div className={`fixed inset-x-0 bottom-0 z-20 bg-opacity-75 bg-black flex items-center overflow-x-auto ${isMenuOpen ? 'py-4' : 'py-0'} ${isMenuOpen ? 'block' : 'hidden'}`}>
-                <div className="flex flex-grow justify-center space-x-4 px-4">
-                    {modelImageNames.map((name) => (
-                        <img 
-                            key={name} 
-                            src={`/${name}.jpg`} 
-                            alt={`Select ${name}`}
-                            className="min-w-[100px] max-w-[200px] w-auto h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200"
-                            onClick={() => { selectImage(name); setIsMenuOpen(!isMenuOpen)}}
-                        />
-                    ))}
+            <div className={`fixed inset-x-0 bottom-7 z-20>`}>
+                 {/* Toggle Button */}
+                 <div className={`flex justify-end`}>
+                    <button 
+                        onClick={() => setIsMenuOpen(!isMenuOpen)} 
+                        /*fixed bottom-20 right-2 transition-transform transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-full'*/
+                        className={`text-white bg-[#303336] hover:bg-[#48b] hover:border-[#aef] hover:shadow-[0_0_8px_#fff] font-bold py-2 px-4 rounded}`}>
+                        {isMenuOpen ? '▼ ' : '▲ '} {buttonText}
+                    </button>
+                </div>
+                <div className={`bg-opacity-75 bg-black flex items-center overflow-x-auto ${isMenuOpen ? 'py-4' : 'py-0'} ${isMenuOpen ? 'block' : 'hidden'}`}>
+                    <div className="flex flex-grow justify-center space-x-4 px-4">
+                        {modelImageNames.map((name) => (
+                            <img 
+                                key={name} 
+                                src={`/${name}.jpg`} 
+                                alt={`Select ${name}`}
+                                className="min-w-[100px] max-w-[200px] w-auto h-16 md:h-24 cursor-pointer transform hover:scale-110 transition-transform duration-200"
+                                onClick={() => { selectImage(name); setIsMenuOpen(!isMenuOpen)}}
+                            />
+                        ))}
+                    </div>
                 </div>
             </div>
 
-            {/* Toggle Button */}
-            <button 
-                onClick={() => setIsMenuOpen(!isMenuOpen)} 
-                className="fixed bottom-36 right-2 text-white bg-[#303336] hover:bg-[#48b] hover:border-[#aef] hover:shadow-[0_0_8px_#fff] font-bold py-2 px-4 rounded">
-                {isMenuOpen ? 'Close' : 'Open'} Phase Selection
-            </button>
+            
         </>
     );
     
@@ -168,6 +179,8 @@ const Map = () => {
         if (index !== -1) {
             const modelId = phasesInfo[index].id; // Assuming the orders match
             setSelectedImage(String(modelId)); // Now storing the model ID instead
+            //console.log(phasesInfo[index].text);
+            setButtonText(phasesInfo[index].text);
         }
     };
     
@@ -382,27 +395,40 @@ const Map = () => {
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
                         viewer.camera.moveBackward(moveSpeed);
-                    else if (e.key === 'a' || e.key === 'A')
+                    else if (e.key === 'a' || e.key === 'A' || e.key === 'ArrowLeft')
                         viewer.camera.moveLeft(moveSpeed);
-                    else if (e.key === 'd' || e.key === 'D')
+                    else if (e.key === 'd' || e.key === 'D' || e.key === 'ArrowRight')
                         viewer.camera.moveRight(moveSpeed);
-                    else if (e.key === 'q' || e.key === 'Q')
+                    else if (e.key === 'q' || e.key === 'Q' || e.key === 'ArrowUp')
                         viewer.camera.moveUp(moveSpeed);
-                    else if (e.key === 'e' || e.key === 'E')
+                    else if (e.key === 'e' || e.key === 'E' || e.key === 'ArrowDown')
                         viewer.camera.moveDown(moveSpeed);
-                    else if (e.key === 'z' || e.key === 'Z')
-                        setIsModalOpen(true);
+                    //else if (e.key === 'z' || e.key === 'Z')
+                        //setIsModalOpen(true);
                 }); 
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
-                        viewer.flyTo(currentModelEntity, {
+                        console.log("Entra");
+                        /*viewer.flyTo(currentModelEntity, {
                             offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
-                                CesiumMath.toRadians(0),
+                                CesiumMath.toRadians(-15),
                                 35
                             ),
                         });
+                        */
+                        viewer.camera.flyTo({
+                            destination: new Cartesian3(4736929.155177345, 155752.35991777678, 4254912.231938995),
+                            orientation: {
+                              direction: new Cartesian3(-0.11077147452686226, 0.9481225389143196, -0.2979820995190974),
+                              up: new Cartesian3(0.7, 0.1, 0.68)
+                            },
+                            duration: 2.0,
+                            complete: function () { },
+                          });
+                        
+                           
                     }
                 };
 
@@ -590,9 +616,10 @@ const Map = () => {
                 nextButton.classList.add('cesium-button');
 
                 //-----Marios-----
+               
 
                 // Path to your JSON file
-                const jsonFilePath = 'data.json';
+                const jsonFilePath = 'data2.json';
 
                 // Variable to store the phases and their locations
                 var phases: Record<string, { locations: Array<any> }> = {};
