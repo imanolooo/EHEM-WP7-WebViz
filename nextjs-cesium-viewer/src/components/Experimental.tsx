@@ -392,9 +392,19 @@ The inscription [AGNVS DEI QVI T]OL[L]ITP[E] / [CCAT]A MON / DI alludes to the p
 		this.pois.push(new POI("Death", "The horseman of Death", `<p style="font-size:14px; font-family:Verdana, sans-serif">Next to the gates of hell there is a saddened figure holding reins in his hand: he is the horseman of Death.`, 4736928.062460028, 155793.12627936073, 4254900.128780006));
 		this.pois.push(new POI("martyrs", "The souls of the martyrs", `<p style="font-size:14px; font-family:Verdana, sans-serif">Six busts, dressed in white robes, that represent the souls of the martyrs mentioned at the opening of the fifth seal.`, 4736926.012778861, 155794.3124003423, 4254903.060940844));
 		this.pois.push(new POI("altar", "The altar", `<p style="font-size:14px; font-family:Verdana, sans-serif">The altar, which has been placed above the souls of the martyrs as the biblical text says, is a very prominent feature.`, 4736926.508230306, 155794.40806272783, 4254903.18560753));
-		this.pois.push(new POI("ciborium", "Canopy or ciborium ", `<p style="font-size:14px; font-family:Verdana, sans-serif">The purpose of the canopy or ciborium is to protect and embellish the altar<br><br><img src='ciborium.jpg' width='60%'>`, 4736926.642469661, 155794.20561968195, 4254903.283976408));
-		this.pois.push(new POI("sky", "The rolling sky", `<p style="font-size:14px; font-family:Verdana, sans-serif">The sky is represented by a white parchment resembling a tablecloth. The inscription (C)OELO is the key to identifying this fragment. <br><br><img src='coelo.jpg' width='60%'>`, 4736925.866166571, 155794.30033455332, 4254902.978532835));
+		this.pois.push(new POI("ciborium", "Canopy or ciborium ", `<p style="font-size:14px; font-family:Verdana, sans-serif">The purpose of the canopy or ciborium is to protect and embellish the altar<br/><br/><img src='ciborium.jpg' height='400'>`, 4736926.642469661, 155794.20561968195, 4254903.283976408));
+		this.pois.push(new POI("sky", "The rolling sky", `<p style="font-size:14px; font-family:Verdana, sans-serif">The sky is represented by a white parchment resembling a tablecloth. The inscription (C)OELO is the key to identifying this fragment. <br><br><img src='coelo.jpg' height='400'>`, 4736925.866166571, 155794.30033455332, 4254902.978532835));
+		this.pois.push(new POI("civate", "Angels from Civate (Italy)", `<p style="font-size:14px; font-family:Verdana, sans-serif">Compare the angel's nimbus of Pedret with these from Civate's frescos. <br><br><img src='civate.jpg' height='400'>`, 4736925.840776396, 155794.60393817635, 4254902.795978143));
+		this.pois.push(new POI("archangel", "Archangel in the south wall", `<p style="font-size:14px; font-family:Verdana, sans-serif">This figure wears a lavish tunic similar to the <i>loros</i> worn by Byzantine archangels. With his left hand he holds a round object similar to a globe.`, 4736927.8349217335, 155790.7494473593, 4254901.109298423));
+		this.pois.push(new POI("banner", "Banner of an archangel", `<p style="font-size:14px; font-family:Verdana, sans-serif">This banner is usually carried by an archangel. This figure, which has now disappeared, was the companion of the archangel in the south wall.`, 4736925.824675283, 155791.94067163244, 4254904.061313368));
+		this.pois.push(new POI("seamonsters", "Sea monsters in the curtains", `<p style="font-size:14px; font-family:Verdana, sans-serif">A fish-tailed archer is shooting an arrow at a sea monster.`, 4736924.887504296, 155794.53987916993, 4254900.70373839));
+		this.pois.push(new POI("elephant", "An elephant?", `<p style="font-size:14px; font-family:Verdana, sans-serif">An elephant-like quadruped appears in the perspective meander register.`, 4736926.406413966, 155794.03136313817, 4254900.168509491));
+		this.pois.push(new POI("saintJohn", "Saint John", `<p style="font-size:14px; font-family:Verdana, sans-serif">The bust of this saint bears an inscription that identifies him, SANCTVS IOANNES.`, 4736925.234089846, 155789.20870657882, 4254906.12338509));
+		this.pois.push(new POI("saintPaul", "Saint Paul", `<p style="font-size:14px; font-family:Verdana, sans-serif">Saint Paul is near to Saint John. The inscription with his name is still legible.`, 4736925.436842949, 155790.14553599738, 4254905.850885627));
 	}
+
+
+
 
 
 
