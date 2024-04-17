@@ -246,7 +246,7 @@ const Map = () => {
                 // Create the Viewer
                 const viewer = new Viewer("cesiumContainer", {
                     terrainProvider: await createWorldTerrainAsync(),   // Await the promise
-                    timeline: true,    // Disable timebar at the bottom
+                    timeline: (appVersion === 'researcher'),    // Disable timebar at the bottom
                     animation: false,    // Disable animation (clock-like) widget
                     baseLayerPicker: false,
                     fullscreenButton: false,
