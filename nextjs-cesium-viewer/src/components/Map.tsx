@@ -13,6 +13,7 @@ import {FirstPersonCameraController} from './FirstPersonNavigation';
 import {Experimental} from './Experimental';
 import StoriesDisplay from "./StoriesDisplay";
 import { useSearchParams } from "next/navigation";
+import './toggle-button.css'; 
 
 
 // This is the default access token
@@ -406,6 +407,41 @@ const Map = () => {
                     //else if (e.key === 'z' || e.key === 'Z')
                         //setIsModalOpen(true);
                 }); 
+
+
+                //-----------------------------------------------------------------------------------------------------
+                //QUALITY SELECTOR FOR THE MODELS
+                //function
+
+                //ui
+                // Create a custom button in the Cesium's existing toolbar
+                // Create the input checkbox element
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'switch';
+                checkbox.classList.add('cesium-checkbox');
+
+                // Create the label element
+                const label = document.createElement('label');
+                label.htmlFor = 'switch';
+
+                // Append the input checkbox and label to a container element
+                const toggle = document.createElement('toggle');
+                toggle.appendChild(checkbox);
+                toggle.appendChild(label);
+
+                // Append the container to the document body or another element
+                viewer.container.appendChild(toggle);
+
+                /*const resetButton = document.createElement('button');
+                resetButton.textContent = "Reset Camera";
+                resetButton.classList.add('cesium-button');
+                resetButton.addEventListener("click", () => {
+                    resetCamera();
+                });
+                viewer.container.appendChild(resetButton);*/
+                //-----------------------------------------------------------------------------------------------------
+
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
@@ -986,13 +1022,16 @@ const Map = () => {
                 if (toolbar) {
                     // Insert GM Carousel button before the existing buttons
                     const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
-                    toolbar.insertBefore(carouselButton, modeButton);
+                    toolbar.insertBefore(toggle, modeButton);
+                    toolbar.insertBefore(carouselButton, toggle);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
                     // toolbar.insertBefore(phasesDropdown, carouselButton);
                     // Insert the Navigation Modes Dropdown toolbar before the Phases Dropdown
                     toolbar.insertBefore(navModeDropdown, carouselButton);
                     // Insert the Reset Camera button before the Phases Dropdown
                     toolbar.insertBefore(resetButton, navModeDropdown);
+
+                    
 
                     // Insert the Debug button before the Reset Camera
                     // toolbar.insertBefore(toggleDebug, resetButton);
