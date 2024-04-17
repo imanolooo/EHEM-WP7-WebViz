@@ -33,7 +33,7 @@ export const phasesInfo = [
     { id: 2540857, text: "Phase Xth cent." },
     { id: 2540858, text: "Phase XIth cent." },
     { id: 2540859, text: "Phase XIIth cent." },
-    { id: 2540862, text: "Phase XIIIth cent." },
+    { id: 2542660, text: "Phase XIIIth cent." },
     { id: 2540819, text: "Phase XXIth cent." }
 ];
 
