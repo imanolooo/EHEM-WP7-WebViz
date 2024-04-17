@@ -352,7 +352,8 @@ const StoriesDisplay = ({ setCameraView, loadModel, setGMmodal, setGMimage, setC
 
                 {/* Display image content */}
                 {currentImageUrl && (
-                  <img src={currentImageUrl} alt="current-image" className="w-full h-auto" />
+                  // <img src={currentImageUrl} alt="current-image" className="w-full h-auto" />
+                  <img src={currentImageUrl} alt="" className="w-full h-auto" />
                 )}
 
                  {/* Audio player */}
