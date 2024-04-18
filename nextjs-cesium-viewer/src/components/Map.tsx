@@ -410,7 +410,7 @@ const Map = () => {
 
 
                 //-----------------------------------------------------------------------------------------------------
-                //QUALITY SELECTOR FOR THE MODELS
+                //MODEL QUALITY SELECTOR FOR THE MODELS
                 //function
 
                 //ui
@@ -433,14 +433,6 @@ const Map = () => {
 
                 // Append the container to the document body or another element
                 viewer.container.appendChild(toggle);
-
-                /*const resetButton = document.createElement('button');
-                resetButton.textContent = "Reset Camera";
-                resetButton.classList.add('cesium-button');
-                resetButton.addEventListener("click", () => {
-                    resetCamera();
-                });
-                viewer.container.appendChild(resetButton);*/
                 //-----------------------------------------------------------------------------------------------------
 
 
@@ -469,29 +461,75 @@ const Map = () => {
                     }
                 };
 
-                const resetButton = document.createElement('button');
+                /*const resetButton = document.createElement('button');
                 resetButton.textContent = "Reset Camera";
                 resetButton.classList.add('cesium-button');
                 resetButton.addEventListener("click", () => {
                     resetCamera();
                 });
-                viewer.container.appendChild(resetButton);
+                viewer.container.appendChild(resetButton);*/
 
+                viewer.homeButton.viewModel.command.beforeExecute.addEventListener(
+                    function(e) {
+                       e.cancel = true;
+                       resetCamera();
+                       //viewer.scene.camera.flyTo(homeCameraView);
+                    });
+
+                
+                
                 
                 // ------
                 // Modal settings
 
+                // ------
+                //Graphic Materials
+                const graphicMaterials = document.createElement('button');
+                graphicMaterials.type = "button";
+                graphicMaterials.className = "cesium-button cesium-toolbar-button cesium-home-button";
+                // Create an SVG element
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                svg.setAttribute('width', '24');
+                svg.setAttribute('height', '24');
+                svg.setAttribute('viewBox', '-4 0 26 24');
+
+                // Set the SVG path string
+                const svgPath = `
+                M 3 3 h 18 v 18 h -18 Z
+                M 7 7 a 1.5 1.5 0 0 1 0 3 a 1.5 1.5 0 0 1 0 -3
+                M 20.4 14.5 L 16 10 L 4 20
+                `;
+                svg.innerHTML = `<path d="${svgPath}" fill="none" stroke="#edffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+                // Append the SVG element to the button
+                graphicMaterials.appendChild(svg);
+
+                 // Add a click event handler to open the Modal
+                 graphicMaterials.addEventListener('click', () => {
+                    setIsModalOpen(true);
+                });  
+                
+                /*graphicMaterials.setAttribute(
+                    "data-bind",
+                    "\
+                attr: { title: tooltip },\
+                click: command,\
+                cesiumSvgPath: { path: svgPath, width: 28, height: 28 }"
+                  );*/
+  
+
                 // Create a custom button in the Cesium's existing toolbar
-                const carouselButton = document.createElement('button');
+                /*const carouselButton = document.createElement('button');
                 carouselButton.classList.add('cesium-button');
                 carouselButton.innerHTML = 'Show graphic materials';    // Open Modal button name
 
                 // Add a click event handler to open the Modal
                 carouselButton.addEventListener('click', () => {
                     setIsModalOpen(true);
-                });  
+                });  */
 
-
+    
 
                 // ------
                 // Phases Dropdown Menu settings
@@ -1024,14 +1062,18 @@ const Map = () => {
                     // Insert GM Carousel button before the existing buttons
                     const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
                     
-                    toolbar.insertBefore(carouselButton, modeButton);
+                    toolbar.insertBefore(graphicMaterials, modeButton);
+                    //toolbar.insertBefore(carouselButton, modeButton);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
                     // toolbar.insertBefore(phasesDropdown, carouselButton);
                     // Insert the Navigation Modes Dropdown toolbar before the Phases Dropdown
-                    toolbar.insertBefore(navModeDropdown, carouselButton);
+                    toolbar.insertBefore(navModeDropdown, graphicMaterials);
                     // Insert the Reset Camera button before the Phases Dropdown
-                    toolbar.insertBefore(resetButton, navModeDropdown);
-                    toolbar.insertBefore(toggle, resetButton);
+                    //toolbar.insertBefore(resetButton, navModeDropdown);
+                    //toolbar.insertBefore(graphicMaterials, navModeDropdown);
+                    const homeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
+                    const home = toolbar.querySelector("cesium-home-button");
+                    toolbar.insertAdjacentElement("afterbegin", toggle);
 
                     
 

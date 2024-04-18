@@ -8,28 +8,29 @@ label {
 	content: 'HD';
 	cursor: pointer;
 	text-indent: 0px;
-	font-size: 15px;
+	font-size: 13px;
   font-weight: bold;
 	font-family: Verdana, sans-serif;
   text-align: center;
-	line-height: 12px;
+	line-height: 22px;
 	width: 50px;
-	height: 25px;
+	height: 30px;
 	background: grey;
 	display: inline-block;
 	border-radius: 100px;
 	position: relative;
+    top: 10px;
 }
 
 label:after {
 	content: 'SD';
 	position: absolute;
-	top: 2px;
-	left: 2px;
-	width: 21px;
-	height: 21px;
+	top: 3px;
+	left: 3px;
+	width: 24px;
+	height: 24px;
 	background: #fff;
-	border-radius: 21px;
+	border-radius: 24px;
 	transition: 0.3s;
 }
 
