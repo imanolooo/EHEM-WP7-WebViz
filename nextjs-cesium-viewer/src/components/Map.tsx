@@ -427,6 +427,7 @@ const Map = () => {
 
                 // Append the input checkbox and label to a container element
                 const toggle = document.createElement('toggle');
+                toggle.id = 'box';
                 toggle.appendChild(checkbox);
                 toggle.appendChild(label);
 
@@ -1022,14 +1023,15 @@ const Map = () => {
                 if (toolbar) {
                     // Insert GM Carousel button before the existing buttons
                     const modeButton = toolbar.querySelector('.cesium-viewer-geocoderContainer');
-                    toolbar.insertBefore(toggle, modeButton);
-                    toolbar.insertBefore(carouselButton, toggle);
+                    
+                    toolbar.insertBefore(carouselButton, modeButton);
                     // Insert the Phases Dropdown toolbar before the GM Carousel
                     // toolbar.insertBefore(phasesDropdown, carouselButton);
                     // Insert the Navigation Modes Dropdown toolbar before the Phases Dropdown
                     toolbar.insertBefore(navModeDropdown, carouselButton);
                     // Insert the Reset Camera button before the Phases Dropdown
                     toolbar.insertBefore(resetButton, navModeDropdown);
+                    toolbar.insertBefore(toggle, resetButton);
 
                     
 
