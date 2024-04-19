@@ -438,7 +438,7 @@ const Map = () => {
                 resetButton.addEventListener("click", () => {
                     resetCamera();
                 });
-                viewer.container.appendChild(resetButton);
+                // viewer.container.appendChild(resetButton);  // not show "Reset Camera" button
 
                 
                 // ------
@@ -453,6 +453,160 @@ const Map = () => {
                 carouselButton.addEventListener('click', () => {
                     setIsModalOpen(true);
                 });  
+
+                // Predefined cameras dropdown menu
+                const camerasDropdown = document.createElement('select');
+                camerasDropdown.id = 'camera-menu';
+                camerasDropdown.classList.add('cesium-button');
+                camerasDropdown.innerHTML = 'Reset camera';    
+
+                {
+                    const option0 = document.createElement('option');
+                    option0.value = 'Reset camera options';
+                    option0.textContent = option0.value;
+                    camerasDropdown.appendChild(option0);
+
+                    const option1 = document.createElement('option');
+                    option1.value = 'Exterior';
+                    option1.textContent = option1.value;
+                    camerasDropdown.appendChild(option1);
+
+                    const option4 = document.createElement('option');
+                    option4.value = 'Interior - central apse';
+                    option4.textContent = option4.value;
+                    camerasDropdown.appendChild(option4);
+
+                    const option5 = document.createElement('option');
+                    option5.value = 'Interior - South apse';
+                    option5.textContent = option5.value;
+                    camerasDropdown.appendChild(option5);
+
+                    const option6 = document.createElement('option');
+                    option6.value = 'Interior - North apse';
+                    option6.textContent = option6.value;
+                    camerasDropdown.appendChild(option6);
+
+                    const option2 = document.createElement('option');
+                    option2.value = 'Interior - central nave';
+                    option2.textContent = option2.value;
+                    camerasDropdown.appendChild(option2);
+
+                    const option3 = document.createElement('option');
+                    option3.value = 'Interior - lateral nave';
+                    option3.textContent = option3.value;
+                    camerasDropdown.appendChild(option3);
+                }
+
+
+                // Dropdown event listener
+                camerasDropdown.addEventListener('change', async (event) => {
+                    const selectedPreset = (event.target as HTMLSelectElement).value;
+
+                    var current = "";
+                    models.forEach((model) => {
+                        if (model.model && model.model.show) current = model.name;
+                    });
+                    console.log(current);
+                    
+
+                    if (selectedPreset === "Exterior")
+                        {
+                            viewer.camera.flyTo({
+                                destination: new Cartesian3(4736929.155177345, 155752.35991777678, 4254912.231938995),
+                                orientation: {
+                                  direction: new Cartesian3(-0.11077147452686226, 0.9481225389143196, -0.2979820995190974),
+                                  up: new Cartesian3(0.7, 0.1, 0.68)
+                                },
+                                duration: 2.0,
+                                complete: function () { },
+                              });
+                        }
+
+                    if (selectedPreset === 'Interior - central nave')
+                        {
+                            viewer.camera.flyTo({
+                                destination: new Cartesian3(4736923.39130684, 155781.5167396294, 4254904.071742702),
+                                orientation: {
+                                    direction: new Cartesian3(0.21014269413278533, 0.9317886965129191, -0.2959896504159732),
+                                    up: new Cartesian3(0.74, 0.04, 0.66)
+                                },
+                                duration: 2.0,
+                                complete: function () { },
+                                });
+                        }        
+
+                    if (selectedPreset === 'Interior - lateral nave')
+                        {
+                            viewer.camera.flyTo({
+                                destination: new Cartesian3(4736920.362838485, 155783.3106908225, 4254907.5690728845),
+                                orientation: {
+                                    direction: new Cartesian3(0.21014253517221007, 0.9317887874336441, -0.29598947705000567),
+                                    up: new Cartesian3(0.74, 0.04, 0.66)
+                                },
+                                duration: 2.0,
+                                complete: function () { if (current === "Phase IXth cent.")
+                                    {
+                                        alert("At the IXth century, the lateral nave did not exist.");
+                                    }},
+                                });
+                            
+            
+                        } 
+                    if (selectedPreset === 'Interior - central apse')
+                    {
+                            viewer.camera.flyTo({
+                                destination: new Cartesian3(4736924.668139745, 155787.9354748301, 4254902.17556473),
+                                orientation: {
+                                    direction: new Cartesian3(0.3039150467251132, 0.9319177785280904,  -0.19790123404704027),
+                                    up: new Cartesian3(0.71, -0.08, 0.7)
+                                },
+                                duration: 2.0,
+                                complete: function () { },
+                                });
+                    }       
+                    if (selectedPreset === 'Interior - South apse')
+                        {
+                                viewer.camera.flyTo({
+                                    destination: new Cartesian3(4736926.595173732, 155786.69117951262, 4254898.480223486),
+                                    orientation: {
+                                        direction: new Cartesian3(0.28189714009233474, 0.9501324185846848,  -0.13335062640340287),
+                                        up: new Cartesian3(0.71, -0.11, 0.7)
+                                    },
+                                    duration: 2.0,
+                                    complete: function () {if (current === "Phase IXth cent.")
+                                        {
+                                            alert("At the IXth century, the South apse did not exist.");
+                                        } },
+                                    });
+                                    
+                        }      
+
+
+                    if (selectedPreset === 'Interior - North apse')
+                        {
+                                viewer.camera.flyTo({
+                                    destination: new Cartesian3(4736921.901812582, 155789.75842352153, 4254905.055329703),
+                                    orientation: {
+                                        direction: new Cartesian3(0.2818966612638122, 0.9501326155778395,  -0.13335023503364837),
+                                        up: new Cartesian3(0.71, -0.11, 0.7)
+                                    },
+                                    duration: 2.0,
+                                    complete: function () { if (current === "Phase IXth cent.")
+                                        {
+                                            alert("At the IXth century, the North apse did not exist.");
+                                        }},
+                                    });
+                                    
+                        }       
+                       
+                       
+                       
+
+
+                    camerasDropdown.value = 'Reset camera options';
+                    
+                });
+
 
 
 
@@ -992,7 +1146,9 @@ const Map = () => {
                     // Insert the Navigation Modes Dropdown toolbar before the Phases Dropdown
                     toolbar.insertBefore(navModeDropdown, carouselButton);
                     // Insert the Reset Camera button before the Phases Dropdown
-                    toolbar.insertBefore(resetButton, navModeDropdown);
+
+                    //toolbar.insertBefore(resetButton, navModeDropdown);
+                    toolbar.insertBefore(camerasDropdown, navModeDropdown);
 
                     // Insert the Debug button before the Reset Camera
                     // toolbar.insertBefore(toggleDebug, resetButton);
