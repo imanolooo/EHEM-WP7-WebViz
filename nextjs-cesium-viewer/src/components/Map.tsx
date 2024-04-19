@@ -206,6 +206,7 @@ const Map = () => {
                             uri: modelUri,
                             show: true,
                         },
+                        name: "St. Quirze de Pedret - " + selectedModel.name
                     });
                 }
             } else if (selectedModel.entityType === 'Tileset' && !selectedModel.tileset) {
@@ -322,7 +323,11 @@ const Map = () => {
                         uri: firstModelUri,
                         show: true, // Show immediately after loading
                     },
+                    name: "St. Quirze de Pedret - " + phasesInfo[0].text
                 });
+
+                viewer.infoBox.viewModel.enableCamera = false;
+                viewer.infoBox.viewModel.isCameraTracking = false;
 
                 // Assuming the first model is a GLTF model
                 // Update the corresponding model in the `models` array to include the entity reference
