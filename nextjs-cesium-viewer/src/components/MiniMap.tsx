@@ -4,7 +4,86 @@ import { phasesInfo} from './Phases';
 import { Cartesian3, Cartographic } from 'cesium';
 import { dir } from 'console';
 
+class Vec2
+{
+  x: number;
+  y: number;
+  constructor(x: number, y: number)
+  {
+    this.x = x;
+    this.y = y;
+  }
+  length(this: Vec2) : number
+  {
+    return Math.sqrt(this.x*this.x + this.y*this.y);
+  }
 
+  normalized(this: Vec2) : Vec2
+  {
+    const n = this.length();
+    return new Vec2(this.x/n, this.y/n);
+  }
+
+  normalize(this: Vec2) : void
+  {
+    const n = this.length();
+    this.x /= n;
+    this.y /= n;
+  }
+
+  area(this: Vec2, other: Vec2) : number
+  {
+    return this.x*other.y - this.y*other.x;
+  }
+
+  angle(this: Vec2, other: Vec2) : number 
+  {
+    const n1 = this.length();
+    const n2 = other.length();
+    const dot = this.dot(other);
+    return Math.acos(dot/(n1*n2));
+  }
+
+
+
+  dot(this: Vec2, other: Vec2) : number
+  {
+    return this.x*other.x + this.y*other.y;
+  }
+
+  add(this: Vec2, other: Vec2) : Vec2
+  {
+    return new Vec2(this.x + other.x, this.y + other.y);
+  } 
+
+  sub(this: Vec2, other: Vec2) : Vec2
+  {
+    return new Vec2(this.x - other.x, this.y - other.y);
+  } 
+
+  mul(this: Vec2, other: number) : Vec2
+  {
+    return new Vec2(this.x*other, this.y*other);
+  } 
+
+}
+
+function barycentric(p0: Vec2, p1: Vec2, p2: Vec2, p: Vec2) : [number, number, number]
+{
+  var v0 = p1.sub(p0);
+  var v1 = p2.sub(p0);
+  var v2 = p.sub(p0);
+  var d00 = v0.dot(v0);
+  var d01 = v0.dot(v1);
+  var d11 = v1.dot(v1);
+  var d20 = v2.dot(v0);
+  var d21 = v2.dot(v1);
+  var denom = d00 * d11 - d01 * d01;
+  var v = (d11 * d20 - d01 * d21) / denom;
+  var w = (d00 * d21 - d01 * d20) / denom;
+  var u = 1 - v - w;
+  return [u, v, w];
+};
 
 interface MiniMapProps {
   setCameraView: any;
@@ -49,8 +128,6 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
     }
   };
 
-  
-
   const posTR = {
     "position": {
       "x": 4736922.531106163,
@@ -61,18 +138,18 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
 
   const posBL = {
     "position": {
-      "x": 4736925.9079194525,
-      "y": 155772.70294584677,
-      "z": 4254896.616353796
+      "x": 4736924.94547117,
+      "y": 155772.65154585388,
+      "z": 4254895.636679317
     }
   }; 
 
   const posBR = {
-    "position": {
-      "x": 4736929.875762047,
-      "y": 155793.19441249827,
-      "z": 4254889.90851941
-    }
+      "position": {
+        "x": 4736929.895482613,
+        "y": 155792.20413750756,
+        "z": 4254889.889544869
+      }
   };
 
   const cTL = Cartographic.fromCartesian(new Cartesian3(posTL.position.x, posTL.position.y, posTL.position.z));
@@ -114,7 +191,7 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
         console.log(interpolate(x, y));
         const pos = interpolate(x,y);
         const config = { "position": pos, 
-        "direction": new Cartesian3(0.19, 0.96, -0.2), "up": new Cartesian3(0.63, 0.0, 0.67) };
+        "direction": new Cartesian3(0.19, 0.96, -0.2), "up": new Cartesian3(0.73, 0.0, 0.67) };
         setCameraView(config);
 
         
@@ -150,28 +227,39 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
     if (camera)
       {
       const carto = Cartographic.fromCartesian(camera.position);
-      const localx = (carto.longitude - cBL.longitude);
-      const localy = (carto.latitude - cBL.latitude);
-      var dirxhor = (cBR.longitude - cBL.longitude);
-      var diryhor = (cBR.latitude - cBL.latitude);
-      var dirxvert = (cTL.longitude - cBL.longitude); 
-      var diryvert = (cTL.latitude - cBL.latitude);
+      const P = new Vec2(carto.longitude, carto.latitude);
+      const BL = new Vec2(cBL.longitude, cBL.latitude);
+      const BR = new Vec2(cBR.longitude, cBR.latitude);
+      const TL = new Vec2(cTL.longitude, cTL.latitude);
+      const TR = new Vec2(cTR.longitude, cTR.latitude);
 
-
-      const normhor = Math.sqrt(dirxhor*dirxhor + diryhor*diryhor);
-      const normvert = Math.sqrt(dirxvert*dirxvert + diryvert*diryvert);
-      dirxhor /= normhor;
-      diryhor /= normhor;
-      dirxvert /= normvert;
-      diryvert /= normvert;
-
-      var compx = localx*dirxhor + localy*diryhor;
-      var compy = localx*dirxvert + localy*diryvert;
-      compx /= normhor;
-      compy /= normvert;
-      compy = 1-compy;
+        var local = new Vec2(0,0);
+        var bar  = barycentric(BL, BR, TL, P);
+        console.log("Barycentric 1: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
+        if (bar[0] >= 0 && bar[1] >= 0 && bar[2] >= 0)
+          local = new Vec2(bar[1], bar[2]);
+        else{
+          bar  = barycentric(BR, TR, TL, P);
+          console.log("Barycentric 2: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
+          local = new Vec2(bar[0]+bar[1], bar[1]+bar[2]);
+        }
+        /*
+      const local = P.sub(BL);
+      var v1 = BR.sub(BL);
+      var v2 = TL.sub(BL);
+      const l1 = v1.length();
+      const l2 = v2.length();
+      const v1n = v1.normalized();
+      const v2n = v2.normalized();  
+      
+      var Q = new Vec2(local.dot(v1n), local.dot(v2n));
+      Q.x /= l1;
+      Q.y /= l2;
+         */
+      var compx = local.x;
+      var compy = 1-local.y;
       console.log("Compx: " + compx + " ; Compy: " + compy + ".");
-
+       
 
       
       const x = compx;
