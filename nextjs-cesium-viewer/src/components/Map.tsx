@@ -1349,6 +1349,11 @@ const Map = () => {
           });
         }
       };
+
+    const currentCamera = ()    => {
+        if (viewerRef.current) 
+            return viewerRef.current.camera;
+    }
       
     return (
         <div>
@@ -1377,7 +1382,7 @@ const Map = () => {
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}
 
-            <MiniMap setCameraView={ setCameraView } loadModel={loadModel} setGMmodal={setIsModalOpen} setGMimage={setGMimage} setCurrentImage={setCurrentImage} onPoisEnabled={setEnabledPois} />
+            <MiniMap setCameraView={ setCameraView } loadModel={loadModel} setGMmodal={setIsModalOpen} setGMimage={setGMimage} setCurrentImage={setCurrentImage} onPoisEnabled={setEnabledPois} currentCamera={currentCamera}/>
 
         </div>
     );

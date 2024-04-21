@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Modal from './Modal';
 import { phasesInfo} from './Phases';
 import { Cartesian3, Cartographic } from 'cesium';
+import { dir } from 'console';
 
 
 
@@ -12,9 +13,10 @@ interface MiniMapProps {
   setGMimage: any;
   setCurrentImage: any;
   onPoisEnabled: (pois: string[]) => void;
+  currentCamera: any
 }
 
-const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentImage, onPoisEnabled }: MiniMapProps) => {
+const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentImage, onPoisEnabled, currentCamera }: MiniMapProps) => {
 
   const [isCollapsed, setIsCollapsed] = useState(true);
   //const [stories, setStories] = useState<Story[]>([]);
@@ -125,7 +127,8 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
     console.log("Draw minimap")
     var canvas = document.getElementById('minicanvas') as HTMLCanvasElement;
     var ctx = canvas.getContext('2d');
-    
+    ctx?.clearRect(0, 0, canvas.width, canvas.height);
+
     var image = document.getElementById("minimap") as HTMLImageElement; //new Image();
     /*
     image.src = 'miniXIII.png';
@@ -139,27 +142,67 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
     //image.onclick = function(e) { handleClick(e); }
 
     const rect = canvas.getBoundingClientRect();
-    const w = rect.width;
-    const h = rect.height;
+    const w = canvas.width; //rect.width;
+    const h = canvas.height; //rect.height;
     console.log("Width: " + w + " ; Height: " + h + ".");
-    if (ctx)
-    {
-      ctx.beginPath();
-      ctx.arc(w/2, h/2, w/10, 0, Math.PI * 2, true); 
-      ctx.moveTo(w/2, h/2);
-      ctx.lineTo(w/2+w/10, h/2+h/10);
-      ctx.lineTo(w/2-w/10, h/2-h/10);
-      ctx.fill();
-      ctx.moveTo(0,0);
-    }
 
+    const camera = currentCamera();
+    if (camera)
+      {
+      const carto = Cartographic.fromCartesian(camera.position);
+      const localx = (carto.longitude - cBL.longitude);
+      const localy = (carto.latitude - cBL.latitude);
+      var dirxhor = (cBR.longitude - cBL.longitude);
+      var diryhor = (cBR.latitude - cBL.latitude);
+      var dirxvert = (cTL.longitude - cBL.longitude); 
+      var diryvert = (cTL.latitude - cBL.latitude);
+
+
+      const normhor = Math.sqrt(dirxhor*dirxhor + diryhor*diryhor);
+      const normvert = Math.sqrt(dirxvert*dirxvert + diryvert*diryvert);
+      dirxhor /= normhor;
+      diryhor /= normhor;
+      dirxvert /= normvert;
+      diryvert /= normvert;
+
+      var compx = localx*dirxhor + localy*diryhor;
+      var compy = localx*dirxvert + localy*diryvert;
+      compx /= normhor;
+      compy /= normvert;
+      compy = 1-compy;
+      console.log("Compx: " + compx + " ; Compy: " + compy + ".");
+
+
+      
+      const x = compx;
+      const y = compy;
+      console.log("X: " + x + " ; Y: " + y + ".");
+      const x0 = w*x;
+      const y0 = h*y;
+      //console.log("X0: " + x0 + " ; Y0: " + y0 + ".");
+
+      if (ctx)
+      {
+        ctx.beginPath();
+        ctx.fillStyle = "rgb(255 255 200)";
+        ctx.moveTo(0,0);  
+        ctx.arc(x0, y0, w/20, 0, Math.PI * 2, true); 
+        ctx.fill();
+        /*
+        ctx.moveTo(w/2, h/2);
+        ctx.lineTo(w/2+w/10, h/2+h/10);
+        ctx.lineTo(w/2-w/10, h/2-h/10);
+        ctx.fill();
+        ctx.moveTo(0,0);
+        */
+      }
+    }
     //setInterval(draw, 500);
   }
 
-  const mytimer = () => {
-    console.log("Timer minimap");
-    setInterval(draw, 500);
-  } 
+  useEffect(() => {
+    setInterval(draw, 200);
+  });
 
   // Render 
   return (
@@ -167,7 +210,7 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
         <p className="text-white text-center"> 13th Century </p>  
         {/* <img id="minimap" src="miniXIII.png" onClick={(handleClick)}/> */}
         <img id="minimap" src="miniXIII.png" width="0" height="0" />
-        <canvas id="minicanvas" width="200" height="200" style={{width: '100%', height: '100%'}} onLoad={(mytimer)} onClick={(handleClick)} >
+        <canvas id="minicanvas" width="200" height="200" style={{width: '100%', height: '100%'}} onClick={(handleClick)} >
         </canvas>
         
         
