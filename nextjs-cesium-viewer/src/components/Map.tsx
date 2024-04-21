@@ -1,7 +1,7 @@
 'use client'    // Client component
 
 import { Ion, createWorldTerrainAsync, Viewer, Camera, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
-    ConstantProperty, Matrix4, Entity, HeadingPitchRange, IonResource, JulianDate, LabelStyle, VerticalOrigin,
+    ConstantProperty, Matrix4, Entity, IonResource, JulianDate, LabelStyle, VerticalOrigin,
     Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle, Cesium3DTileset } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import React, { useEffect, useRef, useState } from "react";
@@ -12,6 +12,7 @@ import "cesium/Build/Cesium/Widgets/widgets.css"
 import {FirstPersonCameraController} from './FirstPersonNavigation';
 import {Experimental} from './Experimental';
 import StoriesDisplay from "./StoriesDisplay";
+import MiniMap from "./MiniMap";
 import { useSearchParams } from "next/navigation";
 
 
@@ -264,7 +265,7 @@ const Map = () => {
                 setViewer(viewer);
                 viewerRef.current = viewer;
                 const scene = viewer.scene;
-                scene.globe.depthTestAgainstTerrain = true;
+                scene.globe.depthTestAgainstTerrain = false; // temporary 
                 //scene.useWebVR = true;
                 
 
@@ -1375,6 +1376,9 @@ const Map = () => {
 
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}
+
+            <MiniMap setCameraView={ setCameraView } loadModel={loadModel} setGMmodal={setIsModalOpen} setGMimage={setGMimage} setCurrentImage={setCurrentImage} onPoisEnabled={setEnabledPois} />
+
         </div>
     );
 };
