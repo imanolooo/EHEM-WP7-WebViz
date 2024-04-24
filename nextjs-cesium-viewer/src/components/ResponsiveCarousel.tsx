@@ -9,6 +9,8 @@ import * as Annotorious from '@recogito/annotorious-openseadragon';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 
 import '@recogito/annotorious-openseadragon/dist/annotorious.min.css';
+// import '@recogito/annotorious-shape-labels/dist/annotorious-shape-labels.min.js';
+
 
 interface AnnotationData {
     text: string;
@@ -57,11 +59,19 @@ function createAnnotoriousAnnotation(annotationData: AnnotationData, currentImag
         "@context": "http://www.w3.org/ns/anno.jsonld",
         "id": annotationData.id,
         "type": "Annotation",
-        "body": {
+        "body": [{
             "type": "TextualBody",
             "value": annotationData.text,
-            "purpose": "commenting"
+            //"purpose": "commenting", 
+            "format" : "text/html"  // support HTML tags
         },
+        /*{
+            "type": "TextualBody",
+            "value": annotationData.text,
+            "purpose": "tagging", 
+            "format" : "text/html"  // support HTML tags
+        }*/
+        ],
         "target": {
             "source": currentImage,
             "selector": {
@@ -242,8 +252,11 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
 
             if (imageUrl && row_data[2].children[0].length > 0) {
                 // Creating the AnnotationData object
+                var cleanText = row_data[1].children[0]; 
+                console.log(cleanText);
+                cleanText = cleanText.replace(/<\/?[^>]+(>|$)/g, ""); // Remove HTML tags
                 const annotationData: AnnotationData = {
-                    text: row_data[1].children[0],
+                    text: cleanText,
                     points: row_data[2].children[0],
                     imageUrl: imageUrl,
                     id: row_data[0].children[0],
@@ -443,6 +456,7 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
 
         // Initialize Annotorious with the viewer
         const config = {};
+        //console.log('Config', config);
         const anno = Annotorious(viewer, config);
         // Make annotations read-only, cannot create new or edit existing annotations
         anno.readOnly = true; 
@@ -462,6 +476,11 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
             }
         });
     
+        for (var i=0; i<document.styleSheets.length; i++) {
+            document.styleSheets[i].insertRule('.a9s-annotation .a9s-outer { stroke-width: 5px }'); // Change the stroke width of the annotation border
+        }
+
+
         return () => {
             viewer.destroy(); // Clean up viewer
             anno.destroy(); // Clear annotations

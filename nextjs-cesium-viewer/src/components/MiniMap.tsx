@@ -201,7 +201,7 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
   }
 
   const draw = () => {
-    console.log("Draw minimap")
+    //console.log("Draw minimap")
     var canvas = document.getElementById('minicanvas') as HTMLCanvasElement;
     var ctx = canvas.getContext('2d');
     ctx?.clearRect(0, 0, canvas.width, canvas.height);
@@ -221,7 +221,7 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
     const rect = canvas.getBoundingClientRect();
     const w = canvas.width; //rect.width;
     const h = canvas.height; //rect.height;
-    console.log("Width: " + w + " ; Height: " + h + ".");
+    //console.log("Width: " + w + " ; Height: " + h + ".");
 
     const camera = currentCamera();
     if (camera)
@@ -235,12 +235,12 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
 
         var local = new Vec2(0,0);
         var bar  = barycentric(BL, BR, TL, P);
-        console.log("Barycentric 1: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
+        //console.log("Barycentric 1: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
         if (bar[0] >= 0 && bar[1] >= 0 && bar[2] >= 0)
           local = new Vec2(bar[1], bar[2]);
         else{
           bar  = barycentric(BR, TR, TL, P);
-          console.log("Barycentric 2: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
+          //console.log("Barycentric 2: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
           local = new Vec2(bar[0]+bar[1], bar[1]+bar[2]);
         }
         /*
@@ -258,13 +258,13 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
          */
       var compx = local.x;
       var compy = 1-local.y;
-      console.log("Compx: " + compx + " ; Compy: " + compy + ".");
+      //console.log("Compx: " + compx + " ; Compy: " + compy + ".");
        
 
       
       const x = compx;
       const y = compy;
-      console.log("X: " + x + " ; Y: " + y + ".");
+      //console.log("X: " + x + " ; Y: " + y + ".");
       const x0 = w*x;
       const y0 = h*y;
       //console.log("X0: " + x0 + " ; Y0: " + y0 + ".");
