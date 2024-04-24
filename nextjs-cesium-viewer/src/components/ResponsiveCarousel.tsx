@@ -567,7 +567,7 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
                 <React.Fragment>
                     {/* Simple UI */}
                     {/* Dropdown for selecting a phase */}
-                    <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black mr-2">
+                    <select onChange={(e) => setSelectedPhase(e.target.value)} defaultValue="all" className="text-black mr-2" hidden>
                         <option value="all">All Phases</option>
                         {architecturalPhases.map((phaseId, index) => (
                             <option key={phaseId} value={phaseId} className="text-black">
@@ -577,7 +577,7 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
                     </select>
 
                     {/* Dropdown for selecting a space */}
-                    <select onChange={(e) => setSelectedSpace(e.target.value)} defaultValue="all" className="text-black">
+                    <select onChange={(e) => setSelectedSpace(e.target.value)} defaultValue="all" className="text-black" hidden>
                         <option value="all">All Spaces</option>
                         {architecturalSpaces.map((spaceId, index) => (
                             <option key={spaceId} value={spaceId} className="text-black">
