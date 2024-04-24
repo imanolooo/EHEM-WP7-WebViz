@@ -478,6 +478,8 @@ const ResponsiveCarousel: React.FC<Props> = ({currentImage, setCurrentImage}) =>
     
         for (var i=0; i<document.styleSheets.length; i++) {
             document.styleSheets[i].insertRule('.a9s-annotation .a9s-outer { stroke-width: 5px }'); // Change the stroke width of the annotation border
+            document.styleSheets[i].insertRule('.a9s-annotation.hover .a9s-inner  { fill:rgba(255,240,0,0.1)  }'); // Change the color opacity
+            document.styleSheets[i].insertRule('.a9s-annotation.hover .a9s-outer  { stroke-width: 8px }'); // Change the color opacity
         }
 
 
