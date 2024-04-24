@@ -41,10 +41,3 @@ body {
 .carousel .thumbs-wrapper {
   margin: 0px !important;
 }
-
-/* Annotation styles */
-.a9s-annotation .a9s-outer {
-  stroke:rgb(255, 3, 45);
-  stroke-width: 10px;
-}
-
