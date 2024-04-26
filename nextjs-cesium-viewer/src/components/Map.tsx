@@ -1402,8 +1402,21 @@ const Map = () => {
             {/* Return the Cesium Viewer */}
             <div id="cesiumContainer" />
 
-            {/* Phases Image Menu */}
-            {renderMenu()}
+           
+
+            {/* Logos */}
+            <div className={`fixed inset-x-0 top-4 >`}>
+                    <div className="flex flex-grow justify-center space-x-4 px-4">
+                            <img 
+                                src="logo-small.jpg"
+                                className="min-w-[100px] max-w-[400px] w-auto h-10  transform hover:scale-150 transition-transform duration-200"
+                            />
+                        
+                    </div>
+            </div>
+
+             {/* Phases Image Menu */}
+             {renderMenu()}
 
             {/* Graphic Material Modal */}
             {/* Return the Image Carousel Modal */}
