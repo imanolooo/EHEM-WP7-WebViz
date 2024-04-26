@@ -219,9 +219,10 @@ const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosit
   }
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    if (canvasRef.current === null) return;
+    const canvas = canvasRef.current as HTMLCanvasElement;
     if (canvas) {
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext('2d') as CanvasRenderingContext2D;
       draw(context, canvas.width, canvas.height);
     }
   }, [draw]);
