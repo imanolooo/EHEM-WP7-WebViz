@@ -1405,15 +1405,21 @@ const Map = () => {
            
 
             {/* Logos */}
-            <div className={`fixed inset-x-0 top-4 >`}>
-                    <div className="flex flex-grow justify-center space-x-4 px-4">
-                            <img 
-                                src="logo-small.jpg"
-                                className="min-w-[100px] max-w-[400px] w-auto h-12 md:h-18  transform hover:scale-150 transition-transform duration-200"
-                            />
+            
+            <div className={`fixed inset-x-0 top-10 z-0>`}>
+                <div className="flex items-center">
+                    <div className="flex flex-grow justify-center space-x-4 px-4 mx-auto">
                         
+                            <img 
+                            src="logo-small.jpg"
+                            className="min-w-[100px] max-w-[400px] w-auto h-4 md:h-18  z-0 transform hover:scale-[4] transition-transform duration-200"
+                            />
                     </div>
-            </div>
+                    </div>
+                    </div>
+            
+
+            
 
              {/* Phases Image Menu */}
              {renderMenu()}
