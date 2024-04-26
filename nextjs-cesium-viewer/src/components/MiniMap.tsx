@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-//import Modal from './Modal';
-//import { phasesInfo} from './Phases';
 import { Cartesian3, Cartographic } from 'cesium';
-//import { dir } from 'console';
-
 
 class Vec2
 {
@@ -82,6 +78,7 @@ interface MiniMapProps {
 const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosition, isPhaseMenuOpen }: MiniMapProps) => {
   const canvasRef = useRef(null)
 
+  /* position of the corners of the minimap */
   const posTL = {
     "position": {
       "x": 4736917.438207317,
@@ -147,13 +144,11 @@ const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosit
       if (rect)
         {
           var x = (e.clientX - rect.left)/(rect.right - rect.left); //x position within the element.
-        var y = (e.clientY - rect.top) / (rect.bottom - rect.top);  //y position within the element.
-        //console.log("Left? : " + x + " ; Top? : " + y + ".");
-        //console.log(interpolate(x, y));
-        const pos = interpolate(x,y);
-        const config = { "position": pos, 
-        "direction": new Cartesian3(0.19, 0.96, -0.2), "up": new Cartesian3(0.73, 0.0, 0.67) };
-        setCameraView(config);
+          var y = (e.clientY - rect.top) / (rect.bottom - rect.top);  //y position within the element.
+          const pos = interpolate(x,y);
+          const config = { "position": pos, 
+          "direction": new Cartesian3(0.19, 0.96, -0.2), "up": new Cartesian3(0.73, 0.0, 0.67) };
+          setCameraView(config);
         }
     }
   }
@@ -236,11 +231,8 @@ const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosit
   return (
     
     <div className={`absolute ${isPhaseMenuOpen?"bottom-40": "bottom-7"} right-2 w-1/12 max-w-md bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg shadow-lg shadow-black transition-opacity duration-200 ease-out transform opacity-100`}>
-    
         <p className="text-white text-center"> {currentModel} Century </p>  
-        
         <p hidden> {currentCameraPosition?" ":"  "}</p>
-        {/* <img id="minimap" src="miniXIII.png" onClick={(handleClick)}/> */}
         <img id="minimapIX" src="miniIX-200.png" width="0" height="0" />
         <img id="minimapX" src="miniX-200.png" width="0" height="0" />
         <img id="minimapXI" src="miniXI-200.png" width="0" height="0" />
