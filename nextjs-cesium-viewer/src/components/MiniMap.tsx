@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Modal from './Modal';
-import { phasesInfo} from './Phases';
+//import Modal from './Modal';
+//import { phasesInfo} from './Phases';
 import { Cartesian3, Cartographic } from 'cesium';
-import { dir } from 'console';
+//import { dir } from 'console';
+
 
 class Vec2
 {
@@ -30,21 +31,6 @@ class Vec2
     this.x /= n;
     this.y /= n;
   }
-
-  area(this: Vec2, other: Vec2) : number
-  {
-    return this.x*other.y - this.y*other.x;
-  }
-
-  angle(this: Vec2, other: Vec2) : number 
-  {
-    const n1 = this.length();
-    const n2 = other.length();
-    const dot = this.dot(other);
-    return Math.acos(dot/(n1*n2));
-  }
-
-
 
   dot(this: Vec2, other: Vec2) : number
   {
@@ -87,38 +73,14 @@ function barycentric(p0: Vec2, p1: Vec2, p2: Vec2, p: Vec2) : [number, number, n
 
 interface MiniMapProps {
   setCameraView: any;
-  loadModel: any;
-  setGMmodal: any;
-  setGMimage: any;
-  setCurrentImage: any;
-  onPoisEnabled: (pois: string[]) => void;
-  currentCamera: any
+  currentCamera: any;
+  currentModel: any;
+  currentCameraPosition: any;
+  isPhaseMenuOpen: boolean;
 }
 
-const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentImage, onPoisEnabled, currentCamera }: MiniMapProps) => {
-
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  //const [stories, setStories] = useState<Story[]>([]);
-  //const [selectedStory, setSelectedStory] = useState<Story | null>(null);
-  const [currentParadeIndex, setCurrentParadeIndex] = useState(0);
-  const [displayContent, setDisplayContent] = useState<string[]>([]);
-  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
-  const timeoutIds = useRef<NodeJS.Timeout[]>([]); // Additional ref to keep track of timeout IDs
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalHtmlContent, setModalHtmlContent] = useState('');
-  //const [isHoveringTitles, setIsHoveringTitles] = useState(false);
-  //const audioRef = useRef(new Audio());
-  //const playPauseButtonRef = useRef(null);
-  //const muteButtonRef = useRef(null);
-
-  // Handle mouse enter and leave for story titles area
-  //const handleMouseEnter = () => setIsHoveringTitles(true);
-  //const handleMouseLeave = () => setIsHoveringTitles(false);
-
-  // Toggle collapse state
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosition, isPhaseMenuOpen }: MiniMapProps) => {
+  const canvasRef = useRef(null)
 
   const posTL = {
     "position": {
@@ -175,52 +137,37 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
       return newPos;
   }
 
-  const handleClick = (e: any) => {
 
-    console.log("Click on minimap")
+  const handleClick2 = (e: any) => {
+    //console.log("Click on minimap")
     var d = document.getElementById('minicanvas');
-    if (d) d.onclick = function(e) {
-      // e = Mouse click event.
+    if (d) {
       var rect = null;
       if (e.target) rect = d?.getBoundingClientRect();
       if (rect)
         {
           var x = (e.clientX - rect.left)/(rect.right - rect.left); //x position within the element.
         var y = (e.clientY - rect.top) / (rect.bottom - rect.top);  //y position within the element.
-        console.log("Left? : " + x + " ; Top? : " + y + ".");
-        console.log(interpolate(x, y));
+        //console.log("Left? : " + x + " ; Top? : " + y + ".");
+        //console.log(interpolate(x, y));
         const pos = interpolate(x,y);
         const config = { "position": pos, 
         "direction": new Cartesian3(0.19, 0.96, -0.2), "up": new Cartesian3(0.73, 0.0, 0.67) };
         setCameraView(config);
-
-        
-
         }
     }
   }
 
-  const draw = () => {
+  const draw = (ctx:CanvasRenderingContext2D,width:number, height:number) => {
     //console.log("Draw minimap")
-    var canvas = document.getElementById('minicanvas') as HTMLCanvasElement;
-    var ctx = canvas.getContext('2d');
-    ctx?.clearRect(0, 0, canvas.width, canvas.height);
+    ctx?.clearRect(0, 0, width, height);
 
-    var image = document.getElementById("minimap") as HTMLImageElement; //new Image();
-    /*
-    image.src = 'miniXIII.png';
-    image.id = 'minimap';
-    image.onload = function() {
-      ctx?.drawImage(image, 0, 0, 200, 200);
-    }
-    */ 
-   if (image) ctx?.drawImage(image, 0, 0, 200, 200);
+    var image = document.getElementById("minimap"+currentModel) as HTMLImageElement; 
+    if (ctx) ctx.imageSmoothingQuality = "high";
+    if (image) ctx?.drawImage(image, 0, 0, 200, 200);
     
-    //image.onclick = function(e) { handleClick(e); }
-
-    const rect = canvas.getBoundingClientRect();
-    const w = canvas.width; //rect.width;
-    const h = canvas.height; //rect.height;
+    const w = width; //rect.width;
+    const h = height; //rect.height;
     //console.log("Width: " + w + " ; Height: " + h + ".");
 
     const camera = currentCamera();
@@ -243,19 +190,7 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
           //console.log("Barycentric 2: " + bar[0] + " ; " + bar[1] + " ; " + bar[2] + "."); 
           local = new Vec2(bar[0]+bar[1], bar[1]+bar[2]);
         }
-        /*
-      const local = P.sub(BL);
-      var v1 = BR.sub(BL);
-      var v2 = TL.sub(BL);
-      const l1 = v1.length();
-      const l2 = v2.length();
-      const v1n = v1.normalized();
-      const v2n = v2.normalized();  
       
-      var Q = new Vec2(local.dot(v1n), local.dot(v2n));
-      Q.x /= l1;
-      Q.y /= l2;
-         */
       var compx = local.x;
       var compy = 1-local.y;
       //console.log("Compx: " + compx + " ; Compy: " + compy + ".");
@@ -264,44 +199,55 @@ const MiniMap = ({ setCameraView, loadModel, setGMmodal, setGMimage, setCurrentI
       
       const x = compx;
       const y = compy;
-      //console.log("X: " + x + " ; Y: " + y + ".");
       const x0 = w*x;
       const y0 = h*y;
-      //console.log("X0: " + x0 + " ; Y0: " + y0 + ".");
+
 
       if (ctx)
       {
         ctx.beginPath();
-        ctx.fillStyle = "rgb(255 255 200)";
+        ctx.fillStyle = "rgb(255 255 180)";
         ctx.moveTo(0,0);  
-        ctx.arc(x0, y0, w/20, 0, Math.PI * 2, true); 
+        const radius = w/30;
+        ctx.arc(x0, y0, radius, 0, Math.PI * 2, true); 
         ctx.fill();
-        /*
-        ctx.moveTo(w/2, h/2);
-        ctx.lineTo(w/2+w/10, h/2+h/10);
-        ctx.lineTo(w/2-w/10, h/2-h/10);
-        ctx.fill();
-        ctx.moveTo(0,0);
-        */
+
       }
+      
     }
-    //setInterval(draw, 500);
+    
   }
 
   useEffect(() => {
-    setInterval(draw, 200);
-  });
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext('2d');
+      draw(context, canvas.width, canvas.height);
+    }
+  }, [draw]);
+
+
+
+  
+
 
   // Render 
   return (
-    <div className="absolute bottom-40 left-2 w-1/12 max-w-md bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg shadow-lg shadow-black transition-opacity duration-200 ease-out transform opacity-100">
-        <p className="text-white text-center"> 13th Century </p>  
+    
+    <div className={`absolute ${isPhaseMenuOpen?"bottom-40": "bottom-7"} right-2 w-1/12 max-w-md bg-gray-800 bg-opacity-50 border border-gray-700 rounded-lg shadow-lg shadow-black transition-opacity duration-200 ease-out transform opacity-100`}>
+    
+        <p className="text-white text-center"> {currentModel} Century </p>  
+        
+        <p hidden> {currentCameraPosition?" ":"  "}</p>
         {/* <img id="minimap" src="miniXIII.png" onClick={(handleClick)}/> */}
-        <img id="minimap" src="miniXIII.png" width="0" height="0" />
-        <canvas id="minicanvas" width="200" height="200" style={{width: '100%', height: '100%'}} onClick={(handleClick)} >
+        <img id="minimapIX" src="miniIX-200.png" width="0" height="0" />
+        <img id="minimapX" src="miniX-200.png" width="0" height="0" />
+        <img id="minimapXI" src="miniXI-200.png" width="0" height="0" />
+        <img id="minimapXII" src="miniXII-200.png" width="0" height="0" />
+        <img id="minimapXIII" src="miniXIII-200.png" width="0" height="0" />
+        <img id="minimapXXI" src="miniXXI-200.png" width="0" height="0" />  
+        <canvas ref={canvasRef} id="minicanvas" width="200" height="200" style={{width: '100%', height: '100%'}} onClick={(handleClick2)}  >
         </canvas>
-        
-        
     </div>
         
   );

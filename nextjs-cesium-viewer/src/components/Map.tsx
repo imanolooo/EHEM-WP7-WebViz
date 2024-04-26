@@ -51,6 +51,8 @@ const Map = () => {
     const searchParams = useSearchParams();
     const appVersion = searchParams.get('version');
 
+    const [currentCentury, setCurrentCentury] = useState("IX");
+    const [currentCameraPosition, setCurrentCameraPosition] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [currentImage, setCurrentImage] = useState<string | null>(null); // Graphic material
     const [selectedImage, setSelectedImage] = useState<string | null>(null); // Phase
@@ -88,6 +90,21 @@ const Map = () => {
         }, 3000);
         
     }
+
+    /*
+    useEffect(() => {
+        if (viewer) {
+            console.log("viewer is ready");
+            setCurrentCameraPosition(viewer.camera.position);
+        }
+    }, [viewer?.camera.position, viewer?.camera.direction, viewer?.camera.up]);
+    */
+
+    /*
+    useEffect(() => {
+        setInterval(() => {console.log("Timer"); if (viewer) {console.log(viewer.camera.position); setCurrentCameraPosition(viewer.camera.position);}}, 1000);
+    }, []);
+    *
 
     // utility for getting the current time
     /* 
@@ -147,7 +164,7 @@ const Map = () => {
             {/* Menu Content */}
             <div className={`fixed inset-x-0 bottom-7 z-20>`}>
                  {/* Toggle Button */}
-                 <div className={`flex justify-end`}>
+                 <div className={`flex justify-center`}>
                     <button 
                         onClick={() => setIsMenuOpen(!isMenuOpen)} 
                         /*fixed bottom-20 right-2 transition-transform transform ${isMenuOpen ? 'translate-y-0' : 'translate-y-full'*/
@@ -208,7 +225,9 @@ const Map = () => {
                             show: true,
                         },
                         name: "St. Quirze de Pedret - " + selectedModel.name
+                        
                     });
+                    
                 }
             } else if (selectedModel.entityType === 'Tileset' && !selectedModel.tileset) {
                 // Load 3D Tileset
@@ -223,6 +242,11 @@ const Map = () => {
                 if (selectedModel.model) selectedModel.model.show = true;
                 if (selectedModel.tileset) selectedModel.tileset.show = true;
             }
+            var a = selectedModel.name;
+            var b = a.substr(6);
+            var c = a.substr(6,b.search("th"));
+            setCurrentCentury(c); // Update the current century
+            console.log('Selected model : ', c);
         }
     };
     
@@ -268,6 +292,14 @@ const Map = () => {
                 scene.globe.depthTestAgainstTerrain = false; // temporary 
                 //scene.useWebVR = true;
                 
+                setInterval(() => {
+                    //console.log("Timer"); 
+                    if (viewer) 
+                        {
+                            //console.log(viewer.camera.position.x); 
+                            setCurrentCameraPosition(viewer.camera.position.x);
+                        }
+                    }, 200);
 
                 //----- Marios -------
 
@@ -395,8 +427,17 @@ const Map = () => {
                 // Set up variables for camera controls
                 var moveSpeed = 1.0;
                 // Add keyboard event listener for WASD movement
+
+                /*
+                document.addEventListener('mousedown', function (e) {
+                    setCurrentCameraPosition(viewer.camera.position);
+                    console.log("Mouse click");
+                });   
+                */
+
                 document.addEventListener('keydown', function (e) {
                     if (firstPersonCameraController && firstPersonCameraController._enabled) return; // Disable this WASD movement when in first person mode
+                    //setCurrentCameraPosition(viewer.camera.position);
                     if (e.key === 'w' || e.key === 'W')
                         viewer.camera.moveForward(moveSpeed);
                     else if (e.key === 's' || e.key === 'S')
@@ -415,7 +456,7 @@ const Map = () => {
 
                 const resetCamera = () => {
                     if (currentModelEntity) {
-                        console.log("Entra");
+                        //console.log("Entra");
                         /*viewer.flyTo(currentModelEntity, {
                             offset: new HeadingPitchRange(
                                 CesiumMath.toRadians(100),
@@ -1382,7 +1423,7 @@ const Map = () => {
             {/* Conditionally render phaseBoxes */}
             {viewer && phaseBoxes}
 
-            <MiniMap setCameraView={ setCameraView } loadModel={loadModel} setGMmodal={setIsModalOpen} setGMimage={setGMimage} setCurrentImage={setCurrentImage} onPoisEnabled={setEnabledPois} currentCamera={currentCamera}/>
+            <MiniMap setCameraView={ setCameraView } currentCamera={currentCamera} currentModel={currentCentury} currentCameraPosition={currentCameraPosition} isPhaseMenuOpen={isMenuOpen} />
 
         </div>
     );
