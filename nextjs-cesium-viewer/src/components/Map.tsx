@@ -2,7 +2,7 @@
 
 import { Ion, createWorldTerrainAsync, Viewer, Camera, Cartesian3, PerspectiveFrustum, Color, Transforms, HeadingPitchRoll,
     ConstantProperty, Matrix4, Entity, IonResource, JulianDate, LabelStyle, VerticalOrigin,
-    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle, Cesium3DTileset } from "cesium";
+    Cartesian2, defined, ScreenSpaceEventType, CameraEventType, ConstantPositionProperty, ShadowMode, Rectangle, Cesium3DTileset, CustomShader, LightingModel, UniformType, VaryingType, TextureUniform, CustomShaderMode } from "cesium";
 import { Math as CesiumMath } from 'cesium';
 import React, { useEffect, useRef, useState } from "react";
 import Modal from './Modal';
@@ -201,6 +201,19 @@ const Map = () => {
             setButtonText(phasesInfo[index].text);
         }
     };
+
+    const customShaderUnlit = new CustomShader({
+     
+        lightingModel: LightingModel.UNLIT,  
+        vertexShaderText: `
+        void vertexMain(VertexInput vsInput, inout czm_modelVertexOutput vsOutput) {
+        }
+        `,
+        fragmentShaderText: `
+        void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material) {
+        }
+        `
+      });
     
     // Load the selected phase .glB model
     const loadModel = async (modelId: number) => {
@@ -223,10 +236,16 @@ const Map = () => {
                         model: {
                             uri: modelUri,
                             show: true,
+                            customShader: selectedModel.name.includes("XXI") ? customShaderUnlit : undefined
                         },
                         name: "St. Quirze de Pedret - " + selectedModel.name
                         
+                        
                     });
+                    if (selectedModel.name.includes("XXI"))
+                        {
+                            
+                        }
                     
                 }
             } else if (selectedModel.entityType === 'Tileset' && !selectedModel.tileset) {
