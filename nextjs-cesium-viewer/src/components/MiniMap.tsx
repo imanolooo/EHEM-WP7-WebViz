@@ -201,11 +201,15 @@ const MiniMap = ({ setCameraView, currentCamera, currentModel,currentCameraPosit
       if (ctx)
       {
         ctx.beginPath();
-        ctx.fillStyle = "rgb(255 255 180)";
-        ctx.moveTo(0,0);  
+        ctx.strokeStyle = "rgb(0 50 50)";
+        ctx.lineWidth = 1;
+        
+        ctx.fillStyle = "rgb(20 255 255)";
+        //ctx.moveTo(0,0);  
         const radius = w/30;
         ctx.arc(x0, y0, radius, 0, Math.PI * 2, true); 
         ctx.fill();
+        ctx.stroke();
 
       }
       
